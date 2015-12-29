@@ -1,0 +1,9 @@
+eclipse/
+build/
+.gradle/
+*.iml
+*.ipr
+*.iws
+forge-*-changelog.txt
+out/
+
