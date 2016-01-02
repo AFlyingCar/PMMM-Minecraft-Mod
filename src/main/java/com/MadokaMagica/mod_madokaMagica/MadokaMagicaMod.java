@@ -31,6 +31,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 
 import com.MadokaMagica.mod_madokaMagica.events.MadokaMagicaEvent;
 import com.MadokaMagica.mod_madokaMagica.events.MadokaMagicaWitchTransformationEvent;
+import com.MadokaMagica.mod_madokaMagica.events.MadokaMagicaPuellaMagiTransformationEvent;
 import com.MadokaMagica.mod_madokaMagica.managers.PlayerDataTrackerManager;
 import com.MadokaMagica.mod_madokaMagica.managers.MadokaMagicaEventManager;
 import com.MadokaMagica.mod_madokaMagica.managers.ItemSoulGemManager;
@@ -109,6 +110,10 @@ public class MadokaMagicaMod {
         }
     }
 
+    public void onPlayerPuellaMagiTransformation(MadokaMagicaPuellaMagiTransformationEvent event){
+        // stuff
+    }
+
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public boolean onDeathWithHighestPriority(LivingDeathEvent event){
         Entity entity = event.entity;
@@ -121,7 +126,9 @@ public class MadokaMagicaMod {
                 FMLLog.warning("Found null in itemSoulGemManager! This most likely means that the player is somehow turning into a witch without having a soulgem. Please consult a programmer.");
                 return false;
             }
-            // Do something with Factory classes to generate a witch here
+
+            pmdt.setPlayerState(2);
+
         }
         return true;
     }
