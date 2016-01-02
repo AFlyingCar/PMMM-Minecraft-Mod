@@ -2,15 +2,16 @@
 {
   "modid": "mod_madokaMagica",
   "name": "Puella Magi Madoka Magica Mod",
-  "description": "I can't think of a good description right now.",
+  "description": "A mod that allows the player to make a contract to become a Puella Magi!",
   "version": "${version}",
   "mcversion": "${mcversion}",
-  "url": "",
+  "url": "github.com/AFlyingCar/PMMM-Minecraft-Mod",
   "updateUrl": "",
-  "authorList": ["ExampleDude"],
-  "credits": "The Forge and FML guys, for making this example",
+  "authorList": ["AFlyingCar"],
+  "credits": "The awesome people who build Forge, allowing this mod to be possible.",
   "logoFile": "",
   "screenshots": [],
   "dependencies": []
 }
 ]
+
