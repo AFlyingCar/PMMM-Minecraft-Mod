@@ -29,6 +29,7 @@ import cpw.mods.fml.common.registry.EntityRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
+import com.MadokaMagica.mod_madokaMagica.commands.CommandStartWitchTransformation;
 import com.MadokaMagica.mod_madokaMagica.events.MadokaMagicaEvent;
 import com.MadokaMagica.mod_madokaMagica.events.MadokaMagicaWitchTransformationEvent;
 import com.MadokaMagica.mod_madokaMagica.events.MadokaMagicaPuellaMagiTransformationEvent;
@@ -82,11 +83,13 @@ public class MadokaMagicaMod {
         */
 
         madokaMagicaEventManager.register((MadokaMagicaEvent)MadokaMagicaWitchTransformationEvent.getInstance());
+        madokaMagicaEventManager.register((MadokaMagicaEvent)MadokaMagicaPuellaMagiTransformationEvent.getInstance());
     }
 
     @EventHandler
-    public void onServerAboutToStart(FMLServerStartingEvent event){
+    public void onServerStarting(FMLServerStartingEvent event){
         // Load each player data thing and add it to playerDataTrackerManager
+        event.registerServerCommand( CommandStartWitchTransformation.getInstance() );
     }
 
     @EventHandler
@@ -98,6 +101,8 @@ public class MadokaMagicaMod {
         for(MadokaMagicaEvent e : madokaMagicaEventManager.getActiveEvents()){
             if(e instanceof MadokaMagicaWitchTransformationEvent)
                 this.onPlayerWitchTransformation((MadokaMagicaWitchTransformationEvent)e);
+            else if(e instanceof MadokaMagicaPuellaMagiTransformationEvent)
+                this.onPlayerPuellaMagiTransformation((MadokaMagicaPuellaMagiTransformationEvent)e);
         }
     }
 
@@ -105,8 +110,15 @@ public class MadokaMagicaMod {
         ArrayList<PMDataTracker> trackers = event.getTrackers();
         for(PMDataTracker tracker : trackers){
             EntityPlayer player = tracker.getPlayer();
+            float size = 1.0f;
+
+            // If the player is done transforming
+            if(tracker.getPlayerState() == 2){
+                event.cancel(tracker);
+                size = 2.0f;
+            }
             // NOTE: Take a look at the explosion size. I'm not sure how to set that value, so let's just ignore it for now.
-            Explosion exp = player.worldObj.newExplosion(player,player.posX,player.posY,player.posZ,1.0f,false,false);
+            Explosion exp = player.worldObj.newExplosion(player,player.posX,player.posY,player.posZ,size,false,false);
         }
     }
 
@@ -114,6 +126,8 @@ public class MadokaMagicaMod {
         // stuff
     }
 
+    // The player doesn't actually transform into a witch until they die
+    // That's why we need to prevent them from truly dying so that they become a witch instead.
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public boolean onDeathWithHighestPriority(LivingDeathEvent event){
         Entity entity = event.entity;
@@ -122,6 +136,7 @@ public class MadokaMagicaMod {
         PMDataTracker pmdt = playerDataTrackerManager.getTrackerByPlayer((EntityPlayer)entity);
         if(entity instanceof EntityPlayer && pmdt != null && MadokaMagicaWitchTransformationEvent.getInstance().isActive(pmdt)){
             ItemSoulGem soulgem = itemSoulGemManager.getSoulGemByPlayer((EntityPlayer)entity);
+            // Why the hell would soulgem even be null?
             if(soulgem == null){
                 FMLLog.warning("Found null in itemSoulGemManager! This most likely means that the player is somehow turning into a witch without having a soulgem. Please consult a programmer.");
                 return false;
@@ -154,3 +169,4 @@ public class MadokaMagicaMod {
         }
     }
 }
+
