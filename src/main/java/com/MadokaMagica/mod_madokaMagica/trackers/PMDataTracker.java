@@ -5,15 +5,24 @@ import java.util.Map.Entry;
 import java.util.List;
 import java.util.HashMap;
 
+import net.minecraft.util.DamageSource;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.passive.EntityVillager;
+
+import net.minecraftforge.event.entity.living.LivingAttackEvent;
+
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.common.eventhandler.EventPriority;
 
 import com.MadokaMagica.mod_madokaMagica.util.Helper;
 import com.MadokaMagica.mod_madokaMagica.items.ItemSoulGem;
+import com.MadokaMagica.mod_madokaMagica.managers.PlayerDataTrackerManager;
 
 public class PMDataTracker {
     public static final int MAX_POTENTIAL = 100;
@@ -24,12 +33,30 @@ public class PMDataTracker {
 	private Map<Integer,Float> like_entity_type = null; // A certain type of entity
 	private Map<Integer,Float> liked_entities = null; // A specific entity
 	private Map<Integer,Float> like_level = null;
+
+    private float architectScore = 0;
+    private float engineeringScore = 0;
+    private float greedScore = 0;
+
+    private float waterScore = 0;
+    private float natureScore = 0;
+    private float dayScore = 0;
+    private float nightScore = 0;
+
+    private float heroScore = 0;
+    private float villainScore = 0;
+
+    private float passiveScore = 0;
+    private float aggressiveScore = 0;
+
+    /*
 	private float like_building = 0;
 	private float like_fighting = 0;
 	private float like_water = 0;
 	private float like_night = 0;
 	private float like_day = 0;
     private float hero = 0;
+    */
 
     /*
      * 0 - Normal human
@@ -73,24 +100,49 @@ public class PMDataTracker {
 
 	public void loadTagData(){
 		NBTTagCompound tags = player.getEntityData();
+        // Get the player's potential
 		if(tags.hasKey("PM_POTENTIAL")){
 			potential = tags.getFloat("PM_POTENTIAL");
 		}
-        if(tags.hasKey("PM_LIKES_BUILDING")){
-			like_building = tags.getFloat("PM_LIKES_BUILDING");
+
+        // Get Hero/Villain scores
+        if(tags.hasKey("PM_HERO_SCORE")){
+            heroScore = tags.getFloat("PM_HERO_SCORE");
 		}
-        if(tags.hasKey("PM_LIKES_FIGHTING")){
-			like_fighting = tags.getFloat("PM_LIKES_FIGHTING");
+        if(tags.hasKey("PM_VILLAIN_SCORE")){
+            villainScore = tags.getFloat("PM_VILLAIN_SCORE");
 		}
-        if(tags.hasKey("PM_LIKES_WATER")){
-			like_water = tags.getFloat("PM_LIKES_WATER");
+
+        // Get Aggressive/Passive score
+        if(tags.hasKey("PM_AGGRESSIVE_SCORE")){
+            aggressiveScore = tags.getFloat("PM_AGGRESSIVE_SCORE");
+        }
+        if(tags.hasKey("PM_PASSIVE_SCORE")){
+			passiveScore = tags.getFloat("PM_PASSIVE_SCORE");
 		}
-        if(tags.hasKey("PM_LIKES_NIGHT")){
-			like_night = tags.getFloat("PM_LIKES_NIGHT");
+
+        // Enviroment-based scores
+        if(tags.hasKey("PM_NATURE_SCORE")){
+			natureScore = tags.getFloat("PM_NATURE_SCORE");
 		}
-        if(tags.hasKey("PM_LIKES_DAY")){
-			like_day = tags.getFloat("PM_LIKES_DAY");
+        if(tags.hasKey("PM_DAY_SCORE")){
+            dayScore = tags.getFloat("PM_DAY_SCORE");
+        }
+        if(tags.hasKey("PM_NIGHT_SCORE")){
+            dayScore = tags.getFloat("PM_NIGHT_SCORE");
+        }
+
+        // engineering-type score
+        if(tags.hasKey("PM_ENGINEERING_SCORE")){
+			engineeringScore = tags.getFloat("PM_ENGINEERING_SCORE");
 		}
+        if(tags.hasKey("PM_ARCHITECT_SCORE")){
+            architectScore = tags.getFloat("PM_ARCHITECT_SCORE");
+        }
+        if(tags.hasKey("PM_GREED_SCORE")){
+            greedScore = tags.getFloat("PM_GREED_SCORE");
+        }
+
         if(tags.hasKey("PM_LIKES_LEVEL")){
 			int[] level_data = tags.getIntArray("PM_LIKES_LEVEL");
             float like_amt = Helper.unpackFloat(level_data[1]);
@@ -125,9 +177,7 @@ public class PMDataTracker {
                 like_entity_type.put(new Integer(id),new Float(val));
             }
         }
-        if(tags.hasKey("PM_HERO")){
-            hero = tags.getFloat("PM_HERO");
-        }
+
         if(tags.hasKey("PM_PLAYER_STATE")){
             player_state = tags.getInteger("PM_PLAYER_STATE");
         }
@@ -163,20 +213,20 @@ public class PMDataTracker {
                 rainStartTime = player.worldObj.getTotalWorldTime();
             countingRain = true;
         }else{
+            // Not sure if we want to add to waterScore if not raining
+            // this.waterScore += (rainStartTime/player.worldObj.getTotalWorldTime());
+            rainStartTime = 0;
             countingRain = false;
         }
 
+        // Subtract from water score if the player tries to skip the rain
         if(player.isPlayerFullyAsleep()){
-            if(countingRain){
-                // do something negatively to the player's like_water score
-            }
-            countingRain=false; // regardless of whether or not we are already counting rain, make it false anyway.
+            if(countingRain)
+                this.waterScore -= 1;
         }
-        if(!countingRain){
-            // Do something here to calculate like_water based on how long rain has been happening.
-            // Do some multiply by rainStartTime to make sure that we don't do some weird calculations if it wasn't raining.
-            rainStartTime = 0;
-        }
+
+        // TODO: Add something here to check if player is near water
+
 
         // DOES THE PLAYER LIKE THE NIGHT
         // ==============================
@@ -188,27 +238,48 @@ public class PMDataTracker {
             countingNight = false;
         }
 
-        if(player.isPlayerFullyAsleep()){
-            if(countingNight){
-                // do something negatively to the player's like_night score
+        if(countingNight){
+            // Is more than half of night left
+            // TODO: Change 12000 to whatever half of the night time is
+            if((player.worldObj.getTotalWorldTime()-nightStartTime) > 12000){ 
+                if(player.isPlayerFullyAsleep()){
+                    this.nightScore-=1;
+                    this.dayScore+=1;
+                }
+            }else{
+                if((player.worldObj.getTotalWorldTime()-nightStartTime) > (24000-100)){
+                    this.nightScore+=1;
+                }
             }
-            countingNight = false;
-        }
-        if(!countingNight){
-            // Do something here to calculate like_night based on how long night has been happening.
-            // Do some multiply by nightStartTime to make sure that we don't do some weird calculations if it wasn't night.
         }
 
-        // DOES THE PLAYER LIKE TO FIGHT
-        // =============================
-        // I don't even know how to start with this one.
-        // I'll leave it for another time.
-        // Just know that it will have something to do with the player's like_night score
+        // WHY ARE WE YELLING?
+    }
 
-        // IS THE PLAYER A HERO
-        // ====================
-        // It would have something to do with villages
-        // Does the player fight while inside a village
+    // We MUST make sure that we check for this, unless of course we aren't checking for it
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public void onEntityLivingAttacked(LivingAttackEvent event){
+        if(event.source.getSourceOfDamage() == this.player){
+            if(Helper.isPlayerInVillage(event.source.getSourceOfDamage())){
+                if(event.source.getEntity() instanceof IMob){
+                    this.heroScore += (((EntityLiving)event.source.getEntity()).getMaxHealth()/event.ammount);
+                }else if(event.source.getEntity() instanceof EntityVillager){
+                    this.villainScore += (((EntityLiving)event.source.getEntity()).getMaxHealth()/event.ammount);
+                }else if(event.source.getEntity() instanceof EntityPlayer){
+                    PMDataTracker targetTracker = PlayerDataTrackerManager.getInstance().getTrackerByPlayer((EntityPlayer)event.source.getEntity());
+                    this.heroScore += (((EntityLiving)event.source.getEntity()).getMaxHealth()/event.ammount) + Math.abs(1/(targetTracker.getHeroScore() - this.heroScore));
+                    this.villainScore += (((EntityLiving)event.source.getEntity()).getMaxHealth()/event.ammount) + Math.abs(1/(targetTracker.getVillainScore() - this.villainScore));
+                }
+            }
+            // NOTE: Maybe add something here to check for the player's home?
+            // As in, they are defending their property?
+            // Their home could just be considered the chunks that they spend the most time in on average
+            this.aggressiveScore += (((EntityLiving)event.source.getEntity()).getMaxHealth()/event.ammount);
+        }else if(event.source.getEntity() == this.player){
+            // TODO: Add something here to check if the player is running away
+            // And we can't just check if the player is getting hit
+            // Maybe check if the player is near the monster and hasn't attacked at all?
+        }
     }
 
     // NOTE: Maybe do something here if Entity e is in liked_entities?
@@ -258,5 +329,39 @@ public class PMDataTracker {
 
     public EntityPlayer getPlayer(){
         return this.player;
+    }
+
+    public float getArchitectScore(){
+        return architectScore;
+    }
+    public float getEngineeringScore(){
+        return engineeringScore;
+    }
+    public float getGreedScore(){
+        return greedScore;
+    }
+
+    public float getWaterScore(){
+        return waterScore;
+    }
+    public float getNatureScore(){
+        return natureScore;
+    }
+    public float getDayScore(){
+        return dayScore;
+    }
+    public float getNightScore(){
+        return nightScore;
+    }
+
+    public float getHeroScore(){
+        return heroScore;
+    }
+    public float getVillainScore(){
+        return villainScore;
+    }
+
+    public float getPassiveScore(){
+        return passiveScore;
     }
 }
