@@ -9,6 +9,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.village.Village;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.ChunkCoordinates;
 
@@ -103,5 +104,14 @@ public class Helper{
         // sqrt(xd^2 + zd^2 + yd^2)
         // Because it throws an error if we pass it a double
         return (float)(Math.sqrt(Math.pow(xdist,2)+Math.pow(ydist,2)+Math.pow(zdist,2)));
+    }
+
+    public static boolean isPlayerInVillage(Entity e){
+        // TODO: Figure out what the last parameter is
+        //   I'm just assuming that it is dimension
+        //   Also, find out if the first three are chunk coordinates or something else
+        Village nearest = e.worldObj.villageCollectionObj.findNearestVillage(e.chunkCoordX,e.chunkCoordY,e.chunkCoordZ,e.dimension);
+        // Is the player within the village's radius. Ignore Y coordinate
+        return (Math.abs(nearest.getCenter().posX - e.posX) < nearest.getVillageRadius()) && (Math.abs(nearest.getCenter().posZ - e.posZ) < nearest.getVillageRadius());
     }
 }
