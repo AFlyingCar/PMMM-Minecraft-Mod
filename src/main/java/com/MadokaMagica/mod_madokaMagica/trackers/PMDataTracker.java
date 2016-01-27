@@ -188,6 +188,8 @@ public class PMDataTracker {
         if(isWitch())
             return;
 
+        // TODO: Rewrite this section
+        
         // DOES THE PLAYER LIKE ENTITIES
         // =============================
         cleanNearbyEntitiesMap();
@@ -226,7 +228,27 @@ public class PMDataTracker {
         }
 
         // TODO: Add something here to check if player is near water
+        
 
+        // DOES THE PLAYER LIKE MINING OR FARMING
+        // ======================================
+        if(Helper.isEntityUnderground((Entity)player)){
+            // TODO: Replace `true` with a check for if the player is breaking blocks
+            if(true){
+            }else{
+                // Is the player hiding from the night (or, generally just being active)
+                // Only change it by a miniscule amount (1%)
+                if(player.worldObj.isDaytime())
+                    dayScore -= 0.01;
+                else
+                    nightScore -= 0.01;
+            }
+        }else{
+            if(Helper.isEntityOutside((Entity)player)){
+                // TODO: Add stuff here about whether the player likes to farm
+                //  (If so, add 1 to natureScore)
+            }
+        }
 
         // DOES THE PLAYER LIKE THE NIGHT
         // ==============================
