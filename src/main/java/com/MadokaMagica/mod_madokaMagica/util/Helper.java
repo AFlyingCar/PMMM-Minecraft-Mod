@@ -12,6 +12,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.village.Village;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.ChunkCoordinates;
+import net.minecraft.util.MathHelper;
 
 public class Helper{
     private final static long INT_ALTER_AMT = (long)(Math.pow(10,16));
@@ -113,5 +114,24 @@ public class Helper{
         Village nearest = e.worldObj.villageCollectionObj.findNearestVillage(e.chunkCoordX,e.chunkCoordY,e.chunkCoordZ,e.dimension);
         // Is the player within the village's radius. Ignore Y coordinate
         return (Math.abs(nearest.getCenter().posX - e.posX) < nearest.getVillageRadius()) && (Math.abs(nearest.getCenter().posZ - e.posZ) < nearest.getVillageRadius());
+    }
+
+    public static boolean isEntityUnderground(Entity e){
+        int i = MathHelper.floor_double(e.posX);
+        int j = MathHelper.floor_double(e.posY);
+        int k = MathHelper.floor_double(e.posZ);
+
+        // Is the dimension not the Nether
+        // Is the player lower than level 48 
+        // Is the block the player is exposed to not exposed to the sky
+        return (!e.worldObj.provider.isHellWorld) && e.posY <= 48 && (!e.worldObj.canBlockSeeTheSky(i,j,k));
+    }
+
+    public static boolean isEntityOutside(Entity e){
+        int i = MathHelper.floor_double(e.posX);
+        int j = MathHelper.floor_double(e.posY);
+        int k = MathHelper.floor_double(e.posZ);
+
+        return e.worldObj.canBlockSeeTheSky(i,j,k);
     }
 }
