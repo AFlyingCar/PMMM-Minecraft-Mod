@@ -14,7 +14,9 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.passive.EntityVillager;
+import net.minecraft.item.ItemStack;
 
+import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
@@ -26,6 +28,7 @@ import com.MadokaMagica.mod_madokaMagica.managers.PlayerDataTrackerManager;
 
 public class PMDataTracker {
     public static final int MAX_POTENTIAL = 100;
+    public static final int SWING_TOLERANCE = 3; // 3 seconds
 	private EntityPlayer player; // The player being tracked
     private ItemSoulGem playerSoulGem = null;
 
@@ -79,6 +82,8 @@ public class PMDataTracker {
     private float underground_start_time = -1;
     private Map<Entity,Float> nearbyEntitiesMap;
 
+    private long playerswinglasttime;
+
 	public PMDataTracker(EntityPlayer nplayer){
 		player = nplayer;
         like_entity_type = new HashMap<Integer,Float>();
@@ -87,6 +92,7 @@ public class PMDataTracker {
         nearbyEntitiesMap = new HashMap<Entity,Float>();
 
         potential = calculatePotential();
+        playerswinglasttime = player.worldObj.getTotalWorldTime();
 	}
 
     public PMDataTracker(EntityPlayer nplayer, ItemSoulGem nplayerSG){
@@ -234,7 +240,8 @@ public class PMDataTracker {
         // ======================================
         if(Helper.isEntityUnderground((Entity)player)){
             // TODO: Replace `true` with a check for if the player is breaking blocks
-            if(true){
+            if(((EntityPlayer)player).isSwingInProgress){
+                this.playerswinglasttime = player.worldObj.getTotalWorldTime();
             }else{
                 // Is the player hiding from the night (or, generally just being active)
                 // Only change it by a miniscule amount (1%)
@@ -276,6 +283,20 @@ public class PMDataTracker {
         }
 
         // WHY ARE WE YELLING?
+    }
+
+    @SubscribeEvent
+    public void onEntityItemPickup(EntityItemPickupEvent event){
+        if(event.entityPlayer == this.player){
+            // Is the time since last swinging less than the tolerance level
+            if(Math.abs(this.player.worldObj.getTotalWorldTime()-this.playerswinglasttime) <= PMDataTracker.SWING_TOLERANCE){
+                // Was it actually an ore?
+                if(Helper.isItemOre(event.item.getEntityItem())){
+                    // How many things were in the stack?
+                    this.greedScore += 1*(event.item.getEntityItem().stackSize);
+                }
+            }
+        }
     }
 
     // We MUST make sure that we check for this, unless of course we aren't checking for it
