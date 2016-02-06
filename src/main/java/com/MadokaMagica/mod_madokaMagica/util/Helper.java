@@ -13,6 +13,8 @@ import net.minecraft.village.Village;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.MathHelper;
+import net.minecraft.item.ItemStack;
+import net.minecraftforge.oredict.OreDictionary;
 
 public class Helper{
     private final static long INT_ALTER_AMT = (long)(Math.pow(10,16));
@@ -133,5 +135,21 @@ public class Helper{
         int k = MathHelper.floor_double(e.posZ);
 
         return e.worldObj.canBlockSeeTheSky(i,j,k);
+    }
+
+    public static boolean doesArrayContain_address(Object[] arr,Object obj){
+        for(Object o : arr)
+            if(o==obj) return true;
+        return false;
+    }
+
+    public static boolean doesArrayContain_equals(Object[] arr,Object obj){
+        for(Object o : arr)
+            if(o.equals(obj)) return true;
+        return false;
+    }
+
+    public static boolean isItemOre(ItemStack it){
+        return doesArrayContain_equals(OreDictionary.getOreNames(),it.getDisplayName());
     }
 }
