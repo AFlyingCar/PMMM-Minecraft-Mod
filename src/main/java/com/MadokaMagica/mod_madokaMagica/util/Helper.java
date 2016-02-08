@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Iterator;
 import java.lang.Math;
+import java.nio.IntBuffer;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EnumCreatureType;
@@ -151,5 +152,35 @@ public class Helper{
 
     public static boolean isItemOre(ItemStack it){
         return doesArrayContain_equals(OreDictionary.getOreNames(),it.getDisplayName());
+    }
+
+    public static double getStandardDeviation(IntBuffer buf){
+        // Get average
+        int[] arr = buf.array();
+        int total=0;
+        for(int i:arr)
+            total+=i;
+        int avg = total/arr.length;
+        return getStandardDeviation(buf,avg);
+    }
+
+    public static double getStandardDeviation(IntBuffer buf, double avg){
+        int[] arr = buf.array();
+        // Get deviations of each item
+        int ntotal=0;
+        for(int i:arr)
+            ntotal+=Math.pow(i-avg,2);
+        // Return the final deviation
+        return Math.sqrt((double)(ntotal/arr.length));
+    }
+
+    /*
+     * Pg(z) = 1/(stdDev*sqrt(2PI))*e^-(((z-u)^2)/2stdDev^2)
+     * where z represents grey level, u represents mean (average), and stdDev represents standard deviation
+     */
+    public static double getGaussianNoise(int grey, double avg, double stdDev){
+        double pow = -(Math.pow(grey-avg,2)/(2*stdDev*stdDev));
+        double denom = stdDev*Math.sqrt(2*Math.PI);
+        return (1/denom)*Math.pow(Math.E,pow);
     }
 }
