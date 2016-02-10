@@ -413,4 +413,28 @@ public class PMDataTracker {
     public float getPassiveScore(){
         return passiveScore;
     }
+
+    public float getAggressiveScore(){
+        return aggressiveScore;
+    }
+
+    public String toString(){
+        String str = "";
+        str+= "State: " + getPlayerState() + "\n";
+        str += "Potential: " + potential + "\n";
+        str += "Corruption: " + "NOT IMPLEMENTED" + "\n";
+        str += "Scores\n======\n";
+        str += "Architect: " + getArchitectScore() + "\n";
+        str += "Engineering: " + getEngineeringScore() + "\n";
+        str += "Greed: " + getGreedScore() + "\n";
+        str += "Water: " + getWaterScore() + "\n";
+        str += "Nature: " + getNatureScore() + "\n";
+        str += "Day: " + getDayScore() + "\n";
+        str += "Night: " + getNightScore() + "\n";
+        str += "Hero: " + getHeroScore() + "\n";
+        str += "Villain: " + getVillainScore() + "\n";
+        str += "Passive: " + getPassiveScore() + "\n";
+        str += "Aggressive: " + getAggressiveScore() + "\n";
+        return str;
+    }
 }
