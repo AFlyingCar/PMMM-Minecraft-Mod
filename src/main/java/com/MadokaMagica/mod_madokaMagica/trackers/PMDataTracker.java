@@ -83,6 +83,7 @@ public class PMDataTracker {
     private Map<Entity,Float> nearbyEntitiesMap;
 
     private long playerswinglasttime;
+    private boolean playerswinging;
 
 	public PMDataTracker(EntityPlayer nplayer){
 		player = nplayer;
@@ -196,6 +197,7 @@ public class PMDataTracker {
 
         // TODO: Rewrite this section
         
+        /*
         // DOES THE PLAYER LIKE ENTITIES
         // =============================
         cleanNearbyEntitiesMap();
@@ -213,6 +215,7 @@ public class PMDataTracker {
                 nearbyEntitiesMap.put(e,new Float(e.worldObj.getTotalWorldTime()));
             }
         }
+        */
 
         // DOES THE PLAYER LIKE WATER
         // ==========================
@@ -236,13 +239,16 @@ public class PMDataTracker {
         // TODO: Add something here to check if player is near water
         
 
+
+        this.playerswinging = this.player.isSwingInProgress;
+        if(this.playerswinging)
+            this.playerswinglasttime = player.worldObj.getTotalWorldTime();
+
         // DOES THE PLAYER LIKE MINING OR FARMING
         // ======================================
         if(Helper.isEntityUnderground((Entity)player)){
             // TODO: Replace `true` with a check for if the player is breaking blocks
-            if(((EntityPlayer)player).isSwingInProgress){
-                this.playerswinglasttime = player.worldObj.getTotalWorldTime();
-            }else{
+            if(!this.playerswinging){
                 // Is the player hiding from the night (or, generally just being active)
                 // Only change it by a miniscule amount (1%)
                 if(player.worldObj.isDaytime())
@@ -336,7 +342,7 @@ public class PMDataTracker {
 
     private float calculatePotential(){
         MinecraftServer server = MinecraftServer.getServer();
-        int pAmt = server.getCurrentPlayerCount();
+        int pAmt = server.getCurrentPlayerCount(); // Everybody's potential is dependent on the number of people on the server (doesn't really mean anything in single player)
         float worldAge = server.getEntityWorld().getTotalWorldTime();
         int pexp = player.experienceLevel;
         int dimModifier = getDimensionModifier();
