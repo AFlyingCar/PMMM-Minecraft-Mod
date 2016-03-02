@@ -18,6 +18,11 @@ public class CommandDisplayInformation extends CommandBase{
     }
 
     @Override
+    public boolean canCommandSenderUseCommand(ICommandSender ics){
+        return true;
+    }
+
+    @Override
     public final String getCommandName(){
         return name;
     }
@@ -31,7 +36,13 @@ public class CommandDisplayInformation extends CommandBase{
 
     @Override
     public final void processCommand(ICommandSender sender, String[] command){
-        EntityPlayer target = MinecraftServer.getServer().getConfigurationManager().func_152612_a(command[0]);
+        EntityPlayer player = (EntityPlayer)(CommandBase.getCommandSenderAsPlayer(sender));
+        EntityPlayer target = null;
+        if(command.length > 1)
+            target = player.worldObj.getPlayerEntityByName(command[1]);
+        else
+            target = player;
+
         if(target == null){
             sendChat(getCommandSenderAsPlayer(sender),"Unknown player " + command[0]);
             return;
