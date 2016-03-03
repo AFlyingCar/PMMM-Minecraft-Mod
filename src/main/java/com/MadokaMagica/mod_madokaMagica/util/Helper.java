@@ -4,7 +4,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Iterator;
 import java.lang.Math;
+import java.nio.IntBuffer;
 
+import org.lwjgl.opengl.GL11;
+
+import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.entity.EntityLivingBase;
@@ -151,5 +156,27 @@ public class Helper{
 
     public static boolean isItemOre(ItemStack it){
         return doesArrayContain_equals(OreDictionary.getOreNames(),it.getDisplayName());
+    }
+
+    // This method is beautiful
+    public static int[] HexToRGB(int hex){
+        return new int[] {(hex>>16),(hex>>8)&0xFF,hex&0xFF};
+    }
+
+    public static int RGBToHex(int[] rgb){
+        // TODO: We should really throw some sort of error here
+        if(rgb.length < 3) return -1;
+        return ((rgb[0]<<16)|(rgb[1]<<8)|rgb[2]);
+    }
+
+    public static IntBuffer getScreenPixels(){
+        ScaledResolution sres = new ScaledResolution(Minecraft.getMinecraft(),
+                Minecraft.getMinecraft().displayWidth,
+                Minecraft.getMinecraft().displayHeight);
+        int amt = sres.getScaledWidth()*sres.getScaledHeight();
+        IntBuffer buf = IntBuffer.allocate(amt);
+        GL11.glReadPixels(0,0,sres.getScaledWidth(),sres.getScaledHeight(),
+                GL11.GL_RGBA,GL11.GL_INT,buf);
+        return buf;
     }
 }
