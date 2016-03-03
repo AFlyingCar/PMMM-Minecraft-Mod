@@ -35,20 +35,29 @@ public class CommandDisplayInformation extends CommandBase{
     }
 
     @Override
-    public final void processCommand(ICommandSender sender, String[] command){
-        EntityPlayer player = (EntityPlayer)(CommandBase.getCommandSenderAsPlayer(sender));
+    public void processCommand(ICommandSender sender, String[] command){
+        EntityPlayer player = (EntityPlayer)sender;//(EntityPlayer)(CommandBase.getCommandSenderAsPlayer(sender));
         EntityPlayer target = null;
-        if(command.length > 1)
-            target = player.worldObj.getPlayerEntityByName(command[1]);
+        if(command.length == 1)
+            target = player.worldObj.getPlayerEntityByName(command[0]);
         else
             target = player;
 
+        // This should only ever happen if a username is passed as an argument
         if(target == null){
             sendChat(getCommandSenderAsPlayer(sender),"Unknown player " + command[0]);
             return;
         }
         PMDataTracker pmdt = PlayerDataTrackerManager.getInstance().getTrackerByPlayer(target);
-        sendChat(target,pmdt.toString());
+        if(pmdt != null)
+            sendChat(target,pmdt.toString());
+        else
+            sendChat(player,"Error: the target does not have a data tracker!");
+    }
+
+    @Override
+    public boolean isUsernameIndex(String[] str,int index){
+        return index == 1;
     }
 
     public static void sendChat(EntityPlayer player, String message){
