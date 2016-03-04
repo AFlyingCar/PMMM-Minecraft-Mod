@@ -24,15 +24,12 @@ public class PMEventHandler{
     // If they do not, create one
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event){
-        //CommandDisplayInformation.getInstance().sendChat(event.player,"onPlayerLoggedIn called!");
-        System.out.println("onPlayerLoggedIn called!");
         PMDataTracker oldTracker = PlayerDataTrackerManager.getInstance().getTrackerByUsername(event.player.getDisplayName());
         if(oldTracker != null){
                 oldTracker.player = event.player;
                 oldTracker.loadTagData();
                 return;
         }
-        //CommandDisplayInformation.getInstance().sendChat(event.player,"getTrackerByUsername returned null. Calling new PMDataTracker(...);");
         System.out.println("getTrackerByUsername returned null. Calling new PMDataTracker(...);");
         PMDataTracker tracker = new PMDataTracker(event.player);
         PlayerDataTrackerManager.getInstance().addDataTracker(tracker);
