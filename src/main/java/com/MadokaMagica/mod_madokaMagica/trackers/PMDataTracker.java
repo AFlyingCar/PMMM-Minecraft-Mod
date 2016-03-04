@@ -29,7 +29,7 @@ import com.MadokaMagica.mod_madokaMagica.managers.PlayerDataTrackerManager;
 public class PMDataTracker {
     public static final int MAX_POTENTIAL = 100;
     public static final int SWING_TOLERANCE = 3; // 3 seconds
-	private EntityPlayer player; // The player being tracked
+	public EntityPlayer player; // The player being tracked
     private ItemSoulGem playerSoulGem = null;
 
 	// Track the Player's likes and dislikes
@@ -437,4 +437,14 @@ public class PMDataTracker {
         str += "Aggressive: " + getAggressiveScore() + "\n";
         return str;
     }
+
+    // TODO: Finish thi method.
+    public String getHighestScoreIden(){
+        return "";
+    }
+
+    public float getCorruption(){
+        return playerSoulGem.getDespair();
+    }
 }
+
