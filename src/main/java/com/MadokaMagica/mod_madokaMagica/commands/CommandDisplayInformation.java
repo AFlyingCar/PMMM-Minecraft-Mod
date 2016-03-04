@@ -50,7 +50,8 @@ public class CommandDisplayInformation extends CommandBase{
         }
         PMDataTracker pmdt = PlayerDataTrackerManager.getInstance().getTrackerByPlayer(target);
         if(pmdt != null)
-            sendChat(target,pmdt.toString());
+            for(String s : pmdt.toString().split("\n"))
+                sendChat(target,s);
         else
             sendChat(player,"Error: the target does not have a data tracker!");
     }
