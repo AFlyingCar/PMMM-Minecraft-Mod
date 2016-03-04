@@ -419,11 +419,10 @@ public class PMDataTracker {
     }
 
     public String toString(){
-        String str = "";
+        String str = "PMDataTracker\n=============\n";
         str+= "State: " + getPlayerState() + "\n";
         str += "Potential: " + potential + "\n";
         str += "Corruption: " + "NOT IMPLEMENTED" + "\n";
-        str += "Scores\n======\n";
         str += "Architect: " + getArchitectScore() + "\n";
         str += "Engineering: " + getEngineeringScore() + "\n";
         str += "Greed: " + getGreedScore() + "\n";
