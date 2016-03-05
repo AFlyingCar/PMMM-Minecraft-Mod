@@ -94,6 +94,8 @@ public class PMDataTracker {
 
         potential = calculatePotential();
         playerswinglasttime = player.worldObj.getTotalWorldTime();
+
+        loadTagData();
 	}
 
     public PMDataTracker(EntityPlayer nplayer, ItemSoulGem nplayerSG){
@@ -289,6 +291,10 @@ public class PMDataTracker {
         }
 
         // WHY ARE WE YELLING?
+
+        
+        // Saving
+        PlayerDataTrackerManager.getInstance().saveTracker(this);
     }
 
     @SubscribeEvent
@@ -416,6 +422,10 @@ public class PMDataTracker {
 
     public float getAggressiveScore(){
         return aggressiveScore;
+    }
+
+    public float getPotential(){
+        return potential;
     }
 
     public String toString(){
