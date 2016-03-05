@@ -435,7 +435,7 @@ public class PMDataTracker {
         String str = "PMDataTracker\n=============\n";
         str+= "State: " + getPlayerState() + "\n";
         str += "Potential: " + potential + "\n";
-        str += "Corruption: " + "NOT IMPLEMENTED" + "\n";
+        str += "Corruption: " + getCorruption() + "\n";
         str += "Architect: " + getArchitectScore() + "\n";
         str += "Engineering: " + getEngineeringScore() + "\n";
         str += "Greed: " + getGreedScore() + "\n";
@@ -450,13 +450,31 @@ public class PMDataTracker {
         return str;
     }
 
-    // TODO: Finish thi method.
     public String getHighestScoreIden(){
-        return "";
+        float[] scores = {getArchitectScore(), getEngineeringScore(),getGreedScore(),getWaterScore(),getNatureScore(),
+            getDayScore(),getNightScore(),getHeroScore(),getVillainScore(),getPassiveScore(),getAggressiveScore()};
+        int idx = Helper.getMaxInArray(scores);
+        switch(idx){
+            case 3:
+                return "WATER";
+            case 4:
+                return "NATURE";
+            case 6:
+                return "NIGHT";
+            case 8:
+                return "HERO";
+            case 10:
+                return "AGGRESSIVE";
+            default:
+                return "DEFAULT";
+        }
     }
 
     public float getCorruption(){
-        return playerSoulGem.getDespair();
+        if(playerSoulGem != null)
+            return playerSoulGem.getDespair();
+        else
+            return -1;
     }
 
     public void incrementTimer(){
