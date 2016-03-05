@@ -14,8 +14,6 @@ import net.minecraft.server.MinecraftServer;
 
 import net.minecraftforge.client.event.sound.PlaySoundEvent17;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
-import net.minecraftforge.common.MinecraftForge;
 
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.Instance;
@@ -30,7 +28,6 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.eventhandler.EventPriority;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.common.registry.EntityRegistry;
-import cpw.mods.fml.common.gameevent.PlayerEvent;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -79,7 +76,6 @@ public class MadokaMagicaMod {
         GameRegistry.registerItem(itemSoulGem,"Soul Gem");
         GameRegistry.registerItem(itemGriefSeed,"Grief Seed");
 
-        //MinecraftForge.EVENT_BUS.register(new PMEventHandler());
         FMLCommonHandler.instance().bus().register(new PMEventHandler());
 
         // GameRegistry.addShapelessRecipe(new ItemStack(itemSoulGem,1,0),new ItemStack(itemSoulGem,1,0),new ItemStack(itemGriefSeed,1,0));
