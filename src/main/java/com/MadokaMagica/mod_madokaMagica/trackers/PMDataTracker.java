@@ -85,6 +85,8 @@ public class PMDataTracker {
     private long playerswinglasttime;
     private boolean playerswinging;
 
+    private int updatetimer = 0;
+
     public PMDataTracker(EntityPlayer nplayer){
         player = nplayer;
         like_entity_type = new HashMap<Integer,Float>();
@@ -295,6 +297,7 @@ public class PMDataTracker {
         
         // Saving
         PlayerDataTrackerManager.getInstance().saveTracker(this);
+        updatetimer = 0;
     }
 
     @SubscribeEvent
@@ -455,5 +458,12 @@ public class PMDataTracker {
     public float getCorruption(){
         return playerSoulGem.getDespair();
     }
-}
 
+    public void incrementTimer(){
+        updatetimer++;
+    }
+
+    public int getUpdateTime(){
+        return updatetimer;
+    }
+}

@@ -63,8 +63,11 @@ public class PlayerDataTrackerManager{
     }
 
 	public void manage(){
-		for(Entry<String,PMDataTracker> trackerset : datatrackers.entrySet())
-			trackerset.getValue().updateData();
+		for(Entry<String,PMDataTracker> trackerset : datatrackers.entrySet()){
+            trackerset.getValue().incrementTimer();
+            
+            if(trackerset.getValue().getUpdateTime() >= 10) trackerset.getValue().updateData();
+        }
 	}
 
 	public static PlayerDataTrackerManager getInstance(){
