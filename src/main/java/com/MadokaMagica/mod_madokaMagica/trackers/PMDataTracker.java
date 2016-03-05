@@ -29,13 +29,13 @@ import com.MadokaMagica.mod_madokaMagica.managers.PlayerDataTrackerManager;
 public class PMDataTracker {
     public static final int MAX_POTENTIAL = 100;
     public static final int SWING_TOLERANCE = 3; // 3 seconds
-	private EntityPlayer player; // The player being tracked
+    public EntityPlayer player; // The player being tracked
     private ItemSoulGem playerSoulGem = null;
 
-	// Track the Player's likes and dislikes
-	private Map<Integer,Float> like_entity_type = null; // A certain type of entity
-	private Map<Integer,Float> liked_entities = null; // A specific entity
-	private Map<Integer,Float> like_level = null;
+    // Track the Player's likes and dislikes
+    private Map<Integer,Float> like_entity_type = null; // A certain type of entity
+    private Map<Integer,Float> liked_entities = null; // A specific entity
+    private Map<Integer,Float> like_level = null;
 
     private float architectScore = 0;
     private float engineeringScore = 0;
@@ -53,11 +53,11 @@ public class PMDataTracker {
     private float aggressiveScore = 0;
 
     /*
-	private float like_building = 0;
-	private float like_fighting = 0;
-	private float like_water = 0;
-	private float like_night = 0;
-	private float like_day = 0;
+    private float like_building = 0;
+    private float like_fighting = 0;
+    private float like_water = 0;
+    private float like_night = 0;
+    private float like_day = 0;
     private float hero = 0;
     */
 
@@ -68,9 +68,9 @@ public class PMDataTracker {
      */
     private int player_state = 0;
 
-	private float potential;
+    private float potential;
 
-	private boolean ready;
+    private boolean ready;
 
     private boolean countingRain = false;
     private float rainStartTime;
@@ -83,9 +83,10 @@ public class PMDataTracker {
     private Map<Entity,Float> nearbyEntitiesMap;
 
     private long playerswinglasttime;
+    private boolean playerswinging;
 
-	public PMDataTracker(EntityPlayer nplayer){
-		player = nplayer;
+    public PMDataTracker(EntityPlayer nplayer){
+        player = nplayer;
         like_entity_type = new HashMap<Integer,Float>();
         liked_entities = new HashMap<Integer,Float>();
         like_level = new HashMap<Integer,Float>();
@@ -93,44 +94,46 @@ public class PMDataTracker {
 
         potential = calculatePotential();
         playerswinglasttime = player.worldObj.getTotalWorldTime();
-	}
+
+        loadTagData();
+    }
 
     public PMDataTracker(EntityPlayer nplayer, ItemSoulGem nplayerSG){
         this(nplayer);
         playerSoulGem = nplayerSG;
     }
 
-	public boolean isReady(){
-		return ready;
-	}
+    public boolean isReady(){
+        return ready;
+    }
 
-	public void loadTagData(){
-		NBTTagCompound tags = player.getEntityData();
+    public void loadTagData(){
+        NBTTagCompound tags = player.getEntityData();
         // Get the player's potential
-		if(tags.hasKey("PM_POTENTIAL")){
-			potential = tags.getFloat("PM_POTENTIAL");
-		}
+        if(tags.hasKey("PM_POTENTIAL")){
+            potential = tags.getFloat("PM_POTENTIAL");
+        }
 
         // Get Hero/Villain scores
         if(tags.hasKey("PM_HERO_SCORE")){
             heroScore = tags.getFloat("PM_HERO_SCORE");
-		}
+        }
         if(tags.hasKey("PM_VILLAIN_SCORE")){
             villainScore = tags.getFloat("PM_VILLAIN_SCORE");
-		}
+        }
 
         // Get Aggressive/Passive score
         if(tags.hasKey("PM_AGGRESSIVE_SCORE")){
             aggressiveScore = tags.getFloat("PM_AGGRESSIVE_SCORE");
         }
         if(tags.hasKey("PM_PASSIVE_SCORE")){
-			passiveScore = tags.getFloat("PM_PASSIVE_SCORE");
-		}
+            passiveScore = tags.getFloat("PM_PASSIVE_SCORE");
+        }
 
         // Enviroment-based scores
         if(tags.hasKey("PM_NATURE_SCORE")){
-			natureScore = tags.getFloat("PM_NATURE_SCORE");
-		}
+            natureScore = tags.getFloat("PM_NATURE_SCORE");
+        }
         if(tags.hasKey("PM_DAY_SCORE")){
             dayScore = tags.getFloat("PM_DAY_SCORE");
         }
@@ -140,8 +143,8 @@ public class PMDataTracker {
 
         // engineering-type score
         if(tags.hasKey("PM_ENGINEERING_SCORE")){
-			engineeringScore = tags.getFloat("PM_ENGINEERING_SCORE");
-		}
+            engineeringScore = tags.getFloat("PM_ENGINEERING_SCORE");
+        }
         if(tags.hasKey("PM_ARCHITECT_SCORE")){
             architectScore = tags.getFloat("PM_ARCHITECT_SCORE");
         }
@@ -150,10 +153,10 @@ public class PMDataTracker {
         }
 
         if(tags.hasKey("PM_LIKES_LEVEL")){
-			int[] level_data = tags.getIntArray("PM_LIKES_LEVEL");
+            int[] level_data = tags.getIntArray("PM_LIKES_LEVEL");
             float like_amt = Helper.unpackFloat(level_data[1]);
             like_level.put(new Integer(level_data[0]),new Float(like_amt));
-		}
+        }
         if(tags.hasKey("PM_LIKES_ENTITY")){
             // list = [Integer,Float,Integer,Float,Integer,Float,...]
             int[] list = tags.getIntArray("PM_LIKES_ENTITY");
@@ -187,7 +190,7 @@ public class PMDataTracker {
         if(tags.hasKey("PM_PLAYER_STATE")){
             player_state = tags.getInteger("PM_PLAYER_STATE");
         }
-	}
+    }
 
     public void updateData(){
         // We don't track anything anymore if the player has turned into a witch
@@ -196,6 +199,7 @@ public class PMDataTracker {
 
         // TODO: Rewrite this section
         
+        /*
         // DOES THE PLAYER LIKE ENTITIES
         // =============================
         cleanNearbyEntitiesMap();
@@ -213,6 +217,7 @@ public class PMDataTracker {
                 nearbyEntitiesMap.put(e,new Float(e.worldObj.getTotalWorldTime()));
             }
         }
+        */
 
         // DOES THE PLAYER LIKE WATER
         // ==========================
@@ -236,13 +241,16 @@ public class PMDataTracker {
         // TODO: Add something here to check if player is near water
         
 
+
+        this.playerswinging = this.player.isSwingInProgress;
+        if(this.playerswinging)
+            this.playerswinglasttime = player.worldObj.getTotalWorldTime();
+
         // DOES THE PLAYER LIKE MINING OR FARMING
         // ======================================
         if(Helper.isEntityUnderground((Entity)player)){
             // TODO: Replace `true` with a check for if the player is breaking blocks
-            if(((EntityPlayer)player).isSwingInProgress){
-                this.playerswinglasttime = player.worldObj.getTotalWorldTime();
-            }else{
+            if(!this.playerswinging){
                 // Is the player hiding from the night (or, generally just being active)
                 // Only change it by a miniscule amount (1%)
                 if(player.worldObj.isDaytime())
@@ -283,6 +291,10 @@ public class PMDataTracker {
         }
 
         // WHY ARE WE YELLING?
+
+        
+        // Saving
+        PlayerDataTrackerManager.getInstance().saveTracker(this);
     }
 
     @SubscribeEvent
@@ -336,7 +348,7 @@ public class PMDataTracker {
 
     private float calculatePotential(){
         MinecraftServer server = MinecraftServer.getServer();
-        int pAmt = server.getCurrentPlayerCount();
+        int pAmt = server.getCurrentPlayerCount(); // Everybody's potential is dependent on the number of people on the server (doesn't really mean anything in single player)
         float worldAge = server.getEntityWorld().getTotalWorldTime();
         int pexp = player.experienceLevel;
         int dimModifier = getDimensionModifier();
@@ -407,4 +419,41 @@ public class PMDataTracker {
     public float getPassiveScore(){
         return passiveScore;
     }
+
+    public float getAggressiveScore(){
+        return aggressiveScore;
+    }
+
+    public float getPotential(){
+        return potential;
+    }
+
+    public String toString(){
+        String str = "PMDataTracker\n=============\n";
+        str+= "State: " + getPlayerState() + "\n";
+        str += "Potential: " + potential + "\n";
+        str += "Corruption: " + "NOT IMPLEMENTED" + "\n";
+        str += "Architect: " + getArchitectScore() + "\n";
+        str += "Engineering: " + getEngineeringScore() + "\n";
+        str += "Greed: " + getGreedScore() + "\n";
+        str += "Water: " + getWaterScore() + "\n";
+        str += "Nature: " + getNatureScore() + "\n";
+        str += "Day: " + getDayScore() + "\n";
+        str += "Night: " + getNightScore() + "\n";
+        str += "Hero: " + getHeroScore() + "\n";
+        str += "Villain: " + getVillainScore() + "\n";
+        str += "Passive: " + getPassiveScore() + "\n";
+        str += "Aggressive: " + getAggressiveScore() + "\n";
+        return str;
+    }
+
+    // TODO: Finish thi method.
+    public String getHighestScoreIden(){
+        return "";
+    }
+
+    public float getCorruption(){
+        return playerSoulGem.getDespair();
+    }
 }
+

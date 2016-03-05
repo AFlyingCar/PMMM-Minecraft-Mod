@@ -10,6 +10,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.Explosion;
+import net.minecraft.server.MinecraftServer;
 
 import net.minecraftforge.client.event.sound.PlaySoundEvent17;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
@@ -17,6 +18,7 @@ import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.Instance;
 import cpw.mods.fml.common.FMLLog;
+import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
@@ -30,6 +32,7 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
 import com.MadokaMagica.mod_madokaMagica.commands.CommandStartWitchTransformation;
+import com.MadokaMagica.mod_madokaMagica.commands.CommandDisplayInformation;
 import com.MadokaMagica.mod_madokaMagica.events.MadokaMagicaEvent;
 import com.MadokaMagica.mod_madokaMagica.events.MadokaMagicaWitchTransformationEvent;
 import com.MadokaMagica.mod_madokaMagica.events.MadokaMagicaPuellaMagiTransformationEvent;
@@ -39,8 +42,7 @@ import com.MadokaMagica.mod_madokaMagica.managers.ItemSoulGemManager;
 import com.MadokaMagica.mod_madokaMagica.items.ItemSoulGem;
 import com.MadokaMagica.mod_madokaMagica.items.ItemGriefSeed;
 import com.MadokaMagica.mod_madokaMagica.trackers.PMDataTracker;
-// import com.MadokaMagica.mod_madokaMagica.entities.*;
-// import com.MadokaMagica.mod_madokaMagica.*;
+import com.MadokaMagica.mod_madokaMagica.handlers.PMEventHandler;
 
 @Mod(modid=MadokaMagicaMod.MODID, version=MadokaMagicaMod.VERSION)
 public class MadokaMagicaMod {
@@ -74,6 +76,8 @@ public class MadokaMagicaMod {
         GameRegistry.registerItem(itemSoulGem,"Soul Gem");
         GameRegistry.registerItem(itemGriefSeed,"Grief Seed");
 
+        FMLCommonHandler.instance().bus().register(new PMEventHandler());
+
         // GameRegistry.addShapelessRecipe(new ItemStack(itemSoulGem,1,0),new ItemStack(itemSoulGem,1,0),new ItemStack(itemGriefSeed,1,0));
 
         /*
@@ -90,6 +94,7 @@ public class MadokaMagicaMod {
     public void onServerStarting(FMLServerStartingEvent event){
         // Load each player data thing and add it to playerDataTrackerManager
         event.registerServerCommand( CommandStartWitchTransformation.getInstance() );
+        event.registerServerCommand( CommandDisplayInformation.getInstance() );
     }
 
     @EventHandler
@@ -124,28 +129,6 @@ public class MadokaMagicaMod {
 
     public void onPlayerPuellaMagiTransformation(MadokaMagicaPuellaMagiTransformationEvent event){
         // stuff
-    }
-
-    // The player doesn't actually transform into a witch until they die
-    // That's why we need to prevent them from truly dying so that they become a witch instead.
-    @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public boolean onDeathWithHighestPriority(LivingDeathEvent event){
-        Entity entity = event.entity;
-
-        // If it is an EntityPlayer and if that player is currently turning into a witch
-        PMDataTracker pmdt = playerDataTrackerManager.getTrackerByPlayer((EntityPlayer)entity);
-        if(entity instanceof EntityPlayer && pmdt != null && MadokaMagicaWitchTransformationEvent.getInstance().isActive(pmdt)){
-            ItemSoulGem soulgem = itemSoulGemManager.getSoulGemByPlayer((EntityPlayer)entity);
-            // Why the hell would soulgem even be null?
-            if(soulgem == null){
-                FMLLog.warning("Found null in itemSoulGemManager! This most likely means that the player is somehow turning into a witch without having a soulgem. Please consult a programmer.");
-                return false;
-            }
-
-            pmdt.setPlayerState(2);
-
-        }
-        return true;
     }
 
     // Jesus Christ this method looks like shit.
