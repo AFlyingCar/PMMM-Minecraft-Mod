@@ -29,13 +29,13 @@ import com.MadokaMagica.mod_madokaMagica.managers.PlayerDataTrackerManager;
 public class PMDataTracker {
     public static final int MAX_POTENTIAL = 100;
     public static final int SWING_TOLERANCE = 3; // 3 seconds
-	public EntityPlayer player; // The player being tracked
+    public EntityPlayer player; // The player being tracked
     private ItemSoulGem playerSoulGem = null;
 
-	// Track the Player's likes and dislikes
-	private Map<Integer,Float> like_entity_type = null; // A certain type of entity
-	private Map<Integer,Float> liked_entities = null; // A specific entity
-	private Map<Integer,Float> like_level = null;
+    // Track the Player's likes and dislikes
+    private Map<Integer,Float> like_entity_type = null; // A certain type of entity
+    private Map<Integer,Float> liked_entities = null; // A specific entity
+    private Map<Integer,Float> like_level = null;
 
     private float architectScore = 0;
     private float engineeringScore = 0;
@@ -53,11 +53,11 @@ public class PMDataTracker {
     private float aggressiveScore = 0;
 
     /*
-	private float like_building = 0;
-	private float like_fighting = 0;
-	private float like_water = 0;
-	private float like_night = 0;
-	private float like_day = 0;
+    private float like_building = 0;
+    private float like_fighting = 0;
+    private float like_water = 0;
+    private float like_night = 0;
+    private float like_day = 0;
     private float hero = 0;
     */
 
@@ -68,9 +68,9 @@ public class PMDataTracker {
      */
     private int player_state = 0;
 
-	private float potential;
+    private float potential;
 
-	private boolean ready;
+    private boolean ready;
 
     private boolean countingRain = false;
     private float rainStartTime;
@@ -85,8 +85,8 @@ public class PMDataTracker {
     private long playerswinglasttime;
     private boolean playerswinging;
 
-	public PMDataTracker(EntityPlayer nplayer){
-		player = nplayer;
+    public PMDataTracker(EntityPlayer nplayer){
+        player = nplayer;
         like_entity_type = new HashMap<Integer,Float>();
         liked_entities = new HashMap<Integer,Float>();
         like_level = new HashMap<Integer,Float>();
@@ -96,44 +96,44 @@ public class PMDataTracker {
         playerswinglasttime = player.worldObj.getTotalWorldTime();
 
         loadTagData();
-	}
+    }
 
     public PMDataTracker(EntityPlayer nplayer, ItemSoulGem nplayerSG){
         this(nplayer);
         playerSoulGem = nplayerSG;
     }
 
-	public boolean isReady(){
-		return ready;
-	}
+    public boolean isReady(){
+        return ready;
+    }
 
-	public void loadTagData(){
-		NBTTagCompound tags = player.getEntityData();
+    public void loadTagData(){
+        NBTTagCompound tags = player.getEntityData();
         // Get the player's potential
-		if(tags.hasKey("PM_POTENTIAL")){
-			potential = tags.getFloat("PM_POTENTIAL");
-		}
+        if(tags.hasKey("PM_POTENTIAL")){
+            potential = tags.getFloat("PM_POTENTIAL");
+        }
 
         // Get Hero/Villain scores
         if(tags.hasKey("PM_HERO_SCORE")){
             heroScore = tags.getFloat("PM_HERO_SCORE");
-		}
+        }
         if(tags.hasKey("PM_VILLAIN_SCORE")){
             villainScore = tags.getFloat("PM_VILLAIN_SCORE");
-		}
+        }
 
         // Get Aggressive/Passive score
         if(tags.hasKey("PM_AGGRESSIVE_SCORE")){
             aggressiveScore = tags.getFloat("PM_AGGRESSIVE_SCORE");
         }
         if(tags.hasKey("PM_PASSIVE_SCORE")){
-			passiveScore = tags.getFloat("PM_PASSIVE_SCORE");
-		}
+            passiveScore = tags.getFloat("PM_PASSIVE_SCORE");
+        }
 
         // Enviroment-based scores
         if(tags.hasKey("PM_NATURE_SCORE")){
-			natureScore = tags.getFloat("PM_NATURE_SCORE");
-		}
+            natureScore = tags.getFloat("PM_NATURE_SCORE");
+        }
         if(tags.hasKey("PM_DAY_SCORE")){
             dayScore = tags.getFloat("PM_DAY_SCORE");
         }
@@ -143,8 +143,8 @@ public class PMDataTracker {
 
         // engineering-type score
         if(tags.hasKey("PM_ENGINEERING_SCORE")){
-			engineeringScore = tags.getFloat("PM_ENGINEERING_SCORE");
-		}
+            engineeringScore = tags.getFloat("PM_ENGINEERING_SCORE");
+        }
         if(tags.hasKey("PM_ARCHITECT_SCORE")){
             architectScore = tags.getFloat("PM_ARCHITECT_SCORE");
         }
@@ -153,10 +153,10 @@ public class PMDataTracker {
         }
 
         if(tags.hasKey("PM_LIKES_LEVEL")){
-			int[] level_data = tags.getIntArray("PM_LIKES_LEVEL");
+            int[] level_data = tags.getIntArray("PM_LIKES_LEVEL");
             float like_amt = Helper.unpackFloat(level_data[1]);
             like_level.put(new Integer(level_data[0]),new Float(like_amt));
-		}
+        }
         if(tags.hasKey("PM_LIKES_ENTITY")){
             // list = [Integer,Float,Integer,Float,Integer,Float,...]
             int[] list = tags.getIntArray("PM_LIKES_ENTITY");
@@ -190,7 +190,7 @@ public class PMDataTracker {
         if(tags.hasKey("PM_PLAYER_STATE")){
             player_state = tags.getInteger("PM_PLAYER_STATE");
         }
-	}
+    }
 
     public void updateData(){
         // We don't track anything anymore if the player has turned into a witch
