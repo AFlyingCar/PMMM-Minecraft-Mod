@@ -9,6 +9,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.entity.player.EntityPlayer;
 
 import com.MadokaMagica.mod_madokaMagica.trackers.PMDataTracker;
+import com.MadokaMagica.mod_madokaMagica.effects.PMEffects;
 
 public class PlayerDataTrackerManager{
 	private HashMap<String,PMDataTracker> datatrackers;
@@ -65,8 +66,11 @@ public class PlayerDataTrackerManager{
 	public void manage(){
 		for(Entry<String,PMDataTracker> trackerset : datatrackers.entrySet()){
             trackerset.getValue().incrementTimer();
-            
-            if(trackerset.getValue().getUpdateTime() >= 10) trackerset.getValue().updateData();
+
+            if(trackerset.getValue().getUpdateTime() >= 10){
+                trackerset.getValue().updateData();
+                PMEffects.applyPlayerEffects(trackerset.getValue());
+            }
         }
 	}
 
