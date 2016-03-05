@@ -209,4 +209,30 @@ public class Helper{
         double denom = stdDev*Math.sqrt(2*Math.PI);
         return (1/denom)*Math.pow(Math.E,pow);
     }
+
+    /*
+     * getMaxInArray
+     * Accepts an int[]
+     * Returns the index of the largest value in the array.
+     */
+    public static int getMaxInArray(int[] arr){
+        int max = 0;
+        for(int i=1;i<arr.length;i++){
+            if(arr[i] > arr[max]) max = i;
+        }
+        return max;
+    }
+
+    /*
+     * getMaxInArray
+     * Accepts an float[]
+     * Returns the index of the largest value in the array.
+     */
+    public static int getMaxInArray(float[] arr){
+        int max = 0;
+        for(int i=1;i<arr.length;i++){
+            if(arr[i] > arr[max]) max = i;
+        }
+        return max;
+    }
 }
