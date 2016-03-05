@@ -5,6 +5,7 @@ build/
 *.ipr
 *.iws
 *.swp
+*.orig
 forge-*-changelog.txt
 out/
 
