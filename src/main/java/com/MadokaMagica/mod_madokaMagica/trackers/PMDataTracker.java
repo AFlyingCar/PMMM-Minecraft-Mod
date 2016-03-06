@@ -87,6 +87,8 @@ public class PMDataTracker {
 
     private int updatetimer = 0;
 
+    private boolean currentlyTransformingIntoWitch;
+
     public PMDataTracker(EntityPlayer nplayer){
         player = nplayer;
         like_entity_type = new HashMap<Integer,Float>();
@@ -530,5 +532,13 @@ public class PMDataTracker {
         str += "Passive: " + getPassiveScore() + "\n";
         str += "Aggressive: " + getAggressiveScore() + "\n";
         return str;
+    }
+
+    public void setIsTransformingIntoWitch(boolean newValue){
+        this.currentlyTransformingIntoWitch = newValue;
+    }
+
+    public boolean isTransformingIntoWitch(){
+        return this.currentlyTransformingIntoWitch;
     }
 }
