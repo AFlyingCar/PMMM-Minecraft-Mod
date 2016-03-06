@@ -4,6 +4,8 @@ import com.MadokaMagica.mod_madokaMagica.events.MadokaMagicaWitchTransformationE
 import com.MadokaMagica.mod_madokaMagica.managers.PlayerDataTrackerManager;
 import com.MadokaMagica.mod_madokaMagica.trackers.PMDataTracker;
 
+import net.minecraftforge.common.MinecraftForge;
+
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.server.MinecraftServer;
@@ -32,14 +34,21 @@ public class CommandStartWitchTransformation extends CommandBase{
 
     @Override
     public final void processCommand(ICommandSender sender, String[] command){
-        EntityPlayer target = MinecraftServer.getServer().getConfigurationManager().func_152612_a(command[0]);
-        if(target == null){
-            // TODO: We should really add some more descriptive error message.
-            sendChat(getCommandSenderAsPlayer(sender),"Invalid use of command.");
+        EntityPlayer senderAsPlayer = (EntityPlayer)sender;
+        if(command.length != 1){
+            sendChat(senderAsPlayer,getCommandUsage(sender));
             return;
         }
-        PMDataTracker pmdt = PlayerDataTrackerManager.getInstance().getTrackerByPlayer(target);
-        MadokaMagicaWitchTransformationEvent.getInstance().activate(pmdt);
+        EntityPlayer target = senderAsPlayer.worldObj.getPlayerEntityByName(command[0]);
+        
+        if(target == null){
+            sendChat(getCommandSenderAsPlayer(sender),"Unknown player: " + command[0]);
+            return;
+        }
+        PMDataTracker tracker = PlayerDataTrackerManager.getInstance().getTrackerByPlayer(target);
+        if(!tracker.isTransformingIntoWitch()){
+            MinecraftForge.EVENT_BUS.post(new MadokaMagicaWitchTransformationEvent(tracker));
+        }
     }
 
     public static void sendChat(EntityPlayer player, String message){
