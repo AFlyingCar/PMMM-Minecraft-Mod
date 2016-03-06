@@ -431,25 +431,6 @@ public class PMDataTracker {
         return potential;
     }
 
-    public String toString(){
-        String str = "PMDataTracker\n=============\n";
-        str+= "State: " + getPlayerState() + "\n";
-        str += "Potential: " + potential + "\n";
-        str += "Corruption: " + getCorruption() + "\n";
-        str += "Architect: " + getArchitectScore() + "\n";
-        str += "Engineering: " + getEngineeringScore() + "\n";
-        str += "Greed: " + getGreedScore() + "\n";
-        str += "Water: " + getWaterScore() + "\n";
-        str += "Nature: " + getNatureScore() + "\n";
-        str += "Day: " + getDayScore() + "\n";
-        str += "Night: " + getNightScore() + "\n";
-        str += "Hero: " + getHeroScore() + "\n";
-        str += "Villain: " + getVillainScore() + "\n";
-        str += "Passive: " + getPassiveScore() + "\n";
-        str += "Aggressive: " + getAggressiveScore() + "\n";
-        return str;
-    }
-
     public String getHighestScoreIden(){
         float[] scores = {getArchitectScore(), getEngineeringScore(),getGreedScore(),getWaterScore(),getNatureScore(),
             getDayScore(),getNightScore(),getHeroScore(),getVillainScore(),getPassiveScore(),getAggressiveScore()};
@@ -477,11 +458,77 @@ public class PMDataTracker {
             return -1;
     }
 
+    public void setPotential(float val){
+        potential = val;
+    }
+
+    public void setCorruption(float val){
+        if(playerSoulGem != null)
+            playerSoulGem.setDespair(val);
+    }
+
+    public void setArchitectScore(float val){
+        architectScore = val;
+    }
+    public void setEngineeringScore(float val){
+        engineeringScore = val;
+    }
+    public void setGreedScore(float val){
+        greedScore = val;
+    }
+
+    public void setWaterScore(float val){
+        waterScore = val;
+    }
+    public void setNatureScore(float val){
+        natureScore = val;
+    }
+    public void setDayScore(float val){
+        dayScore = val;
+    }
+    public void setNightScore(float val){
+        nightScore = val;
+    }
+
+    public void setHeroScore(float val){
+        heroScore = val;
+    }
+    public void setVillainScore(float val){
+        villainScore = val;
+    }
+
+    public void setPassiveScore(float val){
+        passiveScore = val;
+    }
+
+    public void setAggressiveScore(float val){
+        aggressiveScore = val;
+    }
+
     public void incrementTimer(){
         updatetimer++;
     }
 
     public int getUpdateTime(){
         return updatetimer;
+    }
+
+    public String toString(){
+        String str = "PMDataTracker\n=============\n";
+        str+= "State: " + getPlayerState() + "\n";
+        str += "Potential: " + potential + "\n";
+        str += "Corruption: " + getCorruption() + "\n";
+        str += "Architect: " + getArchitectScore() + "\n";
+        str += "Engineering: " + getEngineeringScore() + "\n";
+        str += "Greed: " + getGreedScore() + "\n";
+        str += "Water: " + getWaterScore() + "\n";
+        str += "Nature: " + getNatureScore() + "\n";
+        str += "Day: " + getDayScore() + "\n";
+        str += "Night: " + getNightScore() + "\n";
+        str += "Hero: " + getHeroScore() + "\n";
+        str += "Villain: " + getVillainScore() + "\n";
+        str += "Passive: " + getPassiveScore() + "\n";
+        str += "Aggressive: " + getAggressiveScore() + "\n";
+        return str;
     }
 }
