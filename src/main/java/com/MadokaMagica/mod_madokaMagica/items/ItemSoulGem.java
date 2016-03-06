@@ -34,6 +34,10 @@ public class ItemSoulGem extends Item{
         return despair;
     }
 
+    public void setDespair(float val){
+        despair = val;
+    }
+
 /*
     public PMWeapon createWeapon(){
         // Do some stuff to create a weapon
