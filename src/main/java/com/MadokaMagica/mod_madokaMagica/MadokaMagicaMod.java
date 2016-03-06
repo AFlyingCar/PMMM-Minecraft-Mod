@@ -33,12 +33,16 @@ import cpw.mods.fml.relauncher.SideOnly;
 
 import com.MadokaMagica.mod_madokaMagica.commands.CommandStartWitchTransformation;
 import com.MadokaMagica.mod_madokaMagica.commands.CommandDisplayInformation;
+import com.MadokaMagica.mod_madokaMagica.commands.CommandPlayerData;
+
 import com.MadokaMagica.mod_madokaMagica.events.MadokaMagicaEvent;
 import com.MadokaMagica.mod_madokaMagica.events.MadokaMagicaWitchTransformationEvent;
 import com.MadokaMagica.mod_madokaMagica.events.MadokaMagicaPuellaMagiTransformationEvent;
+
 import com.MadokaMagica.mod_madokaMagica.managers.PlayerDataTrackerManager;
 import com.MadokaMagica.mod_madokaMagica.managers.MadokaMagicaEventManager;
 import com.MadokaMagica.mod_madokaMagica.managers.ItemSoulGemManager;
+
 import com.MadokaMagica.mod_madokaMagica.items.ItemSoulGem;
 import com.MadokaMagica.mod_madokaMagica.items.ItemGriefSeed;
 import com.MadokaMagica.mod_madokaMagica.trackers.PMDataTracker;
@@ -95,6 +99,7 @@ public class MadokaMagicaMod {
         // Load each player data thing and add it to playerDataTrackerManager
         event.registerServerCommand( CommandStartWitchTransformation.getInstance() );
         event.registerServerCommand( CommandDisplayInformation.getInstance() );
+        event.registerServerCommand( CommandPlayerData.getInstance() );
     }
 
     @EventHandler
