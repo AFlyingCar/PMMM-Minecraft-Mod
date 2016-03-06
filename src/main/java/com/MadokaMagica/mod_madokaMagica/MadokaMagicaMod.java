@@ -12,6 +12,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.Explosion;
 import net.minecraft.server.MinecraftServer;
 
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.client.event.sound.PlaySoundEvent17;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 
@@ -81,6 +82,7 @@ public class MadokaMagicaMod {
         GameRegistry.registerItem(itemGriefSeed,"Grief Seed");
 
         FMLCommonHandler.instance().bus().register(new PMEventHandler());
+        MinecraftForge.EVENT_BUS.register(new PMEventHandler());
 
         // GameRegistry.addShapelessRecipe(new ItemStack(itemSoulGem,1,0),new ItemStack(itemSoulGem,1,0),new ItemStack(itemGriefSeed,1,0));
 
@@ -89,8 +91,6 @@ public class MadokaMagicaMod {
         EntityRegistry.registerModEntity(MobPMLabrynthEntrance.class,"PMLabrynthEntrance",properties.PMLabrynthEntranceEntityID,this,70,1,true);
         EntityRegistry.registerModEntity(MobPMMinion.class,"PMMinion",properties.PMMinionEntityID,this,70,1,true);
         */
-
-        madokaMagicaEventManager.register((MadokaMagicaEvent)MadokaMagicaWitchTransformationEvent.getInstance());
         madokaMagicaEventManager.register((MadokaMagicaEvent)MadokaMagicaPuellaMagiTransformationEvent.getInstance());
     }
 
@@ -106,17 +106,19 @@ public class MadokaMagicaMod {
     public void onServerStarted(FMLServerStartedEvent event){
         playerDataTrackerManager.manage();
         itemSoulGemManager.manage();
-        madokaMagicaEventManager.manage();
 
+/*
         for(MadokaMagicaEvent e : madokaMagicaEventManager.getActiveEvents()){
             if(e instanceof MadokaMagicaWitchTransformationEvent)
                 this.onPlayerWitchTransformation((MadokaMagicaWitchTransformationEvent)e);
             else if(e instanceof MadokaMagicaPuellaMagiTransformationEvent)
                 this.onPlayerPuellaMagiTransformation((MadokaMagicaPuellaMagiTransformationEvent)e);
         }
+        */
     }
 
     public void onPlayerWitchTransformation(MadokaMagicaWitchTransformationEvent event){
+        /*
         ArrayList<PMDataTracker> trackers = event.getTrackers();
         for(PMDataTracker tracker : trackers){
             EntityPlayer player = tracker.getPlayer();
@@ -130,6 +132,7 @@ public class MadokaMagicaMod {
             // NOTE: Take a look at the explosion size. I'm not sure how to set that value, so let's just ignore it for now.
             Explosion exp = player.worldObj.newExplosion(player,player.posX,player.posY,player.posZ,size,false,false);
         }
+        */
     }
 
     public void onPlayerPuellaMagiTransformation(MadokaMagicaPuellaMagiTransformationEvent event){
