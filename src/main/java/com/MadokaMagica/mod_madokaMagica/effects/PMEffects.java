@@ -21,8 +21,12 @@ public class PMEffects{
         renderGradient(opacity1);
     }
 
+    // A simple calculation to simulate 0%-100% within a range of lowestPercent%-100%
     private static float calculateOpacity(PMDataTracker pmdt, float lowestPercent, int mult){
         float corruption = pmdt.getCorruption();
+        // lowestPercent is our new 0, but 100 is still the maximum
+        // Multiply it by mult so that it rises faster than normal
+        // EX: If the range is 50-100 (half of the normal range), then mult should be 2 so that the final number rises two times as fast.
         float opacity = (mult*(corruption-lowestPercent))/100.0F;
         if(opacity < 0)
             opacity = 0.0F;
