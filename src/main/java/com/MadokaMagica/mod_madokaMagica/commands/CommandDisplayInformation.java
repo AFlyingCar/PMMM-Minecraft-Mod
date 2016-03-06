@@ -27,6 +27,7 @@ public class CommandDisplayInformation extends CommandBase{
         return name;
     }
 
+    // /pmmm-display-info <user name>
     @Override
     public final String getCommandUsage(ICommandSender sender){
         String usage = "";
