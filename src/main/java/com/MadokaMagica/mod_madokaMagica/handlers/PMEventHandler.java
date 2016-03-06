@@ -7,6 +7,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.client.event.sound.PlaySoundEvent17;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.event.ServerChatEvent;
 
 import cpw.mods.fml.common.FMLLog;
 import cpw.mods.fml.common.gameevent.PlayerEvent;
@@ -16,6 +17,7 @@ import cpw.mods.fml.common.eventhandler.EventPriority;
 
 import com.MadokaMagica.mod_madokaMagica.items.ItemSoulGem;
 import com.MadokaMagica.mod_madokaMagica.trackers.PMDataTracker;
+import com.MadokaMagica.mod_madokaMagica.managers.IncubatorManager;
 import com.MadokaMagica.mod_madokaMagica.managers.ItemSoulGemManager;
 import com.MadokaMagica.mod_madokaMagica.managers.PlayerDataTrackerManager;
 import com.MadokaMagica.mod_madokaMagica.events.MadokaMagicaWitchTransformationEvent;
@@ -81,6 +83,14 @@ public class PMEventHandler{
             }
             pmdt.setPlayerState(2);
             // TODO: Do something here to make soulgem become an ItemGriefSeed
+        }
+        return true;
+    }
+
+    @SubscribeEvent(priority = EventPriority.NORMAL)
+    public boolean onServerChat(ServerChatEvent event){
+        if(IncubatorManager.getInstance().isPlayerNearIncubator(event.player)){
+            return IncubatorManager.getInstance().getNearestIncubator(event.player.posX,event.player.posY,event.player.posZ).processChat(event.player,event.message);
         }
         return true;
     }
