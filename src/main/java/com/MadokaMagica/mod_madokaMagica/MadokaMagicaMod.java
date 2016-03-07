@@ -36,12 +36,7 @@ import com.MadokaMagica.mod_madokaMagica.commands.CommandStartWitchTransformatio
 import com.MadokaMagica.mod_madokaMagica.commands.CommandDisplayInformation;
 import com.MadokaMagica.mod_madokaMagica.commands.CommandPlayerData;
 
-import com.MadokaMagica.mod_madokaMagica.events.MadokaMagicaEvent;
-import com.MadokaMagica.mod_madokaMagica.events.MadokaMagicaWitchTransformationEvent;
-import com.MadokaMagica.mod_madokaMagica.events.MadokaMagicaPuellaMagiTransformationEvent;
-
 import com.MadokaMagica.mod_madokaMagica.managers.PlayerDataTrackerManager;
-import com.MadokaMagica.mod_madokaMagica.managers.MadokaMagicaEventManager;
 import com.MadokaMagica.mod_madokaMagica.managers.ItemSoulGemManager;
 
 import com.MadokaMagica.mod_madokaMagica.items.ItemSoulGem;
@@ -59,7 +54,6 @@ public class MadokaMagicaMod {
 
     private static PlayerDataTrackerManager playerDataTrackerManager;
     private static ItemSoulGemManager itemSoulGemManager;
-    private static MadokaMagicaEventManager madokaMagicaEventManager;
     // private static ListenerList madokaMagicaEventListener;
 
     private static ISound wtransform_music = null;
@@ -75,7 +69,6 @@ public class MadokaMagicaMod {
         itemGriefSeed = (new ItemGriefSeed()).setUnlocalizedName("itemGriefSeed");
 
         playerDataTrackerManager = PlayerDataTrackerManager.getInstance();
-        madokaMagicaEventManager = MadokaMagicaEventManager.getInstance();
         itemSoulGemManager = ItemSoulGemManager.getInstance();
 
         GameRegistry.registerItem(itemSoulGem,"Soul Gem");
@@ -91,7 +84,6 @@ public class MadokaMagicaMod {
         EntityRegistry.registerModEntity(MobPMLabrynthEntrance.class,"PMLabrynthEntrance",properties.PMLabrynthEntranceEntityID,this,70,1,true);
         EntityRegistry.registerModEntity(MobPMMinion.class,"PMMinion",properties.PMMinionEntityID,this,70,1,true);
         */
-        madokaMagicaEventManager.register((MadokaMagicaEvent)MadokaMagicaPuellaMagiTransformationEvent.getInstance());
     }
 
     @EventHandler
@@ -106,37 +98,6 @@ public class MadokaMagicaMod {
     public void onServerStarted(FMLServerStartedEvent event){
         playerDataTrackerManager.manage();
         itemSoulGemManager.manage();
-
-/*
-        for(MadokaMagicaEvent e : madokaMagicaEventManager.getActiveEvents()){
-            if(e instanceof MadokaMagicaWitchTransformationEvent)
-                this.onPlayerWitchTransformation((MadokaMagicaWitchTransformationEvent)e);
-            else if(e instanceof MadokaMagicaPuellaMagiTransformationEvent)
-                this.onPlayerPuellaMagiTransformation((MadokaMagicaPuellaMagiTransformationEvent)e);
-        }
-        */
-    }
-
-    public void onPlayerWitchTransformation(MadokaMagicaWitchTransformationEvent event){
-        /*
-        ArrayList<PMDataTracker> trackers = event.getTrackers();
-        for(PMDataTracker tracker : trackers){
-            EntityPlayer player = tracker.getPlayer();
-            float size = 1.0f;
-
-            // If the player is done transforming
-            if(tracker.getPlayerState() == 2){
-                event.cancel(tracker);
-                size = 2.0f;
-            }
-            // NOTE: Take a look at the explosion size. I'm not sure how to set that value, so let's just ignore it for now.
-            Explosion exp = player.worldObj.newExplosion(player,player.posX,player.posY,player.posZ,size,false,false);
-        }
-        */
-    }
-
-    public void onPlayerPuellaMagiTransformation(MadokaMagicaPuellaMagiTransformationEvent event){
-        // stuff
     }
 
     // Jesus Christ this method looks like shit.

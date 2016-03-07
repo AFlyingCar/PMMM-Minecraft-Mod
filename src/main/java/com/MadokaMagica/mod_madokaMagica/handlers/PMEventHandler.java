@@ -21,6 +21,7 @@ import com.MadokaMagica.mod_madokaMagica.managers.IncubatorManager;
 import com.MadokaMagica.mod_madokaMagica.managers.ItemSoulGemManager;
 import com.MadokaMagica.mod_madokaMagica.managers.PlayerDataTrackerManager;
 import com.MadokaMagica.mod_madokaMagica.events.MadokaMagicaWitchTransformationEvent;
+import com.MadokaMagica.mod_madokaMagica.events.MadokaMagicaPuellaMagiTransformationEvent;
 
 public class PMEventHandler{
     // Once the player has logged in, check if they have a data tracker
@@ -64,6 +65,12 @@ public class PMEventHandler{
         // TODO: Do something to spawn the explosion, I can't test this method right now, so I don't know how to spawn the newly created explosion
 
         return true;
+    }
+
+    @SubscribeEvent
+    public boolean onPlayerPuellaMagiTransformation(MadokaMagicaPuellaMagiTransformationEvent event){
+        // TODO: Finish this method.
+        return false;
     }
 
     // The player doesn't actually transform into a witch until they die
