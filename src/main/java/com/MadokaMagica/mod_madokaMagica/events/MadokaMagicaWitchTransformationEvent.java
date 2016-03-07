@@ -1,12 +1,7 @@
 package com.MadokaMagica.mod_madokaMagica.events;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
 import cpw.mods.fml.common.eventhandler.Event;
-
 import net.minecraft.entity.player.EntityPlayer;
-
 import com.MadokaMagica.mod_madokaMagica.trackers.PMDataTracker;
 
 public class MadokaMagicaWitchTransformationEvent extends Event {
