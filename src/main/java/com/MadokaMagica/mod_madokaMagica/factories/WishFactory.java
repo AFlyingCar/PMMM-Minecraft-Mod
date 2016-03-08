@@ -17,9 +17,9 @@ public class WishFactory{
 		Wish newWish = null;
 
 		ArrayList<String> parts = generateParts(player, message.toLowerCase());
-		if(parts != null){
-			newWish = new Wish(parts.get(1),player,message);
-		}
+		if(parts == null) return newWish;
+
+        newWish = new Wish(parts.get(1),player,message);
 
 		return newWish;
 	}
@@ -31,6 +31,7 @@ public class WishFactory{
 		//Pattern parameters = Pattern.compile(parameterPattern);
         Pattern targets = Pattern.compile("("+buildUsernamePattern(player)+")");
 
+        // We check how it starts to see if message is even directed at the Incubator
 		Matcher start_matches = start.matcher(message);
 		Matcher command_matches = command.matcher(message);
 		//Matcher parameters_matches = parameters.matcher(message);
