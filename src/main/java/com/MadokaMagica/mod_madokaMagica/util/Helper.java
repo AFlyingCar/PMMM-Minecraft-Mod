@@ -1,5 +1,6 @@
 package com.MadokaMagica.mod_madokaMagica.util;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Iterator;
@@ -8,6 +9,7 @@ import java.nio.IntBuffer;
 
 import org.lwjgl.opengl.GL11;
 
+import net.minecraft.world.World;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
@@ -234,5 +236,14 @@ public class Helper{
             if(arr[i] > arr[max]) max = i;
         }
         return max;
+    }
+
+    public static List<String> getListOfUsernames(World worldObj){
+        ArrayList<String> usernames = new ArrayList<String>();
+        for(int i=0;i<worldObj.playerEntities.size();i++){
+            EntityPlayer player = (EntityPlayer)worldObj.playerEntities.get(i);
+            usernames.add(player.getDisplayName());
+        }
+        return usernames;
     }
 }
