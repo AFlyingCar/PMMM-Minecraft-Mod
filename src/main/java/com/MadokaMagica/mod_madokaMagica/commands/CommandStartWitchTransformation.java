@@ -26,6 +26,11 @@ public class CommandStartWitchTransformation extends CommandBase{
     }
 
     @Override
+    public int getRequiredPermissionLevel(){
+        return 2;
+    }
+
+    @Override
     public final String getCommandUsage(ICommandSender sender){
         String usage = "";
         usage += "/"+name+" "+"<user name>";
