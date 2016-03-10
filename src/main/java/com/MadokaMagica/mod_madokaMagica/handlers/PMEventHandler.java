@@ -80,16 +80,18 @@ public class PMEventHandler{
         Entity entity = event.entity;
 
         // If it is an EntityPlayer and if that player is currently turning into a witch
-        PMDataTracker pmdt = PlayerDataTrackerManager.getInstance().getTrackerByPlayer((EntityPlayer)entity);
-        if(entity instanceof EntityPlayer && pmdt != null && pmdt.isTransformingIntoWitch()){
-            ItemSoulGem soulgem = ItemSoulGemManager.getInstance().getSoulGemByPlayer((EntityPlayer)entity);
-            // Why the hell would soulgem even be null?
-            if(soulgem == null){
-                FMLLog.warning("Found null in itemSoulGemManager! This most likely means that the player is somehow turning into a witch without having a soulgem. Please consult a programmer.");
-                return false;
+        if(entity instanceof EntityPlayer){
+            PMDataTracker pmdt = PlayerDataTrackerManager.getInstance().getTrackerByPlayer((EntityPlayer)entity);
+            if(pmdt != null && pmdt.isTransformingIntoWitch()){
+                ItemSoulGem soulgem = ItemSoulGemManager.getInstance().getSoulGemByPlayer((EntityPlayer)entity);
+                // Why the hell would soulgem even be null?
+                if(soulgem == null){
+                    FMLLog.warning("Found null in itemSoulGemManager! This most likely means that the player is somehow turning into a witch without having a soulgem. Please consult a programmer.");
+                    return false;
+                }
+                pmdt.setPlayerState(2);
+                // TODO: Do something here to make soulgem become an ItemGriefSeed
             }
-            pmdt.setPlayerState(2);
-            // TODO: Do something here to make soulgem become an ItemGriefSeed
         }
         return true;
     }
