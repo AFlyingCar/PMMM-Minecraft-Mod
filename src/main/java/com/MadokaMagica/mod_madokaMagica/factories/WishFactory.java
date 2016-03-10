@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.regex.*;
 
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.server.MinecraftServer;
 
 import com.MadokaMagica.mod_madokaMagica.util.Wish;
 import com.MadokaMagica.mod_madokaMagica.util.Helper;
@@ -27,9 +28,9 @@ public class WishFactory{
 	public static ArrayList<String> generateParts(EntityPlayer player, String message){
 		ArrayList<String> parts = new ArrayList<String>();
 		Pattern start = Pattern.compile(startPattern);
-		Pattern command = Pattern.compile(String.format(commandPattern,buildUsernamePattern(player)));
+		Pattern command = Pattern.compile(String.format(commandPattern,buildUsernamePattern()));
 		//Pattern parameters = Pattern.compile(parameterPattern);
-        Pattern targets = Pattern.compile("("+buildUsernamePattern(player)+")");
+        Pattern targets = Pattern.compile("("+buildUsernamePattern()+")");
 
         // We check how it starts to see if message is even directed at the Incubator
 		Matcher start_matches = start.matcher(message);
@@ -54,9 +55,9 @@ public class WishFactory{
 		return parts;
 	}
 
-    public static String buildUsernamePattern(EntityPlayer player){
+    public static String buildUsernamePattern(){
         String pattern = "";
-        for(String name : Helper.getListOfUsernames(player.worldObj)){
+        for(String name : MinecraftServer.getServer().getAllUsernames()){
             pattern += name + "|";
         }
         pattern += "me|i";

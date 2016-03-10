@@ -237,13 +237,4 @@ public class Helper{
         }
         return max;
     }
-
-    public static List<String> getListOfUsernames(World worldObj){
-        ArrayList<String> usernames = new ArrayList<String>();
-        for(int i=0;i<worldObj.playerEntities.size();i++){
-            EntityPlayer player = (EntityPlayer)worldObj.playerEntities.get(i);
-            usernames.add(player.getDisplayName());
-        }
-        return usernames;
-    }
 }
