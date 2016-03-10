@@ -3,11 +3,15 @@ package com.MadokaMagica.mod_madokaMagica.util;
 import java.util.ArrayList;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.ByteBuffer;
+import java.util.regex.Pattern;
+import java.io.IOException;
 
 public class Dictionary {
 	public static final byte[] MAGIC = new byte[] { (byte)'D', (byte)'I', (byte)'C', (byte)'T', 0, 0 };
 	private String filename;
 	private ArrayList<String> possibilities;
+    private byte[] rawData;
 
 	public Dictionary(String new_filename){
 		filename = new_filename;
@@ -17,7 +21,7 @@ public class Dictionary {
 
 	public void Init(){
 		byte[] allData = readFile();
-		parseFile(allData);
+		parse(allData);
 		rawData = allData;
 	}
 
@@ -47,7 +51,13 @@ public class Dictionary {
 	private byte[] readFile(){
 		// You have no idea how long it took me to find all this stuff
 		// I really hate Java
-		return Files.readAllBytes(Paths.get(filename));
+        try{
+            return Files.readAllBytes(Paths.get(filename));
+        }catch(IOException exception){
+            System.out.println("We got an exception in Dictionary.readFile(). Who cares.");
+            // Return a blank byte[]
+            return new byte[1024];
+        }
 	}
 
 	public ArrayList<String> getAllPossibilities(){
@@ -73,6 +83,6 @@ public class Dictionary {
 			str += possibility + "|";
 		}
 		// Strip off trailing |
-		return str.substring(0,str.length-1) + ")" + suffix;
+		return str.substring(0,str.length()-1) + ")" + suffix;
 	}
 }
