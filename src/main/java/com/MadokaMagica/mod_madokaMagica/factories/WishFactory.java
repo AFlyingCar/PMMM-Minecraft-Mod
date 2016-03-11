@@ -10,8 +10,8 @@ import com.MadokaMagica.mod_madokaMagica.util.Wish;
 import com.MadokaMagica.mod_madokaMagica.util.Helper;
 
 public class WishFactory{
-	public final static String startPattern = "^(kyuubey|hey kyuubey|incubator|coobie|excuse me kyuubey)*";
-	public final static String commandPattern = "*(can (%1$s) have ([0-9]+)|give ([0-9]+) to (%1$s)|give (%1$s) ([0-9]+)|teleport (%1$s) to (%1$s)|(%1$s) has a question)*";
+	public final static String startPattern = "^(kyuubey|hey kyuubey|incubator|coobie|excuse me kyuubey).";
+	public final static String commandPattern = ".(can (%1$s) have ([0-9]+)|give ([0-9]+) to (%1$s)|give (%1$s) ([0-9]+)|teleport (%1$s) to (%1$s)|(%1$s) has a question).";
 	public final static String parameterPattern = "*()*";
 
 	public static Wish generateWish(EntityPlayer player, String message){
