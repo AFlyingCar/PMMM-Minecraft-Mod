@@ -34,6 +34,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 
 import com.MadokaMagica.mod_madokaMagica.commands.CommandStartWitchTransformation;
 import com.MadokaMagica.mod_madokaMagica.commands.CommandDisplayInformation;
+import com.MadokaMagica.mod_madokaMagica.commands.CommandTestWish;
 import com.MadokaMagica.mod_madokaMagica.commands.CommandPlayerData;
 
 import com.MadokaMagica.mod_madokaMagica.managers.PlayerDataTrackerManager;
@@ -92,6 +93,7 @@ public class MadokaMagicaMod {
         event.registerServerCommand( CommandStartWitchTransformation.getInstance() );
         event.registerServerCommand( CommandDisplayInformation.getInstance() );
         event.registerServerCommand( CommandPlayerData.getInstance() );
+        event.registerServerCommand( CommandTestWish.getInstance() );
     }
 
     @EventHandler
