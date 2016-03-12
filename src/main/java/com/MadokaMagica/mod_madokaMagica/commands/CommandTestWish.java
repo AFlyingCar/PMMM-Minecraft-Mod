@@ -50,7 +50,7 @@ public class CommandTestWish extends CommandBase {
 		for(int i=0; i < command.length; i++)
 			fullCommand += command[i];
 
-		Wish test = WishFactory.generateWish(player,fullCommand);
+		Wish test = WishFactory.generateWish(player,fullCommand,true);
 		if(test == null){
 			sendChat(player,"Wish failed. Most likely one or more search requirements were missing.");
 			return;
