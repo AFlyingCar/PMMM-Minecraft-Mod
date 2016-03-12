@@ -11,13 +11,17 @@ import com.MadokaMagica.mod_madokaMagica.util.Helper;
 
 public class WishFactory{
 	public final static String startPattern = "^(kyuubey|hey kyuubey|incubator|coobie|excuse me kyuubey).";
-	public final static String commandPattern = ".(can (%1$s) have ([0-9]+)|give ([0-9]+) to (%1$s)|give (%1$s) ([0-9]+)|teleport (%1$s) to (%1$s)|(%1$s) has a question).";
+	public final static String commandPattern = ".+(can (%1$s) have ([0-9]+)|give ([0-9]+) to (%1$s)|give (%1$s) ([0-9]+)|teleport (%1$s) to (%1$s)|(%1$s) has a question).";
 	public final static String parameterPattern = "*()*";
 
 	public static Wish generateWish(EntityPlayer player, String message){
+		return generateWish(player,message,false);
+	}
+
+	public static Wish generateWish(EntityPlayer player, String message, boolean test){
 		Wish newWish = null;
 
-		ArrayList<String> parts = generateParts(player, message.toLowerCase());
+		ArrayList<String> parts = generateParts(player, message.toLowerCase(),test);
 		if(parts == null) return newWish;
 
         newWish = new Wish(parts.get(1),player,message);
@@ -26,6 +30,10 @@ public class WishFactory{
 	}
 
 	public static ArrayList<String> generateParts(EntityPlayer player, String message){
+		return generateParts(player,message,false);
+	}
+
+	public static ArrayList<String> generateParts(EntityPlayer player, String message, boolean test){
 		ArrayList<String> parts = new ArrayList<String>();
 		Pattern start = Pattern.compile(startPattern);
 		Pattern command = Pattern.compile(String.format(commandPattern,buildUsernamePattern()));
@@ -45,7 +53,16 @@ public class WishFactory{
                 //&&parameters_matches.matches()
                 &&targets_matches.matches()
             ))
-            return null;
+        {
+        	if(test){
+        		for(int i=0;i<3;i++) parts.add("");
+        		parts.set(0,start_matches.group());
+        		parts.set(1,command_matches.group());
+        		parts.set(2,targets_matches.group());
+        		return parts;
+        	}else
+        		return null;
+        }
 
 		parts.add(start_matches.group());
 		parts.add(command_matches.group());
