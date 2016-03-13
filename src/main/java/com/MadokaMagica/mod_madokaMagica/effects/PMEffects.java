@@ -1,16 +1,28 @@
 package com.MadokaMagica.mod_madokaMagica.effects;
 
 import java.nio.IntBuffer;
+
+// Imports that allow me to be a terrible person
+import java.io.PrintStream;
+import java.io.OutputStream;
+import java.io.IOException;
+
 import org.lwjgl.opengl.GL11;
+
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.Minecraft;
+
 import com.MadokaMagica.mod_madokaMagica.util.Helper;
 import com.MadokaMagica.mod_madokaMagica.trackers.PMDataTracker;
 
 public class PMEffects{
     public final static int MBLUR_MAX_FRAME_WAIT = 10;
-    private static int frameCount = 0;
+    private static int frameCount = 10; // Should equal 10 at the start, so that lastOverlay is created the very first time generateMotionBlur is called
     private static IntBuffer lastOverlay = null;
+
+
+    // A TEST COUNTER. DELETE ME SENPAI!
+    private static int tick_counter = 0;
 
     public static void applyPlayerEffects(PMDataTracker pmdt){
         String personality = pmdt.getHighestScoreIden();
@@ -47,13 +59,77 @@ public class PMEffects{
             overlay = generateAggressiveOverlay();
         else
             overlay = generateMotionBlurOverlay();
-        overlay = applyTransparency(overlay, opacity);
+        overlay = applyTransparencyReal(overlay, opacity);
         ScaledResolution sres = new ScaledResolution(Minecraft.getMinecraft(),
                 Minecraft.getMinecraft().displayWidth,
                 Minecraft.getMinecraft().displayHeight);
         int width = sres.getScaledWidth();
         int height = sres.getScaledHeight();
-        GL11.glDrawPixels(width,height,GL11.GL_RGBA,GL11.GL_INT,overlay);
+
+
+        // Start of nightmare fuel
+        // I am so, so sorry
+        tick_counter++; // DELETE THIS LINE
+        if(overlay != null){
+            PrintStream stream = System.out;
+
+            // Shhh... Only dreams now
+            System.setOut(new PrintStream(new OutputStream() {
+                @Override public void write(int b) {}
+            }) {
+                @Override public void flush() {}
+                @Override public void close() {}
+                @Override public void write(int b) {}
+                @Override public void write(byte[] b) {}
+                @Override public void write(byte[] buf, int off, int len) {}
+                @Override public void print(boolean b) {}
+                @Override public void print(char c) {}
+                @Override public void print(int i) {}
+                @Override public void print(long l) {}
+                @Override public void print(float f) {}
+                @Override public void print(double d) {}
+                @Override public void print(char[] s) {}
+                @Override public void print(String s) {}
+                @Override public void print(Object obj) {}
+                @Override public void println() {}
+                @Override public void println(boolean x) {}
+                @Override public void println(char x) {}
+                @Override public void println(int x) {}
+                @Override public void println(long x) {}
+                @Override public void println(float x) {}
+                @Override public void println(double x) {}
+                @Override public void println(char[] x) {}
+                @Override public void println(String x) {}
+                @Override public void println(Object x) {}
+                @Override public PrintStream printf(String format, Object... args) { return this; }
+                @Override public PrintStream printf(java.util.Locale l, String format, Object... args) { return this; }
+                @Override public PrintStream format(String format, Object... args) { return this; }
+                @Override public PrintStream format(java.util.Locale l, String format, Object... args) { return this; }
+                @Override public PrintStream append(CharSequence csq) { return this; }
+                @Override public PrintStream append(CharSequence csq, int start, int end) { return this; }
+                @Override public PrintStream append(char c) { return this; }
+            });
+
+            // Thank you StackOverflow, for allowing me to do this :)
+            // http://stackoverflow.com/questions/9882487/disable-system-out-for-speed-in-java
+
+            System.out.println("Calling glDrawPixels(int,int,int,int,IntBuffer) at tick="+tick_counter);
+
+            draw(width,height,GL11.GL_STENCIL_INDEX,GL11.GL_UNSIGNED_BYTE,overlay);
+
+            System.setOut(stream);
+        }
+    }
+
+    @SuppressWarnings("all") // shh... nobody needs to know ;)
+    private static void draw(int width, int height, int type, int format, IntBuffer overlay){
+        GL11.glDrawPixels(width,height,type,format,overlay); // NOTE: This line seems to fail every once in a while for some reason. Appears to be random
+        // Although, I'm not sure what it is actually doing, since it just seems to print:
+        /*
+            ########## GL ERROR ##########
+            @ Post render
+            1282: Invalid Operation
+        */
     }
 
     private static void renderGradient(float opacity){
@@ -122,11 +198,30 @@ public class PMEffects{
     }
 
     private static IntBuffer applyTransparency(IntBuffer buff, float opacity){
-        int[] colors = new int[buff.array().length];
+        int[] colors;
+        if(buff.hasArray()){
+            colors = new int[buff.capacity()];
+        }else{
+            System.out.println("OH GOD WHAT? WHY DOES buff NOT HAVE AN ACCESSIBLE ARRAY?! AAAAAAAAAA");
+            return null; // Return null because we can't do anything with a buff that doesn't have an array. Nothing will actually happen
+        }
         for(int i=0;i<colors.length;i++){
             colors[i] = (buff.get(i)<<8)|((int)(0xFF*opacity));
         }
         return IntBuffer.wrap(colors);
+    }
+
+    private static IntBuffer applyTransparencyReal(IntBuffer buff, float opacity){
+        IntBuffer returnable = buff.duplicate();
+        if(returnable.hasArray()){
+            System.out.println("OH GOD WHAT? WHY DOES buff NOT HAVE AN ACCESSIBLE ARRAY?! AAAAAAAAAA");
+            return null; // Return null because we can't do anything with a buff that doesn't have an array. Nothing will actually happen
+        }
+
+        for(int i=0; i<returnable.capacity();i++){
+            returnable.put(i,(returnable.get(i)<<8)|((int)(0xFF*opacity)));
+        }
+        return returnable;
     }
 }
 
