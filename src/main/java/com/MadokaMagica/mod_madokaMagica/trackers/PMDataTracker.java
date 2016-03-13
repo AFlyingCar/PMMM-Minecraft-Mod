@@ -85,7 +85,8 @@ public class PMDataTracker {
     private long playerswinglasttime;
     private boolean playerswinging;
 
-    private int updatetimer = 0;
+    private int updatedatatimer = 0;
+    private int updateeffectstimer = 0;
 
     private boolean currentlyTransformingIntoWitch;
 
@@ -299,7 +300,7 @@ public class PMDataTracker {
         
         // Saving
         PlayerDataTrackerManager.getInstance().saveTracker(this);
-        updatetimer = 0;
+        updatedatatimer = 0;
     }
 
     @SubscribeEvent
@@ -507,12 +508,24 @@ public class PMDataTracker {
         aggressiveScore = val;
     }
 
-    public void incrementTimer(){
-        updatetimer++;
+    public void incrementDataTimer(){
+        updatedatatimer++;
     }
 
-    public int getUpdateTime(){
-        return updatetimer;
+    public int getUpdateDataTime(){
+        return updatedatatimer;
+    }
+
+    public void incrementEffectsTimer(){
+        updateeffectstimer++;
+    }
+
+    public int getUpdateEffectsTime(){
+        return updateeffectstimer;
+    }
+
+    public void resetEffectsTimer(){
+        updateeffectstimer = 0;
     }
 
     public String toString(){
