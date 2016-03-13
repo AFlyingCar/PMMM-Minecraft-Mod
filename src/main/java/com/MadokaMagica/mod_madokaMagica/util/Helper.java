@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Iterator;
 import java.lang.Math;
 import java.nio.IntBuffer;
+import java.nio.ByteBuffer;
 
 import org.lwjgl.opengl.GL11;
 
@@ -175,11 +176,24 @@ public class Helper{
         ScaledResolution sres = new ScaledResolution(Minecraft.getMinecraft(),
                 Minecraft.getMinecraft().displayWidth,
                 Minecraft.getMinecraft().displayHeight);
+        // http://wiki.lwjgl.org/index.php?title=Taking_Screen_Shots
+        //int bpp = 4; // I guess we need this too, otherwise amt is too small. Actually I guess we can ignore it for now
         int amt = sres.getScaledWidth()*sres.getScaledHeight();
-        IntBuffer buf = IntBuffer.allocate(amt);
+        // IntBuffer buf = IntBuffer.allocate(amt);
+        // Need to do this weird hoop thing because LWJGL says that the original line was "not direct"
+        // I still don't understand what is wrong, as google turned up almost no results on the subject
+        // The only reason this got fixed is because JBullet had a problem a while ago as well.
+        // IntBuffer buf = ByteBuffer.allocateDirect(amt).asIntBuffer();
+
+        ByteBuffer buf = ByteBuffer.allocateDirect(amt);
+
+        // NOTE: I have no idea what some of these values mean to glReadPixels (or to glDrawPixels for that matter)
+        // By 'these values', I of course mean things like GL_STENCIL_INDEX and GL_UNSIGNED_BYTE
+        // Looks like I fixed it, but I don't know if it fucked up the values I was expecting.
+        // Oh well, fingers crossed.
         GL11.glReadPixels(0,0,sres.getScaledWidth(),sres.getScaledHeight(),
-                GL11.GL_RGBA,GL11.GL_INT,buf);
-        return buf;
+                GL11.GL_STENCIL_INDEX,GL11.GL_UNSIGNED_BYTE,buf);
+        return buf.asIntBuffer();
     }
 
     public static double getStandardDeviation(IntBuffer buf){
