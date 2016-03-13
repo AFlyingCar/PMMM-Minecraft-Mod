@@ -65,14 +65,18 @@ public class PlayerDataTrackerManager{
 
 	public void manage(){
 		for(Entry<String,PMDataTracker> trackerset : datatrackers.entrySet()){
-            trackerset.getValue().incrementTimer();
+            trackerset.getValue().incrementDataTimer();
 
-            if(trackerset.getValue().getUpdateTime() >= 10){
+            if(trackerset.getValue().getUpdateDataTime() >= 10){
                 trackerset.getValue().updateData();
-                PMEffects.applyPlayerEffects(trackerset.getValue());
+                // PMEffects.applyPlayerEffects(trackerset.getValue());
             }
         }
 	}
+
+    public HashMap<String,PMDataTracker> getTrackers(){
+        return datatrackers;
+    }
 
 	public static PlayerDataTrackerManager getInstance(){
 		if(PlayerDataTrackerManager.instance == null)
