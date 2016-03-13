@@ -1,9 +1,13 @@
 package com.MadokaMagica.mod_madokaMagica.handlers;
 
+import java.util.Map;
+import java.util.Map.Entry;
+
 import net.minecraft.entity.Entity;
 import net.minecraft.world.Explosion;
 import net.minecraft.entity.player.EntityPlayer;
 
+import net.minecraftforge.client.event.RenderWorldEvent;
 import net.minecraftforge.client.event.sound.PlaySoundEvent17;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
@@ -16,6 +20,7 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.eventhandler.EventPriority;
 
 import com.MadokaMagica.mod_madokaMagica.items.ItemSoulGem;
+import com.MadokaMagica.mod_madokaMagica.effects.PMEffects;
 import com.MadokaMagica.mod_madokaMagica.trackers.PMDataTracker;
 import com.MadokaMagica.mod_madokaMagica.managers.IncubatorManager;
 import com.MadokaMagica.mod_madokaMagica.managers.ItemSoulGemManager;
@@ -101,6 +106,26 @@ public class PMEventHandler{
         if(IncubatorManager.getInstance().isPlayerNearIncubator(event.player)){
             return IncubatorManager.getInstance().getNearestIncubator(event.player.posX,event.player.posY,event.player.posZ).processChat(event.player,event.message);
         }
+        return true;
+    }
+
+    @SubscribeEvent
+    public boolean onRenderWorld(RenderWorldEvent.Post event){
+        for(Entry<String,PMDataTracker> trackerset : PlayerDataTrackerManager.getInstance().getTrackers().entrySet()){
+            //if(trackerset.getValue() >= )
+            // NOTE: We should test this, because maybe we want to only update these every x render events?
+            //      The problem with this though is that that could make the effects flicker due to not updating often enough, which we don't want
+            PMEffects.applyPlayerEffects(trackerset.getValue());
+
+            // Leave the timer stuff here, in case we decide to use it.
+            // Also, if we do use a value here, we should make sure to deccrement it by a lot, since 10 is way to high
+            // I'm just leaving it as 10 for now
+            if(trackerset.getValue().getUpdateEffectsTime() >= 10)
+                trackerset.getValue().incrementEffectsTimer();
+            else
+                trackerset.getValue().resetEffectsTimer();
+        }
+
         return true;
     }
 }
