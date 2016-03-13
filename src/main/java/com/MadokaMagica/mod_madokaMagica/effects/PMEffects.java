@@ -115,7 +115,7 @@ public class PMEffects{
 
             System.out.println("Calling glDrawPixels(int,int,int,int,IntBuffer) at tick="+tick_counter);
 
-            draw(width,height,GL11.GL_STENCIL_INDEX,GL11.GL_UNSIGNED_BYTE,overlay);
+            //draw(width,height,GL11.GL_STENCIL_INDEX,GL11.GL_UNSIGNED_BYTE,overlay);
 
             System.setOut(stream);
         }
