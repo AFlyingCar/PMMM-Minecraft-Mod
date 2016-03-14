@@ -2,11 +2,6 @@ package com.MadokaMagica.mod_madokaMagica.effects;
 
 import java.nio.IntBuffer;
 
-// Imports that allow me to be a terrible person
-import java.io.PrintStream;
-import java.io.OutputStream;
-import java.io.IOException;
-
 import org.lwjgl.opengl.GL11;
 
 import net.minecraft.client.gui.ScaledResolution;
@@ -20,6 +15,7 @@ public class PMEffects{
     private static int frameCount = 10; // Should equal 10 at the start, so that lastOverlay is created the very first time generateMotionBlur is called
     private static IntBuffer lastOverlay = null;
 
+    private static int timer = 0;
 
     // A TEST COUNTER. DELETE ME SENPAI!
     private static int tick_counter = 0;
@@ -46,78 +42,40 @@ public class PMEffects{
     }
 
     private static void renderOverlay(String personality, float opacity){
-        IntBuffer overlay;
-        if(personality.equals("HERO"))
-            overlay = generateHeroOverlay();
-        else if(personality.equals("NATURE"))
-            overlay = generateNatureOverlay();
-        else if(personality.equals("WATER"))
-            overlay = generateWaterOverlay();
-        else if(personality.equals("NIGHT"))
-            overlay = generateNightOverlay();
-        else if(personality.equals("AGGRESSIVE"))
-            overlay = generateAggressiveOverlay();
-        else
-            overlay = generateMotionBlurOverlay();
-        overlay = applyTransparencyReal(overlay, opacity);
+        IntBuffer overlay = lastOverlay;
+
+        // Only update the overlay every 10 ticks
+        if(timer >= 10){
+            if(personality.equals("HERO"))
+                overlay = generateHeroOverlay();
+            else if(personality.equals("NATURE"))
+                overlay = generateNatureOverlay();
+            else if(personality.equals("WATER"))
+                overlay = generateWaterOverlay();
+            else if(personality.equals("NIGHT"))
+                overlay = generateNightOverlay();
+            else if(personality.equals("AGGRESSIVE"))
+                overlay = generateAggressiveOverlay();
+            else
+                overlay = generateMotionBlurOverlay();
+            overlay = applyTransparencyReal(overlay, opacity);
+
+            lastOverlay = overlay;
+
+            timer = 0;
+        }else{
+            timer++;
+        }
+
         ScaledResolution sres = new ScaledResolution(Minecraft.getMinecraft(),
                 Minecraft.getMinecraft().displayWidth,
                 Minecraft.getMinecraft().displayHeight);
         int width = sres.getScaledWidth();
         int height = sres.getScaledHeight();
 
-
-        // Start of nightmare fuel
-        // I am so, so sorry
-        tick_counter++; // DELETE THIS LINE
         if(overlay != null){
-            PrintStream stream = System.out;
-
-            // Shhh... Only dreams now
-            System.setOut(new PrintStream(new OutputStream() {
-                @Override public void write(int b) {}
-            }) {
-                @Override public void flush() {}
-                @Override public void close() {}
-                @Override public void write(int b) {}
-                @Override public void write(byte[] b) {}
-                @Override public void write(byte[] buf, int off, int len) {}
-                @Override public void print(boolean b) {}
-                @Override public void print(char c) {}
-                @Override public void print(int i) {}
-                @Override public void print(long l) {}
-                @Override public void print(float f) {}
-                @Override public void print(double d) {}
-                @Override public void print(char[] s) {}
-                @Override public void print(String s) {}
-                @Override public void print(Object obj) {}
-                @Override public void println() {}
-                @Override public void println(boolean x) {}
-                @Override public void println(char x) {}
-                @Override public void println(int x) {}
-                @Override public void println(long x) {}
-                @Override public void println(float x) {}
-                @Override public void println(double x) {}
-                @Override public void println(char[] x) {}
-                @Override public void println(String x) {}
-                @Override public void println(Object x) {}
-                @Override public PrintStream printf(String format, Object... args) { return this; }
-                @Override public PrintStream printf(java.util.Locale l, String format, Object... args) { return this; }
-                @Override public PrintStream format(String format, Object... args) { return this; }
-                @Override public PrintStream format(java.util.Locale l, String format, Object... args) { return this; }
-                @Override public PrintStream append(CharSequence csq) { return this; }
-                @Override public PrintStream append(CharSequence csq, int start, int end) { return this; }
-                @Override public PrintStream append(char c) { return this; }
-            });
-
-            // Thank you StackOverflow, for allowing me to do this :)
-            // http://stackoverflow.com/questions/9882487/disable-system-out-for-speed-in-java
-
             System.out.println("Calling glDrawPixels(int,int,int,int,IntBuffer) at tick="+tick_counter);
-
-            //draw(width,height,GL11.GL_STENCIL_INDEX,GL11.GL_UNSIGNED_BYTE,overlay);
-
-            System.setOut(stream);
+            draw(width,height,GL11.GL_COLOR_INDEX,GL11.GL_UNSIGNED_BYTE,overlay);
         }
     }
 
