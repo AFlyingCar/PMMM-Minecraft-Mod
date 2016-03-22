@@ -172,7 +172,7 @@ public class Helper{
         return ((rgb[0]<<16)|(rgb[1]<<8)|rgb[2]);
     }
 
-    public static IntBuffer getScreenPixels(){
+    public static IntBuffer getScreenPixels(int type, int format){
         ScaledResolution sres = new ScaledResolution(Minecraft.getMinecraft(),
                 Minecraft.getMinecraft().displayWidth,
                 Minecraft.getMinecraft().displayHeight);
@@ -192,8 +192,16 @@ public class Helper{
         // Looks like I fixed it, but I don't know if it fucked up the values I was expecting.
         // Oh well, fingers crossed.
         GL11.glReadPixels(0,0,sres.getScaledWidth(),sres.getScaledHeight(),
-                GL11.GL_STENCIL_INDEX,GL11.GL_UNSIGNED_BYTE,buf);
+                type,format,buf);
         return buf.asIntBuffer();
+    }
+
+    public static IntBuffer getScreenPixels(){
+        return getScreenPixels(GL11.GL_STENCIL_INDEX,GL11.GL_UNSIGNED_BYTE);
+    }
+
+    public static IntBuffer getScreenPixels(int type){
+        return getScreenPixels(type,GL11.GL_UNSIGNED_BYTE);
     }
 
     public static double getStandardDeviation(IntBuffer buf){
