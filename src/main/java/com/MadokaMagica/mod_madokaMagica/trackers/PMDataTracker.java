@@ -437,16 +437,29 @@ public class PMDataTracker {
     public String getHighestScoreIden(){
         float[] scores = {getArchitectScore(), getEngineeringScore(),getGreedScore(),getWaterScore(),getNatureScore(),
             getDayScore(),getNightScore(),getHeroScore(),getVillainScore(),getPassiveScore(),getAggressiveScore()};
+        // TODO: Make the math that determines this a bit more sophisticated than what is the highest
         int idx = Helper.getMaxInArray(scores);
         switch(idx){
+            case 0:
+                return "ARCHITECT";
+            case 1:
+                return "ENGINEERING";
+            case 2:
+                return "GREED";
             case 3:
                 return "WATER";
             case 4:
                 return "NATURE";
+            case 5:
+                return "DAY";
             case 6:
                 return "NIGHT";
+            case 7:
+                return "VILLAIN";
             case 8:
                 return "HERO";
+            case 9:
+                return "PASSIVE";
             case 10:
                 return "AGGRESSIVE";
             default:
