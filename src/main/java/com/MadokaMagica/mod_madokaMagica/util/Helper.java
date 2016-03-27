@@ -172,13 +172,13 @@ public class Helper{
         return ((rgb[0]<<16)|(rgb[1]<<8)|rgb[2]);
     }
 
-    public static IntBuffer getScreenPixels(int type, int format){
+    public static IntBuffer getScreenPixels(int type, int format, int amt_multiplier){
         ScaledResolution sres = new ScaledResolution(Minecraft.getMinecraft(),
                 Minecraft.getMinecraft().displayWidth,
                 Minecraft.getMinecraft().displayHeight);
         // http://wiki.lwjgl.org/index.php?title=Taking_Screen_Shots
         //int bpp = 4; // I guess we need this too, otherwise amt is too small. Actually I guess we can ignore it for now
-        int amt = sres.getScaledWidth()*sres.getScaledHeight();
+        int amt = sres.getScaledWidth()*sres.getScaledHeight()*amt_multiplier;
         // IntBuffer buf = IntBuffer.allocate(amt);
         // Need to do this weird hoop thing because LWJGL says that the original line was "not direct"
         // I still don't understand what is wrong, as google turned up almost no results on the subject
@@ -197,11 +197,15 @@ public class Helper{
     }
 
     public static IntBuffer getScreenPixels(){
-        return getScreenPixels(GL11.GL_STENCIL_INDEX,GL11.GL_UNSIGNED_BYTE);
+        return getScreenPixels(GL11.GL_STENCIL_INDEX,GL11.GL_UNSIGNED_BYTE,1);
     }
 
     public static IntBuffer getScreenPixels(int type){
-        return getScreenPixels(type,GL11.GL_UNSIGNED_BYTE);
+        return getScreenPixels(type,GL11.GL_UNSIGNED_BYTE,1);
+    }
+
+    public static IntBuffer getScreenPixels(int type, int format){
+        return getScreenPixels(type,format,1);
     }
 
     public static double getStandardDeviation(IntBuffer buf){
