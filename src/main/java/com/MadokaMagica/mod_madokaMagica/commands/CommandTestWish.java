@@ -1,5 +1,8 @@
 package com.MadokaMagica.mod_madokaMagica.commands;
 
+import java.util.ArrayList;
+import java.util.Map.Entry;
+
 import com.MadokaMagica.mod_madokaMagica.trackers.PMDataTracker;
 import com.MadokaMagica.mod_madokaMagica.managers.PlayerDataTrackerManager;
 
@@ -48,7 +51,7 @@ public class CommandTestWish extends CommandBase {
 
 		String fullCommand = "";
 		for(int i=0; i < command.length; i++)
-			fullCommand += command[i];
+			fullCommand += command[i] + " ";
 
 		Wish test = WishFactory.generateWish(player,fullCommand,true);
 		if(test == null){
@@ -56,9 +59,14 @@ public class CommandTestWish extends CommandBase {
 			return;
 		}
 
-		sendChat(player,"Command: " + test.getCommand());
+		// sendChat(player,"Command: " + test.getCommand());
 		sendChat(player,"Message: " + test.getMessage());
 		sendChat(player,"Is Question: " + test.isQuestion());
+		for(Entry<String,ArrayList<String>> entry:test.getParts().entrySet()){
+			for(String val : entry.getValue()){
+				sendChat(player,entry.getKey()+":"+val);
+			}
+		}
 	}
 
     public static void sendChat(EntityPlayer player, String message){
