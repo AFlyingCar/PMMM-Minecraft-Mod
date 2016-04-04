@@ -3,15 +3,16 @@ package com.MadokaMagica.mod_madokaMagica;
 import java.util.ArrayList;
 
 import net.minecraft.item.Item;
-import net.minecraft.client.audio.ISound;
-import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.audio.ISound;
+import net.minecraft.client.renderer.EntityRenderer;
+import net.minecraft.client.audio.PositionedSoundRecord;
+import net.minecraft.client.resources.SimpleReloadableResourceManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.Explosion;
 import net.minecraft.server.MinecraftServer;
-
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.client.event.sound.PlaySoundEvent17;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
@@ -33,6 +34,7 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
 import com.MadokaMagica.mod_madokaMagica.commands.CommandStartWitchTransformation;
+import com.MadokaMagica.mod_madokaMagica.commands.CommandStartPuellaMagiTransformation;
 import com.MadokaMagica.mod_madokaMagica.commands.CommandDisplayInformation;
 import com.MadokaMagica.mod_madokaMagica.commands.CommandTestWish;
 import com.MadokaMagica.mod_madokaMagica.commands.CommandPlayerData;
@@ -44,6 +46,7 @@ import com.MadokaMagica.mod_madokaMagica.items.ItemSoulGem;
 import com.MadokaMagica.mod_madokaMagica.items.ItemGriefSeed;
 import com.MadokaMagica.mod_madokaMagica.trackers.PMDataTracker;
 import com.MadokaMagica.mod_madokaMagica.handlers.PMEventHandler;
+import com.MadokaMagica.mod_madokaMagica.effects.PMEffects;
 
 @Mod(modid=MadokaMagicaMod.MODID, version=MadokaMagicaMod.VERSION)
 public class MadokaMagicaMod {
@@ -91,9 +94,28 @@ public class MadokaMagicaMod {
     public void onServerStarting(FMLServerStartingEvent event){
         // Load each player data thing and add it to playerDataTrackerManager
         event.registerServerCommand( CommandStartWitchTransformation.getInstance() );
+        // event.registerServerCommand( CommandStartPuellaMagiTransformation.getInstance() );
         event.registerServerCommand( CommandDisplayInformation.getInstance() );
         event.registerServerCommand( CommandPlayerData.getInstance() );
         event.registerServerCommand( CommandTestWish.getInstance() );
+
+
+        // Overwrite EntityRenderer so that activateNextShader does nothing if PMEffects is still active
+        // TODO: add some code that checks a config file for if this should even be done.
+        class OverriddenEntityRenderer extends EntityRenderer {
+            public OverriddenEntityRenderer(){
+                super(Minecraft.getMinecraft(),Minecraft.getMinecraft().getResourceManager());
+            }
+
+            @Override
+            public void activateNextShader(){
+                if(PMEffects.failureCount < PMEffects.MAXIMUM_FAILURE_COUNT) return;
+                super.activateNextShader();
+            }
+        }
+
+        Minecraft.getMinecraft().entityRenderer = new OverriddenEntityRenderer();
+        ((SimpleReloadableResourceManager)Minecraft.getMinecraft().getResourceManager()).registerReloadListener(Minecraft.getMinecraft().entityRenderer);
     }
 
     @EventHandler
@@ -123,4 +145,3 @@ public class MadokaMagicaMod {
         }
     }
 }
-
