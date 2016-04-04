@@ -16,6 +16,8 @@ import java.util.HashMap;
 import java.io.IOException;
 
 import com.google.gson.JsonSyntaxException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.lwjgl.opengl.GL11;
 
 import net.minecraft.client.gui.ScaledResolution;
@@ -32,6 +34,7 @@ public class PMEffects{
     public final static int MBLUR_MAX_FRAME_WAIT = 10;
     private static int frameCount = 10; // Should equal 10 at the start, so that lastOverlay is created the very first time generateMotionBlur is called
     private static IntBuffer lastOverlay = null;
+    private static final Logger logger = LogManager.getLogger();
 
     public static int failureCount = 0;
 
@@ -61,7 +64,8 @@ public class PMEffects{
     };
 
     public static void applyPlayerEffects(PMDataTracker pmdt){
-        EntityRenderer renderer = Minecraft.getMinecraft().entityRenderer;
+        Minecraft mc = Minecraft.getMinecraft();
+        EntityRenderer renderer = mc.entityRenderer;
 
         // If shaders aren't active, then we aren't doing anything anyways.
         if(!renderer.isShaderActive()) failureCount = MAXIMUM_FAILURE_COUNT;
@@ -76,8 +80,8 @@ public class PMEffects{
 
         try{
             // TODO: Find some way to tie opacity into each of these shaders
-            renderer.theShaderGroup = new ShaderGroup(renderer.mc.getTextureManager(),renderer.resourceManager,renderer.mc.getFrameBuffer(),shaderLocations.get(personality));
-            renderer.theShaderGroup.createBindFrameBuffers(renderer.mc.displayWidth,renderer.mc.displayHeight);
+            renderer.theShaderGroup = new ShaderGroup(mc.getTextureManager(),mc.getResourceManager(),mc.getFramebuffer(),shaderLocations.get(personality));
+            renderer.theShaderGroup.createBindFramebuffers(mc.displayWidth,mc.displayHeight);
         }catch(IOException exception){
             failureCount++;
             logger.warn("Unable to load shader \""+personality+"\". Failures="+failureCount,exception);
