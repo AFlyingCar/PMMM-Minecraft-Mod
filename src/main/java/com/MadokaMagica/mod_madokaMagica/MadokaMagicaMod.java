@@ -88,17 +88,6 @@ public class MadokaMagicaMod {
         EntityRegistry.registerModEntity(MobPMLabrynthEntrance.class,"PMLabrynthEntrance",properties.PMLabrynthEntranceEntityID,this,70,1,true);
         EntityRegistry.registerModEntity(MobPMMinion.class,"PMMinion",properties.PMMinionEntityID,this,70,1,true);
         */
-    }
-
-    @EventHandler
-    public void onServerStarting(FMLServerStartingEvent event){
-        // Load each player data thing and add it to playerDataTrackerManager
-        event.registerServerCommand( CommandStartWitchTransformation.getInstance() );
-        // event.registerServerCommand( CommandStartPuellaMagiTransformation.getInstance() );
-        event.registerServerCommand( CommandDisplayInformation.getInstance() );
-        event.registerServerCommand( CommandPlayerData.getInstance() );
-        event.registerServerCommand( CommandTestWish.getInstance() );
-
 
         // Overwrite EntityRenderer so that activateNextShader does nothing if PMEffects is still active
         // TODO: add some code that checks a config file for if this should even be done.
@@ -116,6 +105,16 @@ public class MadokaMagicaMod {
 
         Minecraft.getMinecraft().entityRenderer = new OverriddenEntityRenderer();
         ((SimpleReloadableResourceManager)Minecraft.getMinecraft().getResourceManager()).registerReloadListener(Minecraft.getMinecraft().entityRenderer);
+    }
+
+    @EventHandler
+    public void onServerStarting(FMLServerStartingEvent event){
+        // Load each player data thing and add it to playerDataTrackerManager
+        event.registerServerCommand( CommandStartWitchTransformation.getInstance() );
+        // event.registerServerCommand( CommandStartPuellaMagiTransformation.getInstance() );
+        event.registerServerCommand( CommandDisplayInformation.getInstance() );
+        event.registerServerCommand( CommandPlayerData.getInstance() );
+        event.registerServerCommand( CommandTestWish.getInstance() );
     }
 
     @EventHandler
