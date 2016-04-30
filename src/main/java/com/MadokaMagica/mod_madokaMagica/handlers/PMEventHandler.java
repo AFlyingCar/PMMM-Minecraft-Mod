@@ -115,6 +115,9 @@ public class PMEventHandler{
             //if(trackerset.getValue() >= )
             // NOTE: We should test this, because maybe we want to only update these every x render events?
             //      The problem with this though is that that could make the effects flicker due to not updating often enough, which we don't want
+            //      Maybe we could just update the next event every x render events, and apply them every event?
+            //      I would have to rework a lot of stuff though, so I'm not sure
+            // Disabled for now since it prints that annoying as hell error-message
             PMEffects.applyPlayerEffects(trackerset.getValue());
 
             // Leave the timer stuff here, in case we decide to use it.
