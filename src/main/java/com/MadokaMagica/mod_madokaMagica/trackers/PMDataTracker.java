@@ -353,12 +353,14 @@ public class PMDataTracker {
     }
 
     private float calculatePotential(){
+        // TODO: This method returns some very high numbers. Need to figure out a way to decrease this
         MinecraftServer server = MinecraftServer.getServer();
         int pAmt = server.getCurrentPlayerCount(); // Everybody's potential is dependent on the number of people on the server (doesn't really mean anything in single player)
         float worldAge = server.getEntityWorld().getTotalWorldTime();
         int pexp = player.experienceLevel;
         int dimModifier = getDimensionModifier();
-        return ((MAX_POTENTIAL/pAmt) - (worldAge%(MAX_POTENTIAL/10))) + pexp + dimModifier;
+        float poten = ((MAX_POTENTIAL/pAmt) - (worldAge%(MAX_POTENTIAL/10))) + pexp + dimModifier;
+        return (poten > MAX_POTENTIAL) ? MAX_POTENTIAL : poten; // Ensure that the potential doesn't exceed the maximum
     }
 
     private int getDimensionModifier(){
