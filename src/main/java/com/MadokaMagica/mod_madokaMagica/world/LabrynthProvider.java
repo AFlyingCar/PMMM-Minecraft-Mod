@@ -94,6 +94,17 @@ public class LabrynthProvider extends WorldProvider{
     }
 
     @Override
+    public static WorldProvider getProviderForDimension(int dimID){
+        // Alright, so I've finally figured out what this method is supposed to do.
+        // Based on net/minecraft/world/WorldProvider.java (lines:195-198) and net/minecraftforge/common/DimensionManager.java (lines:285-306)
+        //  I've ascertained that this method is supposed to return a NEW WorldProvider object every time it is called
+        //  Because I need a variable number of dimensions, I think I should implement my own dimension manager, and somehow modify this method to return that
+        // So, TODO: Finish this method
+
+        return null;
+    }
+
+    @Override
     public ChunkCoordinates getRandomizedSpawnPoint(){
         int x = MathHelper.getRandomIntegerInRange(this.worldObj.rand, this.master.posX+MIN_WITCH_DISTANCE, MAX_LABRYNTH_WORLD_SIZE);
         int z = MathHelper.getRandomIntegerInRange(this.worldObj.rand, this.master.posZ+MIN_WITCH_DISTANCE, MAX_LABRYNTH_WORLD_SIZE);
