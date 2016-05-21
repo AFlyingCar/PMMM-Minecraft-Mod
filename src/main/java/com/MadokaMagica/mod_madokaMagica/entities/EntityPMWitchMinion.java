@@ -1,28 +1,33 @@
 package com.MadokaMagica.mod_madokaMagica.entities;
 
-import net.minecraft.entity.monster.IMob;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityFlying;
+import java.util.List;
+
+import net.minecraft.entity.EntityCreature;
+import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.world.World;
+import net.minecraftforge.MinecraftForge;
 
-// We don't actually know if the minion can fly or not.
-// It's all up in the air
-public class EntityPMWitchMinion extends EntityFlying implements IMob{
-    // Minions can be default mobs
-    public boolean isDefaultMob;
-    public EntityLiving mob;
-	public EntityPMWitchMinion(World w){
-		super(w);
-        isDefaultMob = false;
-        mob = this;
+import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitch;
+import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitchLabrynthEntrance;
+import com.MadokaMagica.mod_madokaMagica.events.PMWitchMinionEvolveEvent;
+
+public class EntityPMWitchMinion extends EntityCreature{
+    public boolean undead;
+    private EntityPMWitchLabrynthEntrance entrance;
+    private EntityPMWitch witch;
+    public List<EntityVillager> targets;
+    public int maxBewitchableEntities;
+    public boolean pushable;
+
+	public EntityPMWitchMinion(World worldObj, EntityPMWitch witch, EntityPMWitchLabrynthEntrance entrance){
+		super(worldObj);
+        this.witch = witch;
+        this.entrance = entrance;
+        this.pushable = true;
 	}
-    public EntityPMWitchMinion(World w,EntityLiving mob){
-        super(w);
-        this.isDefaultMob = true;
-        this.mob = mob;
-    }
+
     public void setExperienceLevel(int level){
         this.experienceValue = level;
     }
@@ -30,18 +35,35 @@ public class EntityPMWitchMinion extends EntityFlying implements IMob{
     public void setChaseTicks(int ticks){
         this.numTicksToChaseTarget = ticks;
     }
-    public EntityLiving getMob(){
-        return mob;
+
+    @Override
+    public boolean getCanSpawnHere(){
+        return isInHomeDimension() || isHome();
     }
 
-    public Class<? extends EntityLiving> getMobType(){
-        return mob.getClass();
+    public boolean isInHomeDimension(){
+        // TODO: Finish this method
+        //  It has to wait until the dimensions have been implemented
+        return true;
     }
-    
-    // I don't think it matters
-    // Everybody can be pushed
+
+    public List<EntityVillager> getTargets(){
+        return this.targets;
+    }
+
+    public void addTarget(EntityVillager villager){
+        if(this.targets == null) return;
+        if(this.targets.size() < this.maxBewitchableEntities)
+            this.targets.add(villager);
+    }
+
     @Override
     public boolean canBePushed(){
+        return pushable;
+    }
+
+    @Override
+    public boolean isAIEnabled(){
         return true;
     }
 
@@ -57,34 +79,36 @@ public class EntityPMWitchMinion extends EntityFlying implements IMob{
 
     @Override
     public void onEntityUpdate(){ 
+        if(entrance != null)
+            setHomeArea(entrance.chunkX,
+                        entrance.chunkY,
+                        entrance.chunkZ,
+                        entrance.dimension
+                );
+
+        if(canEvolve())
+            MinecraftForge.EVENT_BUS.post( new PMWitchMinionEvolveEvent(this) );
         super.onEntityUpdate();
+    }
+
+    @Override
+    public boolean isEntityUndead(){
+        return undead;
     }
 
     @Override
     public void writeEntityToNBT(NBTTagCompound rootTag){
         super.writeEntityToNBT(rootTag);
-        rootTag.setBoolean("IsDefaultMob",this.isDefaultMob);
-        if(this.isDefaultMob){
-            NBTBase mobtag = new NBTTagCompound();
-            this.mob.writeEntityToNBT((NBTTagCompound)mobtag);
-            rootTag.setTag("DefaultMob",mobtag);
-            // Have some way of storing klass as a byte array
-            // Or something else.
-            // Basically, we need to somehow write this.mob's class to rootTag
-        }
+        rootTag.setInteger("maxBewitchableEntities",this.maxBewitchableEntities);
+        rootTag.setBoolean("pushable",this.pushable);
+        // TODO: Add something here to save targets
     }
 
     @Override
     public void readEntityFromNBT(NBTTagCompound rootTag){
         super.readEntityFromNBT(rootTag);
-        this.isDefaultMob = rootTag.getBoolean("IsDefaultMob");
-        if(this.isDefaultMob){
-            // Class<? extends EntityLiving> klass = 
-            // this.mob = new klass(this.worldObj);
-            // this.mob.readEntityFromNBT(rootTag);
-        }else{
-            this.mob = this;
-        }
+        this.maxBewitchableEntities = rootTag.getInteger("maxBewitchableEntities");
+        this.pushable = rootTag.getBoolean("pushable");
     }
 }
 
