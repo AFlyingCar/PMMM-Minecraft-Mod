@@ -12,18 +12,40 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.World;
 import cpw.mods.fml.common.registry.GameRegistry;
 
 import com.MadokaMagica.mod_madokaMagica.managers.PlayerDataTrackerManager;
 import com.MadokaMagica.mod_madokaMagica.managers.LabrynthManager;
 import com.MadokaMagica.mod_madokaMagica.trackers.PMDataTracker;
+import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitch;
+import com.MadokaMagica.mod_madokaMagica.entities.ai.EntityAIWanderWithChunkBias;
 
 class EntityPMWitchLabrynthEntrance extends Entity{
     private Random rand;
 
+    public World linkedWorldObj; // TODO: Do we need this?
+    public EntityPMWitch witch;
+
     // All entities within 15 blocks have the possibility of being teleported
     public static double MAX_TELEPORT_DISTANCE = 15.0;
     public static double MIN_TELEPORT_CHANCE = 0.05; // 5%
+
+    public EntityPMWitchLabrynthEntrance(World worldObj){
+        super(worldObj);
+
+        setupAITasks();
+    }
+
+    private void setupAITasks(){
+        tasks.taskEntries.clear();
+        tasks.addTask(0,new EntityAIWanderWithChunkBias(this,
+            this.worldObj.villageCollectionObj.findNearestVillage(this.posX,
+                this.posY,
+                this.posZ,
+                this.dimension
+            ),0.05F)); // I'm just assuming that this is a good speed. Don't quote me on it though...
+    }
 
     @Override
     public void onEntityUpdate(){
@@ -66,49 +88,49 @@ class EntityPMWitchLabrynthEntrance extends Entity{
             if(val < chance)
                 this.teleportEntity(entity);
         }
+    }
 
-        // This method was almost completely shamelessly copied from StevenRS11's DimensionalDoors mod. Specifically, DDTeleporter.java
-        // Not exactly copied though, since we don't need to worry about everything that StevenRS11 did.
-        public void teleportEntity(Entity entity){
-            System.out.println("WARNING! This method has not been finished yet. It requires Labrynths to be at least partially coded first!");
-            return;
+    // This method was almost completely shamelessly copied from StevenRS11's DimensionalDoors mod. Specifically, DDTeleporter.java
+    // Not exactly copied though, since we don't need to worry about everything that StevenRS11 did.
+    public void teleportEntity(Entity entity){
+        System.out.println("WARNING! This method has not been finished yet. It requires Labrynths to be at least partially coded first!");
+        return;
 
 
 
-            if(entity == null){
-                throw new IllegalArgumentException("entity is null.");
-            }
+        if(entity == null){
+            throw new IllegalArgumentException("entity is null.");
+        }
 
-            WorldServer old = entity.worldObj;
-            WorldServer nwo = LabrynthManager.getInstance().loadLabrynth(this.witch);
-            EntityPlayerMP player = (entity instanceof EntityPlayerMP) ? (EntityPlayerMP)entity : null;
+        WorldServer old = entity.worldObj;
+        WorldServer nwo = LabrynthManager.getInstance().loadLabrynth(this.witch);
+        EntityPlayerMP player = (entity instanceof EntityPlayerMP) ? (EntityPlayerMP)entity : null;
 
-            // Don't teleport both entities, make sure that the rider gets unmounted
-            if(entity.riddenByEntity != null){
-                entity.riddenByEntity.mountEntity(null); // unmount
-            }
+        // Don't teleport both entities, make sure that the rider gets unmounted
+        if(entity.riddenByEntity != null){
+            entity.riddenByEntity.mountEntity(null); // unmount
+        }
 
-            if(player != null){
-                // TODO: Find a way to set this value correctly
-                // player.dimension = ?;
+        if(player != null){
+            // TODO: Find a way to set this value correctly
+            // player.dimension = ?;
 
-                // Sanity check
-                old.getPlayerManager().removePlayer(player);
-                nwo.getPlayerManager().addPlayer(player);
-                ChunkCoordinates coords = this.witch.worldObj.provider.getRandomizedSpawnPoint();
-                player.setPositionAndUpdate(coords.posX,coords.posY,coords.posZ)
-            }
+            // Sanity check
+            old.getPlayerManager().removePlayer(player);
+            nwo.getPlayerManager().addPlayer(player);
+            ChunkCoordinates coords = this.witch.worldObj.provider.getRandomizedSpawnPoint();
+            player.setPositionAndUpdate(coords.posX,coords.posY,coords.posZ);
+        }
 
-            nwo.spawnEntityInWorld(entity);
-            entity.setWorld(nwo);
-            
-            entity.worldObj.updateEntityWithOptionalForce(entity,false);
+        nwo.spawnEntityInWorld(entity);
+        entity.setWorld(nwo);
+        
+        entity.worldObj.updateEntityWithOptionalForce(entity,false);
 
-            if(player != null){
-                // Load the chunk that we are going to spawn in
-                nwo.getChunkProvider().loadChunk(MathHelper.floor_double(entity.posX) >> 4,MathHelper.floor_double(entity.posZ) >> 4);
-                GameRegistry.onPlayerChangedDimension((EntityPlayer)entity);
-            }
+        if(player != null){
+            // Load the chunk that we are going to spawn in
+            nwo.getChunkProvider().loadChunk(MathHelper.floor_double(entity.posX) >> 4,MathHelper.floor_double(entity.posZ) >> 4);
+            GameRegistry.onPlayerChangedDimension((EntityPlayer)entity);
         }
     }
 }
