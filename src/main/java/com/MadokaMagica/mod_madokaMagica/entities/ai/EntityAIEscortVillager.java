@@ -2,7 +2,7 @@ package com.MadokaMagica.mod_madokaMagica.entities.ai;
 
 import java.util.List;
 
-import net.minecraft.entity.EntityVillager;
+import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.ai.EntityAITasks;
 
@@ -37,14 +37,16 @@ public class EntityAIEscortVillager extends EntityAIBase {
 				villager.tasks.removeTask(findBewitchedAI(villager.tasks.taskEntries));
 			}
 		}
+		return !(ishome);
 	}
 
 	public EntityAIFollowEntity findBewitchedAI(List entries){
-		List tasks = villager.tasks.taskEntries;
+		// List tasks = villager.tasks.taskEntries;
+		List tasks = entries; 
 		for(Object taskEntry : tasks){
 			EntityAITasks.EntityAITaskEntry entry = (EntityAITasks.EntityAITaskEntry)taskEntry;
 			if(entry.action instanceof EntityAIFollowEntity)
-				return entry.action;
+				return (EntityAIFollowEntity)(entry.action);
 		}
 		return null;
 	}
