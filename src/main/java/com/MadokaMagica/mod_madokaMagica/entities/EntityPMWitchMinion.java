@@ -7,11 +7,13 @@ import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.world.World;
-import net.minecraftforge.MinecraftForge;
+import net.minecraft.village.Village;
+import net.minecraft.util.ChunkCoordinates;
+import net.minecraftforge.common.MinecraftForge;
 
 import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitch;
 import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitchLabrynthEntrance;
-import com.MadokaMagica.mod_madokaMagica.events.PMWitchMinionEvolveEvent;
+import com.MadokaMagica.mod_madokaMagica.events.MadokaMagicaWitchMinionEvolveEvent;
 
 public class EntityPMWitchMinion extends EntityCreature{
     public boolean undead;
@@ -19,6 +21,8 @@ public class EntityPMWitchMinion extends EntityCreature{
     private EntityPMWitch witch;
     public List<EntityVillager> targets;
     public int maxBewitchableEntities;
+    public float influence; // radius around this entity that it can bewitch villagers
+    public float influenceHold; // radius around this entity that it can hold onto bewitched villagers
     public boolean pushable;
 
 	public EntityPMWitchMinion(World worldObj, EntityPMWitch witch, EntityPMWitchLabrynthEntrance entrance){
@@ -26,6 +30,7 @@ public class EntityPMWitchMinion extends EntityCreature{
         this.witch = witch;
         this.entrance = entrance;
         this.pushable = true;
+        this.influence = 5.0F; // TODO: Find a better value for this
 	}
 
     public void setExperienceLevel(int level){
@@ -39,6 +44,10 @@ public class EntityPMWitchMinion extends EntityCreature{
     @Override
     public boolean getCanSpawnHere(){
         return isInHomeDimension() || isHome();
+    }
+
+    public boolean isHome(){
+        return hasHome() && isWithinHomeDistanceCurrentPosition();
     }
 
     public boolean isInHomeDimension(){
@@ -55,6 +64,31 @@ public class EntityPMWitchMinion extends EntityCreature{
         if(this.targets == null) return;
         if(this.targets.size() < this.maxBewitchableEntities)
             this.targets.add(villager);
+    }
+
+    public void clearTargets(){
+        // because fuck it
+        this.targets = null;
+    }
+
+    public boolean canEvolve(){
+        // TODO: Finish this method.
+        return false;
+    }
+
+    public boolean isInOrNearVillage(){
+        Village nearestVillage = this.worldObj.villageCollectionObj.findNearestVillage(
+            this.chunkCoordX,
+            this.chunkCoordY,
+            this.chunkCoordZ,
+            this.dimension);
+        ChunkCoordinates nearestVillageChunkCoords = nearestVillage.getCenter();
+
+        // Can be 5 blocks away from a village to count as nearby
+        float furthestPoint = nearestVillage.getVillageRadius() + 5.0F;
+
+        // Entity must be within 5 blocks of the village
+        return nearestVillageChunkCoords.getDistanceSquared(this.chunkCoordX,this.chunkCoordY,this.chunkCoordZ) <= furthestPoint;
     }
 
     @Override
@@ -80,14 +114,14 @@ public class EntityPMWitchMinion extends EntityCreature{
     @Override
     public void onEntityUpdate(){ 
         if(entrance != null)
-            setHomeArea(entrance.chunkX,
-                        entrance.chunkY,
-                        entrance.chunkZ,
+            setHomeArea(entrance.chunkCoordX,
+                        entrance.chunkCoordY,
+                        entrance.chunkCoordZ,
                         entrance.dimension
                 );
 
         if(canEvolve())
-            MinecraftForge.EVENT_BUS.post( new PMWitchMinionEvolveEvent(this) );
+            MinecraftForge.EVENT_BUS.post( new MadokaMagicaWitchMinionEvolveEvent(this) );
         super.onEntityUpdate();
     }
 
