@@ -4,7 +4,9 @@ import java.util.List;
 import java.util.ArrayList;
 
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.entity.EntityVillager;
+import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.EntityCreature;
+import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.ai.EntityAITasks;
 
@@ -26,10 +28,11 @@ public class EntityAIBewitchVillager extends EntityAIBase {
 			return false;
 
 		if(entity.isInOrNearVillage())
-			return (entity.worldObj.countEntities(EntityVillager) > 0 &&
+			return (entity.worldObj.countEntities(EntityVillager.class) > 0 &&
 				   ((entity.getTargets() == null) ||
 				   	(entity.getTargets().size() >= entity.maxBewitchableEntities)
 				   ));
+		return false;
 	}
 
 	@Override
@@ -43,7 +46,7 @@ public class EntityAIBewitchVillager extends EntityAIBase {
 	public boolean continueExecuting(){
 		if(entity.getTargets().size() >= entity.maxBewitchableEntities)
 			return false;
-		List entities = entity.worldObj.getEntitiesWithinAABB(EntityVillager,
+		List entities = entity.worldObj.getEntitiesWithinAABB(EntityVillager.class,
 					AxisAlignedBB.getBoundingBox(entity.posX-entity.influence,
 											     entity.posY-entity.influence,
 											     entity.posZ-entity.influence,
@@ -52,8 +55,8 @@ public class EntityAIBewitchVillager extends EntityAIBase {
 												 entity.posZ+entity.influence
 					));
 
-		EntityVillager ev = entities.get(Math.random()*(entities.size()-1));
-		ev.tasks.addTask(0,EntityAIFollowEntity(ev,entity));
+		EntityVillager ev = (EntityVillager)(entities.get((int)(Math.random()*(entities.size()-1))));
+		ev.tasks.addTask(0,new EntityAIFollowEntity((EntityCreature)ev,(EntityLiving)entity,0.5D,entity.influenceHold));
 		entity.targets.add(ev);
 		return false;
 	}
