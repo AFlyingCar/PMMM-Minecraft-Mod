@@ -7,6 +7,8 @@ import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.biome.WorldChunkManager;
 import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraft.util.ChunkCoordinates;
+import net.minecraft.util.MathHelper;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -15,6 +17,10 @@ import com.MadokaMagica.mod_madokaMagica.factories.LabrynthGeneratorFactory;
 import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitch;
 
 public class LabrynthProvider extends WorldProvider{
+    // The diameter of the labrynth
+    public final static double MAX_LABRYNTH_WORLD_SIZE = 255.0; // TODO: Find better number than 255. Maybe generate a number?
+    public final static double MIN_WITCH_DISTANCE = MAX_LABRYNTH_WORLD_SIZE/2.0;
+
     private BiomeGenBase labrynthbiome;
     public boolean canSnow;
     public boolean canLightning;
@@ -93,7 +99,8 @@ public class LabrynthProvider extends WorldProvider{
         return this.witchName;
     }
 
-    @Override
+    // TODO: Figure out if this method even exists anymore
+    // @Override
     public static WorldProvider getProviderForDimension(int dimID){
         // Alright, so I've finally figured out what this method is supposed to do.
         // Based on net/minecraft/world/WorldProvider.java (lines:195-198) and net/minecraftforge/common/DimensionManager.java (lines:285-306)
@@ -106,8 +113,8 @@ public class LabrynthProvider extends WorldProvider{
 
     @Override
     public ChunkCoordinates getRandomizedSpawnPoint(){
-        int x = MathHelper.getRandomIntegerInRange(this.worldObj.rand, this.master.posX+MIN_WITCH_DISTANCE, MAX_LABRYNTH_WORLD_SIZE);
-        int z = MathHelper.getRandomIntegerInRange(this.worldObj.rand, this.master.posZ+MIN_WITCH_DISTANCE, MAX_LABRYNTH_WORLD_SIZE);
+        int x = MathHelper.getRandomIntegerInRange(this.worldObj.rand, (int)(this.master.posX+MIN_WITCH_DISTANCE), (int)(MAX_LABRYNTH_WORLD_SIZE));
+        int z = MathHelper.getRandomIntegerInRange(this.worldObj.rand, (int)(this.master.posZ+MIN_WITCH_DISTANCE), (int)(MAX_LABRYNTH_WORLD_SIZE));
         // TODO: Find a better Y value
         return new ChunkCoordinates(x, 25, z);
     }
