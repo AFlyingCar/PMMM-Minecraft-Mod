@@ -46,7 +46,7 @@ public class EntityAIWanderWithChunkBias extends EntityAIBase {
 
 	@Override
 	public void startExecuting(){
-        this.entity.getNavigator().tryMoveToXYZ(this.xPosition, this.yPosition, this.zPosition, this.speed);
+        this.entity.getNavigator().tryMoveToXYZ(this.x, this.y, this.z, this.speed);
 	}
 
 	@Override
@@ -56,9 +56,9 @@ public class EntityAIWanderWithChunkBias extends EntityAIBase {
 
 	public void applyBias(){
 		// Find difference in location
-		int xdiff = Math.abs(chunk.posX - entity.posX);
-		int ydiff = Math.abs(chunk.posY - entity.posY);
-		int zdiff = Math.abs(chunk.posZ - entity.posZ);
+		double xdiff = Math.abs(chunk.posX - entity.posX);
+		double ydiff = Math.abs(chunk.posY - entity.posY);
+		double zdiff = Math.abs(chunk.posZ - entity.posZ);
 
 		// Choose a random percentage
 		double rx = Math.random();
