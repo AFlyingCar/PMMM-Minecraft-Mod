@@ -6,7 +6,7 @@ import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitch;
 public class EntityPMWitchFactory {
 	public EntityPMWitch createWitch(PMDataTracker tracker){
 		// TODO: Finish this method
-		EntityPMWitch witch = new EntityPMWitch(tracker.player.worldObj);
+		EntityPMWitch witch = new EntityPMWitch(tracker);
 
 		// choose AI
 		switch(0){
