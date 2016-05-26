@@ -1,5 +1,8 @@
 package com.MadokaMagica.mod_madokaMagica.factories;
 
+import net.minecraft.world.World;
+import net.minecraft.entity.ai.EntityAIMoveTowardsTarget;
+
 import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitch;
 import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitchMinion;
 import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitchLabrynthEntrance;
@@ -37,7 +40,7 @@ public class EntityPMWitchMinionFactory {
 		clearAITasks(minion);
 		minion.tasks.addTask(0,new EntityAIEscortVillager(minion));
 		minion.tasks.addTask(1,new EntityAIMoveTowardsTarget(minion,0.05,100)); // speed and maximum distance (in blocks)
-		minion.targetTasks.addTask(2,EntityAIBewitchVillager(minion));
+		minion.targetTasks.addTask(2,new EntityAIBewitchVillager(minion));
 	}
 
 	public void setupGuardEntranceAITasks(EntityPMWitchMinion minion){
