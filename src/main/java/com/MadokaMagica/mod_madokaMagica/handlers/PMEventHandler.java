@@ -7,6 +7,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.world.Explosion;
 import net.minecraft.entity.player.EntityPlayer;
 
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.client.event.RenderWorldEvent;
 import net.minecraftforge.client.event.sound.PlaySoundEvent17;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
@@ -25,8 +26,13 @@ import com.MadokaMagica.mod_madokaMagica.trackers.PMDataTracker;
 import com.MadokaMagica.mod_madokaMagica.managers.IncubatorManager;
 import com.MadokaMagica.mod_madokaMagica.managers.ItemSoulGemManager;
 import com.MadokaMagica.mod_madokaMagica.managers.PlayerDataTrackerManager;
+import com.MadokaMagica.mod_madokaMagica.events.MadokaMagicaCreateWitchEvent;
 import com.MadokaMagica.mod_madokaMagica.events.MadokaMagicaWitchTransformationEvent;
 import com.MadokaMagica.mod_madokaMagica.events.MadokaMagicaPuellaMagiTransformationEvent;
+import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitchLabrynthEntrance;
+import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitch;
+import com.MadokaMagica.mod_madokaMagica.factories.EntityPMWitchFactory;
+import com.MadokaMagica.mod_madokaMagica.factories.EntityPMWitchLabrynthEntranceFactory;
 
 public class PMEventHandler{
     // Once the player has logged in, check if they have a data tracker
@@ -95,7 +101,10 @@ public class PMEventHandler{
                     return false;
                 }
                 pmdt.setPlayerState(2);
+                
                 // TODO: Do something here to make soulgem become an ItemGriefSeed
+
+                MinecraftForge.EVENT_BUS.post(new MadokaMagicaCreateWitchEvent(pmdt));
             }
         }
         return true;
@@ -118,7 +127,7 @@ public class PMEventHandler{
             //      Maybe we could just update the next event every x render events, and apply them every event?
             //      I would have to rework a lot of stuff though, so I'm not sure
             // Disabled for now since it prints that annoying as hell error-message
-            PMEffects.applyPlayerEffects(trackerset.getValue());
+            // PMEffects.applyPlayerEffects(trackerset.getValue());
 
             // Leave the timer stuff here, in case we decide to use it.
             // Also, if we do use a value here, we should make sure to deccrement it by a lot, since 10 is way to high
@@ -129,6 +138,31 @@ public class PMEventHandler{
                 trackerset.getValue().resetEffectsTimer();
         }
 
+        return true;
+    }
+
+    // This is the method where we will spawn a witch based on a certain player.
+    // We put this triggered by a seperate event so that we can call it elsewhere if we ever decide to
+    // That and it just looks so much nicer by itself.
+    @SubscribeEvent
+    public boolean onCreateWitch(MadokaMagicaCreateWitchEvent event){
+        PMDataTracker tracker = event.playerTracker;
+
+        EntityPMWitchFactory pmwf = new EntityPMWitchFactory();
+        EntityPMWitch witch = pmwf.createWitch(tracker);
+
+        EntityPMWitchLabrynthEntranceFactory pmwlef = new EntityPMWitchLabrynthEntranceFactory();
+        // It spawns in whatever world the player transformed in
+        EntityPMWitchLabrynthEntrance entrance = pmwlef.createWitchLabrynthEntrance(witch,tracker.player.worldObj);
+        if(entrance == null){
+            System.out.println("An error occurred in onCreateWitch(MadokaMagicaCreateWitchEvent)! EntityPMWitchLabrynthEntranceFactory.createWitchLabrynthEntrance(...) returned null!");
+            return false;
+        }
+
+        // TODO: Somehow generate the world inside the labrynth and set it to the entrance BEFORE we spawn everything
+
+        tracker.player.worldObj.spawnEntityInWorld(entrance);
+        entrance.linkedWorldObj.spawnEntityInWorld(witch);
         return true;
     }
 }
