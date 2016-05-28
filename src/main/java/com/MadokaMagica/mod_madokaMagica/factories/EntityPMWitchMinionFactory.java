@@ -8,14 +8,16 @@ import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitchMinion;
 import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitchLabrynthEntrance;
 import com.MadokaMagica.mod_madokaMagica.entities.ai.EntityAIEscortVillager;
 import com.MadokaMagica.mod_madokaMagica.entities.ai.EntityAIBewitchVillager;
+import com.MadokaMagica.mod_madokaMagica.trackers.PMDataTracker;
 
 public class EntityPMWitchMinionFactory {
 	public int aggressiveLevel;
 	public EntityPMWitch witch;
 	public EntityPMWitchLabrynthEntrance home;
+	public PMDataTracker tracker;
 
 	public EntityPMWitchMinion createMinion(World worldObj){
-		EntityPMWitchMinion minion = new EntityPMWitchMinion(worldObj,witch,home);
+		EntityPMWitchMinion minion = new EntityPMWitchMinion(worldObj,witch,home,tracker);
 		// choose AI
 		switch(aggressiveLevel){
 			case 0:
