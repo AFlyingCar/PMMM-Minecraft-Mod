@@ -7,16 +7,19 @@ import java.util.Iterator;
 import java.lang.Math;
 import java.nio.IntBuffer;
 import java.nio.ByteBuffer;
+import java.util.UUID;
 
 import org.lwjgl.opengl.GL11;
 
 import net.minecraft.world.World;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.Minecraft;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.village.Village;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.ChunkCoordinates;
@@ -262,5 +265,40 @@ public class Helper{
             if(arr[i] > arr[max]) max = i;
         }
         return max;
+    }
+
+    /*
+     * getSecondMaxInArray
+     * Accepts a float[]
+     * Returns the index of the second largest value in the array
+     */
+    public static int getSecondMaxInArray(float[] arr){
+        int max = 0;
+        int secondMax = 0;
+        for(int i=1;i<arr.length;i++){
+            if(arr[i] > arr[max]) max = i;
+        }
+        for(int i=1;i<arr.length;i++){
+            if(arr[i] > arr[secondMax] && arr[i] < arr[max]) secondMax = i;
+        }
+        return secondMax;
+    }
+
+    public static int getLowestInArray(float[] arr){
+        int low = 0;
+        for(int i=1;i<arr.length;i++){
+            if(arr[i] < arr[low]) low = i;
+        }
+        return low;
+    }
+
+    public static EntityPlayer getPlayerOnServerByUUID(UUID uuid){
+        if(uuid == null)
+            return null;
+        List<EntityPlayerMP> players = MinecraftServer.getServer().getConfigurationManager().playerEntityList;
+        for(EntityPlayerMP player : players)
+            if(player.getUniqueID().equals(uuid))
+                return player;
+        return null;
     }
 }
