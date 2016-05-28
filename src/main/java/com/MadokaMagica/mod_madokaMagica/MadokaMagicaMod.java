@@ -23,6 +23,8 @@ import cpw.mods.fml.common.FMLLog;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
+import cpw.mods.fml.common.event.FMLPostInitializationEvent;
+import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.event.FMLServerStartedEvent;
 import cpw.mods.fml.common.eventhandler.Event;
@@ -30,6 +32,7 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.eventhandler.EventPriority;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.common.registry.EntityRegistry;
+import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -41,6 +44,8 @@ import com.MadokaMagica.mod_madokaMagica.commands.CommandPlayerData;
 
 import com.MadokaMagica.mod_madokaMagica.managers.PlayerDataTrackerManager;
 import com.MadokaMagica.mod_madokaMagica.managers.ItemSoulGemManager;
+
+import com.MadokaMagica.mod_madokaMagica.proxies.CommonProxy;
 
 import com.MadokaMagica.mod_madokaMagica.items.ItemSoulGem;
 import com.MadokaMagica.mod_madokaMagica.items.ItemGriefSeed;
@@ -66,8 +71,18 @@ public class MadokaMagicaMod {
     public static Item itemSoulGem;
     public static Item itemGriefSeed;
 
+    @SidedProxy(clientSide="com.MadokaMagica.mod_madokaMagica.proxies.ClientProxy",serverSide="com.MadokaMagica.mod_madokaMagica.proxies.ServerProxy")
+    public static CommonProxy proxy;
+
+    @EventHandler
+    public void onPreInitialization(FMLPreInitializationEvent event){
+        proxy.preinit(event);
+    }
+
     @EventHandler
     public void onInitialization(FMLInitializationEvent event){
+        proxy.init(event);
+
         wtransform_music = PositionedSoundRecord.func_147673_a(new ResourceLocation(MadokaMagicaMod.MODID + ":transformmusic"));
         itemSoulGem = (new ItemSoulGem()).setUnlocalizedName("itemSoulGem");
         itemGriefSeed = (new ItemGriefSeed()).setUnlocalizedName("itemGriefSeed");
@@ -105,6 +120,11 @@ public class MadokaMagicaMod {
 
         Minecraft.getMinecraft().entityRenderer = new OverriddenEntityRenderer();
         ((SimpleReloadableResourceManager)Minecraft.getMinecraft().getResourceManager()).registerReloadListener(Minecraft.getMinecraft().entityRenderer);
+    }
+
+    @EventHandler
+    public void onPostInitializationEvent(FMLPostInitializationEvent event){
+        proxy.postinit(event);
     }
 
     @EventHandler
