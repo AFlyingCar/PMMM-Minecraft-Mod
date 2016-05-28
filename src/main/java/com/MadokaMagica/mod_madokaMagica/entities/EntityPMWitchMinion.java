@@ -14,6 +14,7 @@ import net.minecraftforge.common.MinecraftForge;
 import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitch;
 import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitchLabrynthEntrance;
 import com.MadokaMagica.mod_madokaMagica.events.MadokaMagicaWitchMinionEvolveEvent;
+import com.MadokaMagica.mod_madokaMagica.trackers.PMDataTracker;
 
 public class EntityPMWitchMinion extends EntityCreature{
     public boolean undead;
@@ -24,11 +25,13 @@ public class EntityPMWitchMinion extends EntityCreature{
     public float influence; // radius around this entity that it can bewitch villagers
     public float influenceHold; // radius around this entity that it can hold onto bewitched villagers
     public boolean pushable;
+    public PMDataTracker tracker;
 
-	public EntityPMWitchMinion(World worldObj, EntityPMWitch witch, EntityPMWitchLabrynthEntrance entrance){
+	public EntityPMWitchMinion(World worldObj, EntityPMWitch witch, EntityPMWitchLabrynthEntrance entrance, PMDataTracker tracker){
 		super(worldObj);
         this.witch = witch;
         this.entrance = entrance;
+        this.tracker = tracker;
         this.pushable = true;
         this.influence = 5.0F; // TODO: Find a better value for this
 	}
