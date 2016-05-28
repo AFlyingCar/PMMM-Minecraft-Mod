@@ -13,6 +13,7 @@ import net.minecraftforge.client.event.sound.PlaySoundEvent17;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.ServerChatEvent;
+import net.minecraftforge.event.world.WorldEvent;
 
 import cpw.mods.fml.common.FMLLog;
 import cpw.mods.fml.common.gameevent.PlayerEvent;
@@ -49,6 +50,12 @@ public class PMEventHandler{
         PMDataTracker tracker = new PMDataTracker(event.player);
         PlayerDataTrackerManager.getInstance().addDataTracker(tracker);
         tracker.loadTagData();
+    }
+
+    @SubscribeEvent
+    public void onWorldSave(WorldEvent.Save event){
+        if(PlayerDataTrackerManager.getInstance() != null)
+            PlayerDataTrackerManager.getInstance().saveAllTrackers();
     }
 
     @SubscribeEvent
