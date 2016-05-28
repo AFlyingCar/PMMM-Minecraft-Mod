@@ -197,6 +197,21 @@ public class PMDataTracker {
         }
     }
 
+    public void writeTags(NBTTagCompound tags){
+        tags.setFloat("PM_POTENTIAL",        getPotential()         );
+        tags.setFloat("PM_HERO_SCORE",       getHeroScore()         );
+        tags.setFloat("PM_VILLAIN_SCORE",    getVillainScore()      );
+        tags.setFloat("PM_AGGRESSIVE_SCORE", getAggressiveScore()   );
+        tags.setFloat("PM_PASSIVE_SCORE",    getPassiveScore()      );
+        tags.setFloat("PM_NATURE_SCORE",     getNatureScore()       );
+        tags.setFloat("PM_DAY_SCORE",        getDayScore()          );
+        tags.setFloat("PM_NIGHT_SCORE",      getNightScore()        );
+        tags.setFloat("PM_ENGINEERING_SCORE",getEngineeringScore()  );
+        tags.setFloat("PM_ARCHITECT_SCORE",  getArchitectScore()    );
+        tags.setFloat("PM_GREED_SCORE",      getGreedScore()        );
+        tags.setFloat("PM_PLAYER_STATE",     getPlayerState()       );
+    }
+
     public void updateData(){
         // We don't track anything anymore if the player has turned into a witch
         if(isWitch())
@@ -467,6 +482,51 @@ public class PMDataTracker {
             default:
                 return "DEFAULT";
         }
+    }
+
+    public String getSecondHighestScoreIden(){
+        float[] scores = {getArchitectScore(), getEngineeringScore(),getGreedScore(),getWaterScore(),getNatureScore(),
+            getDayScore(),getNightScore(),getHeroScore(),getVillainScore(),getPassiveScore(),getAggressiveScore()};
+
+        int idx = Helper.getSecondMaxInArray(scores);
+        switch(idx){
+            case 0:
+                return "ARCHITECT";
+            case 1:
+                return "ENGINEERING";
+            case 2:
+                return "GREED";
+            case 3:
+                return "WATER";
+            case 4:
+                return "NATURE";
+            case 5:
+                return "DAY";
+            case 6:
+                return "NIGHT";
+            case 7:
+                return "VILLAIN";
+            case 8:
+                return "HERO";
+            case 9:
+                return "PASSIVE";
+            case 10:
+                return "AGGRESSIVE";
+            default:
+                return "DEFAULT";
+        }
+    }
+
+    public String[] getScoreIdensFromLowestToHighest(){
+        float[] scores = {getArchitectScore(), getEngineeringScore(),getGreedScore(),getWaterScore(),getNatureScore(),
+            getDayScore(),getNightScore(),getHeroScore(),getVillainScore(),getPassiveScore(),getAggressiveScore()};
+        String[] idens = new String[scores.length];
+
+        for(int i=0; i < scores.length; i++){
+
+        }
+        // TODO: FInish this method
+        return idens;
     }
 
     public float getCorruption(){

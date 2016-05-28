@@ -1,5 +1,6 @@
 package com.MadokaMagica.mod_madokaMagica.managers;
 
+import java.util.UUID;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,6 +11,7 @@ import net.minecraft.entity.player.EntityPlayer;
 
 import com.MadokaMagica.mod_madokaMagica.trackers.PMDataTracker;
 import com.MadokaMagica.mod_madokaMagica.effects.PMEffects;
+import com.MadokaMagica.mod_madokaMagica.util.Helper;
 
 public class PlayerDataTrackerManager{
 	private HashMap<String,PMDataTracker> datatrackers;
@@ -35,6 +37,10 @@ public class PlayerDataTrackerManager{
         */
 	}
 
+    public PMDataTracker getTrackerByUUID(UUID uuid){
+        return getTrackerByPlayer(Helper.getPlayerOnServerByUUID(uuid));
+    }
+
     public void saveAndRemoveTracker(PMDataTracker pmdt){
         this.saveTracker(pmdt);
         if(datatrackers.containsValue(pmdt))
@@ -43,18 +49,13 @@ public class PlayerDataTrackerManager{
 
     public void saveTracker(PMDataTracker pmdt){
         NBTTagCompound tags = pmdt.player.getEntityData();
-        tags.setFloat("PM_POTENTIAL",pmdt.getPotential());
-        tags.setFloat("PM_HERO_SCORE",pmdt.getHeroScore());
-        tags.setFloat("PM_VILLAIN_SCORE",pmdt.getVillainScore());
-        tags.setFloat("PM_AGGRESSIVE_SCORE",pmdt.getAggressiveScore());
-        tags.setFloat("PM_PASSIVE_SCORE",pmdt.getPassiveScore());
-        tags.setFloat("PM_NATURE_SCORE",pmdt.getNatureScore());
-        tags.setFloat("PM_DAY_SCORE",pmdt.getDayScore());
-        tags.setFloat("PM_NIGHT_SCORE",pmdt.getNightScore());
-        tags.setFloat("PM_ENGINEERING_SCORE",pmdt.getEngineeringScore());
-        tags.setFloat("PM_ARCHITECT_SCORE",pmdt.getArchitectScore());
-        tags.setFloat("PM_GREED_SCORE",pmdt.getGreedScore());
-        tags.setFloat("PM_PLAYER_STATE",pmdt.getPlayerState());
+        pmdt.writeTags(tags);
+    }
+
+    public void saveAllTrackers(){
+        for(Entry<String,PMDataTracker> trackerset : datatrackers.entrySet()){
+            saveTracker(trackerset.getValue());
+        }
     }
 
     public PMDataTracker getTrackerByUsername(String name){
