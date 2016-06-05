@@ -9,6 +9,9 @@ import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitchLabrynthEntrance;
 import com.MadokaMagica.mod_madokaMagica.entities.ai.EntityAIEscortVillager;
 import com.MadokaMagica.mod_madokaMagica.entities.ai.EntityAIBewitchVillager;
 import com.MadokaMagica.mod_madokaMagica.trackers.PMDataTracker;
+import com.MadokaMagica.mod_madokaMagica.renderers.RenderPMWitchMinion;
+import com.MadokaMagica.mod_madokaMagica.renderers.RenderPMWitchMinionHolder;
+import com.MadokaMagica.mod_madokaMagica.factories.RenderPMWitchMinionFactory;
 
 public class EntityPMWitchMinionFactory {
 	public int aggressiveLevel;
@@ -32,6 +35,9 @@ public class EntityPMWitchMinionFactory {
 				this.setupGuardWitchAITasks(minion);
 				break;
 		}
+
+		RenderPMWitchMinion renderer = RenderPMWitchMinionFactory.createRenderer(minion);
+		RenderPMWitchMinionHolder.getInstance().addEntity(minion,renderer);
 
 		// TODO: do something to create the model
 
