@@ -17,6 +17,7 @@ import net.minecraft.world.World;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTBase;
 import cpw.mods.fml.common.registry.GameRegistry;
+import net.minecraft.util.DamageSource;
 
 import com.MadokaMagica.mod_madokaMagica.managers.PlayerDataTrackerManager;
 import com.MadokaMagica.mod_madokaMagica.managers.LabrynthManager;
@@ -159,5 +160,11 @@ public class EntityPMWitchLabrynthEntrance extends EntityCreature{
     public void readEntityFromNBT(NBTTagCompound rootTag){
         // TODO: Finish this method
         super.readEntityFromNBT(rootTag);
+    }
+
+    @Override
+    public boolean attackEntityFrom(DamageSource source, float what){
+        // TODO: Find out what the second parameter is supposed to represent
+        return false;
     }
 }
