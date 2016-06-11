@@ -15,6 +15,7 @@ import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitch;
 import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitchLabrynthEntrance;
 import com.MadokaMagica.mod_madokaMagica.events.MadokaMagicaWitchMinionEvolveEvent;
 import com.MadokaMagica.mod_madokaMagica.trackers.PMDataTracker;
+import com.MadokaMagica.mod_madokaMagica.util.Helper;
 
 public class EntityPMWitchMinion extends EntityCreature{
     public boolean undead;
@@ -27,14 +28,23 @@ public class EntityPMWitchMinion extends EntityCreature{
     public boolean pushable;
     public PMDataTracker tracker;
 
-	public EntityPMWitchMinion(World worldObj, EntityPMWitch witch, EntityPMWitchLabrynthEntrance entrance, PMDataTracker tracker){
-		super(worldObj);
+    public EntityPMWitchMinion(World worldObj, EntityPMWitch witch, EntityPMWitchLabrynthEntrance entrance, PMDataTracker tracker){
+        super(worldObj);
         this.witch = witch;
         this.entrance = entrance;
         this.tracker = tracker;
         this.pushable = true;
         this.influence = 5.0F; // TODO: Find a better value for this
-	}
+    }
+
+    public EntityPMWitchMinion(World worldObj){
+        super(worldObj);
+        this.witch = null;
+        this.entrance = null;
+        this.tracker = Helper.generateRandomizedTracker(this);
+        this.pushable = true;
+        this.influence = 5.0F;
+    }
 
     public void setExperienceLevel(int level){
         this.experienceValue = level;
