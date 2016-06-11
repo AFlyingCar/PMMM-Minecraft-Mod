@@ -12,29 +12,29 @@ import com.MadokaMagica.mod_madokaMagica.MadokaMagicaMod;
 import com.MadokaMagica.mod_madokaMagica.util.RenderLivingFriend;
 
 public class RenderPMWitchMinion extends RenderLivingFriend{
-	public ResourceLocation minionTexture;
+    public ResourceLocation minionTexture;
 
-	public RenderPMWitchMinion(ModelBase base, float shadowSize){
-		super(base,shadowSize);
-		setEntityTexture();
-	}
+    public RenderPMWitchMinion(ModelBase base, float shadowSize){
+        super(base,shadowSize);
+        setEntityTexture();
+    }
 
-	@Override
-	public void preRenderCallback(EntityLivingBase entity, float f){
-		preRenderCallbackPMWitchMinion((EntityPMWitchMinion)entity,f);
-	}
+    @Override
+    public void preRenderCallback(EntityLivingBase entity, float f){
+        preRenderCallbackPMWitchMinion((EntityPMWitchMinion)entity,f);
+    }
 
-	protected void preRenderCallbackPMWitchMinion(EntityPMWitchMinion entity, float f){
-		// This method is to be overridden by the factories
-	}
+    protected void preRenderCallbackPMWitchMinion(EntityPMWitchMinion entity, float f){
+        // This method is to be overridden by the factories
+    }
 
-	protected void setEntityTexture(){
-		minionTexture = new ResourceLocation(MadokaMagicaMod.MODID+":textures/entity/minions/minionDEFAULT.png");
-	}
+    protected void setEntityTexture(){
+        minionTexture = new ResourceLocation(MadokaMagicaMod.MODID+":textures/entity/minions/minionDEFAULT.png");
+    }
 
-	@Override
-	protected ResourceLocation getEntityTexture(Entity e){
-		return minionTexture;
-	}
+    @Override
+    protected ResourceLocation getEntityTexture(Entity e){
+        return minionTexture;
+    }
 }
 
