@@ -27,6 +27,9 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.oredict.OreDictionary;
 
+import com.MadokaMagica.mod_madokaMagica.trackers.PMDataTracker;
+import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitchMinion;
+
 public class Helper{
     private final static long INT_ALTER_AMT = (long)(Math.pow(10,16));
 
@@ -300,5 +303,11 @@ public class Helper{
             if(player.getUniqueID().equals(uuid))
                 return player;
         return null;
+    }
+
+    public static PMDataTracker generateRandomizedTracker(EntityPMWitchMinion entity){
+        PMDataTracker tracker = new PMDataTracker(entity); // TODO: Pass entity to this class
+        tracker.randomize();
+        return tracker;
     }
 }
