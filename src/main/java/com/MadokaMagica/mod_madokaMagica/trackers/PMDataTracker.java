@@ -24,12 +24,18 @@ import cpw.mods.fml.common.eventhandler.EventPriority;
 
 import com.MadokaMagica.mod_madokaMagica.util.Helper;
 import com.MadokaMagica.mod_madokaMagica.items.ItemSoulGem;
+import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitchMinion;
 import com.MadokaMagica.mod_madokaMagica.managers.PlayerDataTrackerManager;
+
+// IMPORTANT
+// TODO: Re-write part of this class later so that it is more compatible with Witches and Minions
+// IMPORTANT
 
 public class PMDataTracker {
     public static final int MAX_POTENTIAL = 100;
     public static final int SWING_TOLERANCE = 3; // 3 seconds
     public EntityPlayer player; // The player being tracked
+    public EntityPMWitchMinion minion; // So that minions can be tracked as well
     private ItemSoulGem playerSoulGem = null;
 
     // Track the Player's likes and dislikes
@@ -65,6 +71,7 @@ public class PMDataTracker {
      * 0 - Normal human
      * 1 - Puella Magi
      * 2 - Witch
+     * 3 - Minion
      */
     private int player_state = 0;
 
@@ -106,6 +113,27 @@ public class PMDataTracker {
     public PMDataTracker(EntityPlayer nplayer, ItemSoulGem nplayerSG){
         this(nplayer);
         playerSoulGem = nplayerSG;
+    }
+
+    public PMDataTracker(EntityPMWitchMinion minion){
+
+        // COPY-PASTED CODE!
+        // This is done because we can't just call the other constructor with a 'null' argument, as this throws an 'ambiguous argument' error.
+        // I think it's because, since null doesn't have a type, the compiler doesn't know which constructor to call. Oh well, I fixed it.
+        player = null;
+        like_entity_type = new HashMap<Integer,Float>();
+        liked_entities = new HashMap<Integer,Float>();
+        like_level = new HashMap<Integer,Float>();
+        nearbyEntitiesMap = new HashMap<Entity,Float>();
+
+        potential = calculatePotential();
+        playerswinglasttime = player.worldObj.getTotalWorldTime();
+
+        loadTagData();
+
+
+        this.minion = minion;
+        player_state = 3;
     }
 
     public boolean isReady(){
@@ -393,6 +421,10 @@ public class PMDataTracker {
         player_state = state;
     }
 
+    public boolean isMinion(){
+        return player_state == 3;
+    }
+
     public boolean isWitch(){
         return player_state == 2;
     }
@@ -628,5 +660,19 @@ public class PMDataTracker {
 
     public boolean isTransformingIntoWitch(){
         return this.currentlyTransformingIntoWitch;
+    }
+
+    public void randomize(){
+        this.architectScore = ((float)Math.random())*50F;
+        this.engineeringScore = ((float)Math.random())*50F;
+        this.greedScore = ((float)Math.random())*50F;
+        this.waterScore = ((float)Math.random())*50F;
+        this.natureScore = ((float)Math.random())*50F;
+        this.dayScore = ((float)Math.random())*50F;
+        this.nightScore = ((float)Math.random())*50F;
+        this.heroScore = ((float)Math.random())*50F;
+        this.villainScore = ((float)Math.random())*50F;
+        this.passiveScore = ((float)Math.random())*50F;
+        this.aggressiveScore = ((float)Math.random())*50F;
     }
 }
