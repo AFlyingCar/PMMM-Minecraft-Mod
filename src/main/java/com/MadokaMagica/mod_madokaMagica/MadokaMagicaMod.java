@@ -53,6 +53,8 @@ import com.MadokaMagica.mod_madokaMagica.trackers.PMDataTracker;
 import com.MadokaMagica.mod_madokaMagica.handlers.PMEventHandler;
 import com.MadokaMagica.mod_madokaMagica.effects.PMEffects;
 
+import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitchMinion;
+
 @Mod(modid=MadokaMagicaMod.MODID, version=MadokaMagicaMod.VERSION)
 public class MadokaMagicaMod {
     public static final String MODID   = "MadokaMagicaMod";
@@ -67,6 +69,7 @@ public class MadokaMagicaMod {
 
     private static ISound wtransform_music = null;
 
+    public static int entityID=0;
 
     public static Item itemSoulGem;
     public static Item itemGriefSeed;
@@ -101,8 +104,10 @@ public class MadokaMagicaMod {
         /*
         EntityRegistry.registerModEntity(MobPMWitch.class, "PMWitch", properties.PMWitchEntityID,this,70,1,false);
         EntityRegistry.registerModEntity(MobPMLabrynthEntrance.class,"PMLabrynthEntrance",properties.PMLabrynthEntranceEntityID,this,70,1,true);
-        EntityRegistry.registerModEntity(MobPMMinion.class,"PMMinion",properties.PMMinionEntityID,this,70,1,true);
         */
+
+        // Just do it the way the Touhou Items mod does things. Because I would like to have a spawn egg for now. Maybe later I'll switch it back
+        EntityRegistry.registerGlobalEntityID(EntityPMWitchMinion.class,"PMWitchMinion",entityID++,0x3F5505,0x4E6414);
 
         // Overwrite EntityRenderer so that activateNextShader does nothing if PMEffects is still active
         // TODO: add some code that checks a config file for if this should even be done.
