@@ -10,6 +10,7 @@ import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.resources.SimpleReloadableResourceManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityList;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.Explosion;
 import net.minecraft.server.MinecraftServer;
@@ -54,6 +55,7 @@ import com.MadokaMagica.mod_madokaMagica.handlers.PMEventHandler;
 import com.MadokaMagica.mod_madokaMagica.effects.PMEffects;
 
 import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitchMinion;
+import com.MadokaMagica.mod_madokaMagica.entities.EntityIncubator;
 
 @Mod(modid=MadokaMagicaMod.MODID, version=MadokaMagicaMod.VERSION)
 public class MadokaMagicaMod {
@@ -69,7 +71,7 @@ public class MadokaMagicaMod {
 
     private static ISound wtransform_music = null;
 
-    public static int entityID=0;
+    public static int entityID=348;
 
     public static Item itemSoulGem;
     public static Item itemGriefSeed;
@@ -107,7 +109,10 @@ public class MadokaMagicaMod {
         */
 
         // Just do it the way the Touhou Items mod does things. Because I would like to have a spawn egg for now. Maybe later I'll switch it back
-        EntityRegistry.registerGlobalEntityID(EntityPMWitchMinion.class,"PMWitchMinion",entityID++,0x3F5505,0x4E6414);
+        // EntityRegistry.registerGlobalEntityID(EntityPMWitchMinion.class,"PMWitchMinion",entityID++,0x3F5505,0x4E6414);
+        // EntityRegistry.registerGlobalEntityID(EntityIncubator.class,"Incubator",entityID++,0xFFFFFF,0xFF0000);
+
+        registerEntityWithEgg(EntityIncubator.class,"Incubator",entityID++,this,80,3,false,0xFFFFFF,0xFF0000);
 
         // Overwrite EntityRenderer so that activateNextShader does nothing if PMEffects is still active
         // TODO: add some code that checks a config file for if this should even be done.
@@ -167,5 +172,11 @@ public class MadokaMagicaMod {
                     event.setResult(Event.Result.DENY);
             }
         }
+    }
+
+    public void registerEntityWithEgg(Class<? extends Entity> entityClass, String identifier, int id, int trackRange, int frequency, boolean sendsVelocityUpdates, int backgroundColor, int foregroundColor){
+        EntityRegistry.registerModEntity(entityClass, identifier,id,this,trackRange,frequency,sendsVelocityUpdates);
+        // Create a spawn egg (basically copied from EntityList.java)
+        EntityList.entityEggs.put(Integer.valueOf(id), new EntityList.EntityEggInfo(id, backgroundColor, foregroundColor));
     }
 }
