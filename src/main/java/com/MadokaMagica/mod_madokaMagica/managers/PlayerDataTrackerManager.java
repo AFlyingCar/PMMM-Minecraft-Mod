@@ -22,7 +22,7 @@ public class PlayerDataTrackerManager{
 	}
 
 	public void addDataTracker(PMDataTracker tracker){
-        datatrackers.put(""+tracker.player.getDisplayName(),tracker);
+        datatrackers.put(""+tracker.getIdentifierName(),tracker);
 	}
 
 	public PMDataTracker getTrackerByPlayer(EntityPlayer p){
@@ -48,7 +48,7 @@ public class PlayerDataTrackerManager{
     }
 
     public void saveTracker(PMDataTracker pmdt){
-        NBTTagCompound tags = pmdt.player.getEntityData();
+        NBTTagCompound tags = pmdt.entity.getEntityData();
         pmdt.writeTags(tags);
     }
 
