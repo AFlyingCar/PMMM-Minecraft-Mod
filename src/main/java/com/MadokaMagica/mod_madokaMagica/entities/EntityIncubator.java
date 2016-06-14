@@ -4,13 +4,13 @@ import java.util.Map;
 
 import net.minecraft.world.World;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.player.EntityPlayer;
 
 import com.MadokaMagica.mod_madokaMagica.util.Wish;
 import com.MadokaMagica.mod_madokaMagica.factories.WishFactory;
 
-public class EntityIncubator extends Entity{
+public class EntityIncubator extends EntityCreature{
 	private Map<EntityPlayer,Wish> wishByPlayer;
 
 	public EntityIncubator(World world){
