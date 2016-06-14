@@ -14,6 +14,7 @@ import net.minecraftforge.common.MinecraftForge;
 import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitch;
 import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitchLabrynthEntrance;
 import com.MadokaMagica.mod_madokaMagica.events.MadokaMagicaWitchMinionEvolveEvent;
+import com.MadokaMagica.mod_madokaMagica.events.MadokaMagicaCreateModelEvent;
 import com.MadokaMagica.mod_madokaMagica.trackers.PMDataTracker;
 import com.MadokaMagica.mod_madokaMagica.util.Helper;
 
@@ -26,6 +27,7 @@ public class EntityPMWitchMinion extends EntityCreature{
     public float influence; // radius around this entity that it can bewitch villagers
     public float influenceHold; // radius around this entity that it can hold onto bewitched villagers
     public boolean pushable;
+    public boolean invisible;
     public PMDataTracker tracker;
 
     public EntityPMWitchMinion(World worldObj, EntityPMWitch witch, EntityPMWitchLabrynthEntrance entrance, PMDataTracker tracker){
@@ -35,6 +37,7 @@ public class EntityPMWitchMinion extends EntityCreature{
         this.tracker = tracker;
         this.pushable = true;
         this.influence = 5.0F; // TODO: Find a better value for this
+        this.invisible = false;
     }
 
     public EntityPMWitchMinion(World worldObj){
@@ -44,6 +47,9 @@ public class EntityPMWitchMinion extends EntityCreature{
         this.tracker = Helper.generateRandomizedTracker(this);
         this.pushable = true;
         this.influence = 5.0F;
+        this.invisible = false;
+
+        MinecraftForge.EVENT_BUS.post(new MadokaMagicaCreateModelEvent(this));
     }
 
     public void setExperienceLevel(int level){
@@ -144,10 +150,21 @@ public class EntityPMWitchMinion extends EntityCreature{
     }
 
     @Override
+    public boolean isInvisible(){
+        return invisible;
+    }
+
+    @Override
     public void writeEntityToNBT(NBTTagCompound rootTag){
         super.writeEntityToNBT(rootTag);
         rootTag.setInteger("maxBewitchableEntities",this.maxBewitchableEntities);
         rootTag.setBoolean("pushable",this.pushable);
+
+        // Write this entity's data tracker to its tag area
+        if(tracker != null){
+            tracker.writeTags(rootTag);
+        }
+
         // TODO: Add something here to save targets
     }
 
@@ -156,6 +173,13 @@ public class EntityPMWitchMinion extends EntityCreature{
         super.readEntityFromNBT(rootTag);
         this.maxBewitchableEntities = rootTag.getInteger("maxBewitchableEntities");
         this.pushable = rootTag.getBoolean("pushable");
+
+        // Read this entity's tracker
+        if(tracker == null){
+            tracker = new PMDataTracker(this);
+        }
+        //tracker.loadTagData(rootTag);
+        tracker.loadTagData();
     }
 }
 
