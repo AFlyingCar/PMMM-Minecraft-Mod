@@ -25,6 +25,7 @@ import cpw.mods.fml.common.eventhandler.EventPriority;
 import com.MadokaMagica.mod_madokaMagica.util.Helper;
 import com.MadokaMagica.mod_madokaMagica.items.ItemSoulGem;
 import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitchMinion;
+import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitch;
 import com.MadokaMagica.mod_madokaMagica.managers.PlayerDataTrackerManager;
 
 // IMPORTANT
@@ -34,8 +35,7 @@ import com.MadokaMagica.mod_madokaMagica.managers.PlayerDataTrackerManager;
 public class PMDataTracker {
     public static final int MAX_POTENTIAL = 100;
     public static final int SWING_TOLERANCE = 3; // 3 seconds
-    public EntityPlayer player; // The player being tracked
-    public EntityPMWitchMinion minion; // So that minions can be tracked as well
+    public Entity entity; // The entity being tracked
     private ItemSoulGem playerSoulGem = null;
 
     // Track the Player's likes and dislikes
@@ -57,15 +57,6 @@ public class PMDataTracker {
 
     private float passiveScore = 0;
     private float aggressiveScore = 0;
-
-    /*
-    private float like_building = 0;
-    private float like_fighting = 0;
-    private float like_water = 0;
-    private float like_night = 0;
-    private float like_day = 0;
-    private float hero = 0;
-    */
 
     /*
      * 0 - Normal human
@@ -98,14 +89,15 @@ public class PMDataTracker {
     private boolean currentlyTransformingIntoWitch;
 
     public PMDataTracker(EntityPlayer nplayer){
-        player = nplayer;
+        entity = nplayer;
         like_entity_type = new HashMap<Integer,Float>();
         liked_entities = new HashMap<Integer,Float>();
         like_level = new HashMap<Integer,Float>();
         nearbyEntitiesMap = new HashMap<Entity,Float>();
 
         potential = calculatePotential();
-        playerswinglasttime = player.worldObj.getTotalWorldTime();
+        playerswinglasttime = entity.worldObj.getTotalWorldTime();
+        player_state = 0;
 
         loadTagData();
     }
@@ -116,24 +108,36 @@ public class PMDataTracker {
     }
 
     public PMDataTracker(EntityPMWitchMinion minion){
-
         // COPY-PASTED CODE!
         // This is done because we can't just call the other constructor with a 'null' argument, as this throws an 'ambiguous argument' error.
         // I think it's because, since null doesn't have a type, the compiler doesn't know which constructor to call. Oh well, I fixed it.
-        player = null;
+        entity = minion;
+        like_entity_type = new HashMap<Integer,Float>();
+        liked_entities = new HashMap<Integer,Float>();
+        like_level = new HashMap<Integer,Float>();
+        nearbyEntitiesMap = new HashMap<Entity,Float>();
+
+        potential = 0;//calculatePotential();
+        playerswinglasttime = entity.worldObj.getTotalWorldTime();
+
+        loadTagData();
+
+        player_state = 3;
+    }
+
+    public PMDataTracker(EntityPMWitch witch){
+        entity = witch;
         like_entity_type = new HashMap<Integer,Float>();
         liked_entities = new HashMap<Integer,Float>();
         like_level = new HashMap<Integer,Float>();
         nearbyEntitiesMap = new HashMap<Entity,Float>();
 
         potential = calculatePotential();
-        playerswinglasttime = player.worldObj.getTotalWorldTime();
+        playerswinglasttime = entity.worldObj.getTotalWorldTime();
 
         loadTagData();
 
-
-        this.minion = minion;
-        player_state = 3;
+        player_state = 2;
     }
 
     public boolean isReady(){
@@ -141,7 +145,7 @@ public class PMDataTracker {
     }
 
     public void loadTagData(){
-        NBTTagCompound tags = player.getEntityData();
+        NBTTagCompound tags = entity.getEntityData();
         // Get the player's potential
         if(tags.hasKey("PM_POTENTIAL")){
             potential = tags.getFloat("PM_POTENTIAL");
@@ -242,8 +246,10 @@ public class PMDataTracker {
 
     public void updateData(){
         // We don't track anything anymore if the player has turned into a witch
-        if(isWitch())
+        if(isWitch() || isMinion())
             return;
+
+        EntityPlayer player = (EntityPlayer)entity; // Do this so we can refer to the entity as a player, since this method is only for players
 
         // TODO: Rewrite this section
         
@@ -290,13 +296,13 @@ public class PMDataTracker {
         
 
 
-        this.playerswinging = this.player.isSwingInProgress;
+        this.playerswinging = player.isSwingInProgress;
         if(this.playerswinging)
             this.playerswinglasttime = player.worldObj.getTotalWorldTime();
 
         // DOES THE PLAYER LIKE MINING OR FARMING
         // ======================================
-        if(Helper.isEntityUnderground((Entity)player)){
+        if(Helper.isEntityUnderground(player)){
             // TODO: Replace `true` with a check for if the player is breaking blocks
             if(!this.playerswinging){
                 // Is the player hiding from the night (or, generally just being active)
@@ -307,7 +313,7 @@ public class PMDataTracker {
                     nightScore -= 0.01;
             }
         }else{
-            if(Helper.isEntityOutside((Entity)player)){
+            if(Helper.isEntityOutside(player)){
                 // TODO: Add stuff here about whether the player likes to farm
                 //  (If so, add 1 to natureScore)
             }
@@ -348,9 +354,9 @@ public class PMDataTracker {
 
     @SubscribeEvent
     public void onEntityItemPickup(EntityItemPickupEvent event){
-        if(event.entityPlayer == this.player){
+        if(event.entityPlayer == this.entity){
             // Is the time since last swinging less than the tolerance level
-            if(Math.abs(this.player.worldObj.getTotalWorldTime()-this.playerswinglasttime) <= PMDataTracker.SWING_TOLERANCE){
+            if(Math.abs(this.entity.worldObj.getTotalWorldTime()-this.playerswinglasttime) <= PMDataTracker.SWING_TOLERANCE){
                 // Was it actually an ore?
                 if(Helper.isItemOre(event.item.getEntityItem())){
                     // How many things were in the stack?
@@ -363,7 +369,7 @@ public class PMDataTracker {
     // We MUST make sure that we check for this, unless of course we aren't checking for it
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onEntityLivingAttacked(LivingAttackEvent event){
-        if(event.source.getSourceOfDamage() == this.player){
+        if(event.source.getSourceOfDamage() == this.entity){
             if(Helper.isPlayerInVillage(event.source.getSourceOfDamage())){
                 if(event.source.getEntity() instanceof IMob){
                     this.heroScore += (((EntityLiving)event.source.getEntity()).getMaxHealth()/event.ammount);
@@ -379,7 +385,7 @@ public class PMDataTracker {
             // As in, they are defending their property?
             // Their home could just be considered the chunks that they spend the most time in on average
             this.aggressiveScore += (((EntityLiving)event.source.getEntity()).getMaxHealth()/event.ammount);
-        }else if(event.source.getEntity() == this.player){
+        }else if(event.source.getEntity() == this.entity){
             // TODO: Add something here to check if the player is running away
             // And we can't just check if the player is getting hit
             // Maybe check if the player is near the monster and hasn't attacked at all?
@@ -388,7 +394,7 @@ public class PMDataTracker {
 
     // NOTE: Maybe do something here if Entity e is in liked_entities?
     private void cleanNearbyEntitiesMap(){
-        float ctime = player.worldObj.getTotalWorldTime();
+        float ctime = entity.worldObj.getTotalWorldTime();
         for(Entry<Entity,Float> e : nearbyEntitiesMap.entrySet())
             // If the player has not been near Entity e for longer than twice the tolerance length...
             if(nearbyEntitiesMap.get(e.getKey()).floatValue() >= (Helper.timeTolerance*2))
@@ -400,9 +406,14 @@ public class PMDataTracker {
         MinecraftServer server = MinecraftServer.getServer();
         int pAmt = server.getCurrentPlayerCount(); // Everybody's potential is dependent on the number of people on the server (doesn't really mean anything in single player)
         float worldAge = server.getEntityWorld().getTotalWorldTime();
-        int pexp = player.experienceLevel;
+
+        int pexp = 0;
+        if(player_state == 1 || player_state == 0)
+            pexp = ((EntityPlayer)entity).experienceLevel; // Got to check if the entity is a player first, and not a witch or minion
+
         int dimModifier = getDimensionModifier();
         float poten = ((MAX_POTENTIAL/pAmt) - (worldAge%(MAX_POTENTIAL/10))) + pexp + dimModifier;
+
         return (poten > MAX_POTENTIAL) ? MAX_POTENTIAL : poten; // Ensure that the potential doesn't exceed the maximum
     }
 
@@ -437,8 +448,13 @@ public class PMDataTracker {
         return player_state;
     }
 
+    public Entity getEntity(){
+        return this.entity;
+    }
+
     public EntityPlayer getPlayer(){
-        return this.player;
+        System.out.println("WARNING! Attempted to call deprecated method getPlayer()! Please use getEntity() instead.");
+        return null;
     }
 
     public float getArchitectScore(){
@@ -565,7 +581,7 @@ public class PMDataTracker {
         if(playerSoulGem != null)
             return playerSoulGem.getDespair();
         else
-            return -1;
+            return -1.0F;
     }
 
     public void setPotential(float val){
@@ -674,5 +690,13 @@ public class PMDataTracker {
         this.villainScore = ((float)Math.random())*50F;
         this.passiveScore = ((float)Math.random())*50F;
         this.aggressiveScore = ((float)Math.random())*50F;
+    }
+
+    public String getIdentifierName(){
+        if(player_state <= 1){
+            return ((EntityPlayer)entity).getDisplayName();
+        }else{
+            return entity.getPersistentID().toString();
+        }
     }
 }
