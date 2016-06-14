@@ -28,12 +28,17 @@ import com.MadokaMagica.mod_madokaMagica.managers.IncubatorManager;
 import com.MadokaMagica.mod_madokaMagica.managers.ItemSoulGemManager;
 import com.MadokaMagica.mod_madokaMagica.managers.PlayerDataTrackerManager;
 import com.MadokaMagica.mod_madokaMagica.events.MadokaMagicaCreateWitchEvent;
+import com.MadokaMagica.mod_madokaMagica.events.MadokaMagicaCreateModelEvent;
 import com.MadokaMagica.mod_madokaMagica.events.MadokaMagicaWitchTransformationEvent;
 import com.MadokaMagica.mod_madokaMagica.events.MadokaMagicaPuellaMagiTransformationEvent;
 import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitchLabrynthEntrance;
 import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitch;
+import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitchMinion;
 import com.MadokaMagica.mod_madokaMagica.factories.EntityPMWitchFactory;
+import com.MadokaMagica.mod_madokaMagica.factories.RenderPMWitchMinionFactory;
 import com.MadokaMagica.mod_madokaMagica.factories.EntityPMWitchLabrynthEntranceFactory;
+import com.MadokaMagica.mod_madokaMagica.renderers.RenderPMWitchMinion;
+import com.MadokaMagica.mod_madokaMagica.renderers.RenderPMWitchMinionHolder;
 
 public class PMEventHandler{
     // Once the player has logged in, check if they have a data tracker
@@ -42,7 +47,7 @@ public class PMEventHandler{
     public void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event){
         PMDataTracker oldTracker = PlayerDataTrackerManager.getInstance().getTrackerByUsername(event.player.getDisplayName());
         if(oldTracker != null){
-                oldTracker.player = event.player;
+                oldTracker.entity = event.player;
                 oldTracker.loadTagData();
                 return;
         }
@@ -73,9 +78,10 @@ public class PMEventHandler{
         if(tracker.getPlayerState() == 2){
             event.setCanceled(true);
             size = 2.0F;
+            // TODO: Spawn witch here, or throw an event to do so
         }
 
-        EntityPlayer player = tracker.getPlayer();
+        EntityPlayer player = (EntityPlayer)tracker.getEntity();
 
         // NOTE: Take a look at the explosion size. I'm not sure how to set that value, so let's just ignore it for now.
         Explosion exp = player.worldObj.newExplosion(player,player.posX,player.posY,player.posZ,size,false,false);
@@ -160,7 +166,7 @@ public class PMEventHandler{
 
         EntityPMWitchLabrynthEntranceFactory pmwlef = new EntityPMWitchLabrynthEntranceFactory();
         // It spawns in whatever world the player transformed in
-        EntityPMWitchLabrynthEntrance entrance = pmwlef.createWitchLabrynthEntrance(witch,tracker.player.worldObj);
+        EntityPMWitchLabrynthEntrance entrance = pmwlef.createWitchLabrynthEntrance(witch,tracker.entity.worldObj);
         if(entrance == null){
             System.out.println("An error occurred in onCreateWitch(MadokaMagicaCreateWitchEvent)! EntityPMWitchLabrynthEntranceFactory.createWitchLabrynthEntrance(...) returned null!");
             return false;
@@ -168,8 +174,23 @@ public class PMEventHandler{
 
         // TODO: Somehow generate the world inside the labrynth and set it to the entrance BEFORE we spawn everything
 
-        tracker.player.worldObj.spawnEntityInWorld(entrance);
+        tracker.entity.worldObj.spawnEntityInWorld(entrance);
         entrance.linkedWorldObj.spawnEntityInWorld(witch);
+        return true;
+    }
+
+    @SubscribeEvent
+    public boolean onCreateModel(MadokaMagicaCreateModelEvent event){
+        if(event.entityType == 0){
+            EntityPMWitchMinion entity = (EntityPMWitchMinion)event.entity;
+            RenderPMWitchMinion renderer = RenderPMWitchMinionFactory.createRenderer(entity);
+            RenderPMWitchMinionHolder.getInstance().addEntity(entity,renderer);
+        }else{
+            EntityPMWitch entity = (EntityPMWitch)event.entity;
+            // Other code using the factorys and holders that I haven't designed yet.
+            // So uhhh... TODO I guess?
+        }
+
         return true;
     }
 }
