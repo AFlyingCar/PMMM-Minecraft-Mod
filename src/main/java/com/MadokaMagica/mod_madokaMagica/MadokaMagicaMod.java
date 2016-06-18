@@ -50,6 +50,7 @@ import com.MadokaMagica.mod_madokaMagica.proxies.CommonProxy;
 
 import com.MadokaMagica.mod_madokaMagica.items.ItemSoulGem;
 import com.MadokaMagica.mod_madokaMagica.items.ItemGriefSeed;
+import com.MadokaMagica.mod_madokaMagica.items.placers.IncubatorMonsterPlacer;
 import com.MadokaMagica.mod_madokaMagica.trackers.PMDataTracker;
 import com.MadokaMagica.mod_madokaMagica.handlers.PMEventHandler;
 import com.MadokaMagica.mod_madokaMagica.effects.PMEffects;
@@ -75,6 +76,7 @@ public class MadokaMagicaMod {
 
     public static Item itemSoulGem;
     public static Item itemGriefSeed;
+    public static Item incubatorSpawnEgg;
 
     @SidedProxy(clientSide="com.MadokaMagica.mod_madokaMagica.proxies.ClientProxy",serverSide="com.MadokaMagica.mod_madokaMagica.proxies.ServerProxy")
     public static CommonProxy proxy;
@@ -112,7 +114,9 @@ public class MadokaMagicaMod {
         // EntityRegistry.registerGlobalEntityID(EntityPMWitchMinion.class,"PMWitchMinion",entityID++,0x3F5505,0x4E6414);
         // EntityRegistry.registerGlobalEntityID(EntityIncubator.class,"Incubator",entityID++,0xFFFFFF,0xFF0000);
 
-        registerEntityWithEgg(EntityIncubator.class,"Incubator",entityID++,80,3,false,0xFFFFFF,0xFF0000);
+        registerEntityWithEgg(EntityIncubator.class,"Incubator",++entityID,80,3,false,0xFFFFFF,0xFF0000);
+        incubatorSpawnEgg = new IncubatorMonsterPlacer("Incubator",0xFFFFFF,0xFF0000).setUnlocalizedName("spawn egg "+"Incubator".toLowerCase()).setTextureName("madokamagica:spawn egg");
+        GameRegistry.registerItem(incubatorSpawnEgg,"spawnEgg"+"Incubator");
 
         // Overwrite EntityRenderer so that activateNextShader does nothing if PMEffects is still active
         // TODO: add some code that checks a config file for if this should even be done.
@@ -175,8 +179,8 @@ public class MadokaMagicaMod {
     }
 
     public void registerEntityWithEgg(Class<? extends Entity> entityClass, String identifier, int id, int trackRange, int frequency, boolean sendsVelocityUpdates, int backgroundColor, int foregroundColor){
-        EntityRegistry.registerModEntity(entityClass, identifier,id,this,trackRange,frequency,sendsVelocityUpdates);
+        EntityRegistry.registerModEntity(entityClass, identifier,id,MadokaMagicaMod.instance,trackRange,frequency,sendsVelocityUpdates);
         // Create a spawn egg (basically copied from EntityList.java)
-        EntityList.entityEggs.put(Integer.valueOf(id), new EntityList.EntityEggInfo(id, backgroundColor, foregroundColor));
+        //EntityList.entityEggs.put(Integer.valueOf(id), new EntityList.EntityEggInfo(id, backgroundColor, foregroundColor));
     }
 }
