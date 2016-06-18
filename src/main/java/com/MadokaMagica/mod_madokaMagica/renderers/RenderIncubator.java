@@ -22,7 +22,7 @@ public class RenderIncubator extends RenderLiving {
 	}
 
 	protected void preRenderCallbackIncubator(EntityIncubator entity, float f){
-
+		super.preRenderCallback(entity,f);
 	}
 
 	protected void setEntityTexture(){
