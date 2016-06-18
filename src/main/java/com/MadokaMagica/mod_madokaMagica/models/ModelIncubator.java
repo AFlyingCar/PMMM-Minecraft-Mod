@@ -147,6 +147,7 @@ public class ModelIncubator extends ModelBase {
         tail1.render(size);
         tail2.render(size);
         tail3.render(size);
+        // super.render(entity,time,swingsuppress,tick,headAngleY,headAngleX,size);
     }
 
     @Override
@@ -155,49 +156,49 @@ public class ModelIncubator extends ModelBase {
         cycleIndex = (int)((getDistanceMovedTotal(entity)*CYCLES_PER_BLOCK)%animationCycle.length);
 
         // For each frame of the animation, set the rotation of each bodypart 
-        head.rotateAngleX = animationCycle[cycleIndex][0][1];
-        head.rotateAngleY = animationCycle[cycleIndex][0][2];
-        head.rotateAngleZ = animationCycle[cycleIndex][0][3];
+        head.rotateAngleX = animationCycle[cycleIndex][0][0];
+        head.rotateAngleY = animationCycle[cycleIndex][0][1];
+        head.rotateAngleZ = animationCycle[cycleIndex][0][2];
 
-        earL.rotateAngleX = animationCycle[cycleIndex][0][1];
-        earL.rotateAngleY = animationCycle[cycleIndex][0][2];
-        earL.rotateAngleZ = animationCycle[cycleIndex][0][3];
+        earL.rotateAngleX = animationCycle[cycleIndex][0][0];
+        earL.rotateAngleY = animationCycle[cycleIndex][0][1];
+        earL.rotateAngleZ = animationCycle[cycleIndex][0][2];
 
-        earR.rotateAngleX = animationCycle[cycleIndex][0][1];
-        earR.rotateAngleY = animationCycle[cycleIndex][0][2];
-        earR.rotateAngleZ = animationCycle[cycleIndex][0][3];
+        earR.rotateAngleX = animationCycle[cycleIndex][0][0];
+        earR.rotateAngleY = animationCycle[cycleIndex][0][1];
+        earR.rotateAngleZ = animationCycle[cycleIndex][0][2];
 
-        body.rotateAngleX = animationCycle[cycleIndex][0][1];
-        body.rotateAngleY = animationCycle[cycleIndex][0][2];
-        body.rotateAngleZ = animationCycle[cycleIndex][0][3];
+        body.rotateAngleX = animationCycle[cycleIndex][0][0];
+        body.rotateAngleY = animationCycle[cycleIndex][0][1];
+        body.rotateAngleZ = animationCycle[cycleIndex][0][2];
 
-        legLB.rotateAngleX = animationCycle[cycleIndex][0][1];
-        legLB.rotateAngleY = animationCycle[cycleIndex][0][2];
-        legLB.rotateAngleZ = animationCycle[cycleIndex][0][3];
+        legLB.rotateAngleX = animationCycle[cycleIndex][0][0];
+        legLB.rotateAngleY = animationCycle[cycleIndex][0][1];
+        legLB.rotateAngleZ = animationCycle[cycleIndex][0][2];
 
-        legLF.rotateAngleX = animationCycle[cycleIndex][0][1];
-        legLF.rotateAngleY = animationCycle[cycleIndex][0][2];
-        legLF.rotateAngleZ = animationCycle[cycleIndex][0][3];
+        legLF.rotateAngleX = animationCycle[cycleIndex][0][0];
+        legLF.rotateAngleY = animationCycle[cycleIndex][0][1];
+        legLF.rotateAngleZ = animationCycle[cycleIndex][0][2];
 
-        legRB.rotateAngleX = animationCycle[cycleIndex][0][1];
-        legRB.rotateAngleY = animationCycle[cycleIndex][0][2];
-        legRB.rotateAngleZ = animationCycle[cycleIndex][0][3];
+        legRB.rotateAngleX = animationCycle[cycleIndex][0][0];
+        legRB.rotateAngleY = animationCycle[cycleIndex][0][1];
+        legRB.rotateAngleZ = animationCycle[cycleIndex][0][2];
 
-        legRF.rotateAngleX = animationCycle[cycleIndex][0][1];
-        legRF.rotateAngleY = animationCycle[cycleIndex][0][2];
-        legRF.rotateAngleZ = animationCycle[cycleIndex][0][3];
+        legRF.rotateAngleX = animationCycle[cycleIndex][0][0];
+        legRF.rotateAngleY = animationCycle[cycleIndex][0][1];
+        legRF.rotateAngleZ = animationCycle[cycleIndex][0][2];
 
-        tail1.rotateAngleX = animationCycle[cycleIndex][0][1];
-        tail1.rotateAngleY = animationCycle[cycleIndex][0][2];
-        tail1.rotateAngleZ = animationCycle[cycleIndex][0][3];
+        tail1.rotateAngleX = animationCycle[cycleIndex][0][0];
+        tail1.rotateAngleY = animationCycle[cycleIndex][0][1];
+        tail1.rotateAngleZ = animationCycle[cycleIndex][0][2];
 
-        tail2.rotateAngleX = animationCycle[cycleIndex][0][1];
-        tail2.rotateAngleY = animationCycle[cycleIndex][0][2];
-        tail2.rotateAngleZ = animationCycle[cycleIndex][0][3];
+        tail2.rotateAngleX = animationCycle[cycleIndex][0][0];
+        tail2.rotateAngleY = animationCycle[cycleIndex][0][1];
+        tail2.rotateAngleZ = animationCycle[cycleIndex][0][2];
 
-        tail3.rotateAngleX = animationCycle[cycleIndex][0][1];
-        tail3.rotateAngleY = animationCycle[cycleIndex][0][2];
-        tail3.rotateAngleZ = animationCycle[cycleIndex][0][3];
+        tail3.rotateAngleX = animationCycle[cycleIndex][0][0];
+        tail3.rotateAngleY = animationCycle[cycleIndex][0][1];
+        tail3.rotateAngleZ = animationCycle[cycleIndex][0][2];
     }
 
     protected void updateDistanceMovedTotal(Entity entity){
