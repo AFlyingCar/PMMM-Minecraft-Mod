@@ -7,12 +7,17 @@ import cpw.mods.fml.client.registry.RenderingRegistry;
 
 import com.MadokaMagica.mod_madokaMagica.proxies.CommonProxy;
 import com.MadokaMagica.mod_madokaMagica.models.ModelPMWitchMinion;
+import com.MadokaMagica.mod_madokaMagica.models.ModelIncubator;
 import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitchMinion;
+import com.MadokaMagica.mod_madokaMagica.entities.EntityIncubator;
 import com.MadokaMagica.mod_madokaMagica.renderers.RenderPMWitchMinionHolder;
+import com.MadokaMagica.mod_madokaMagica.renderers.RenderIncubator;
 
 public class ClientProxy extends CommonProxy {
 	public void preinit(FMLPreInitializationEvent event){
-		RenderingRegistry.registerEntityRenderingHandler(EntityPMWitchMinion.class,RenderPMWitchMinionHolder.getInstance());
+		//RenderingRegistry.registerEntityRenderingHandler(EntityPMWitchMinion.class,RenderPMWitchMinionHolder.getInstance());
+		System.out.println("ClientProxy.preinit(FMLPreInitializationEvent)");
+		RenderingRegistry.registerEntityRenderingHandler(EntityIncubator.class,new RenderIncubator(new ModelIncubator(),0.5F));
 
 		super.preinit(event);
 	}
