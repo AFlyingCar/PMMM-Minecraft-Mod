@@ -8,20 +8,20 @@ import com.MadokaMagica.mod_madokaMagica.trackers.PMDataTracker;
 import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitchLabrynthEntrance;
 
 public class EntityPMWitch extends EntityMob{
-	public PMDataTracker tracker;
-	public EntityPMWitchLabrynthEntrance entrance;
-	public EntityPMWitch(PMDataTracker pd){
-		super(pd.entity.worldObj);
-	}
+    public PMDataTracker tracker;
+    public EntityPMWitchLabrynthEntrance entrance;
+    public EntityPMWitch(PMDataTracker pd){
+        super(pd.entity.worldObj);
+    }
 
-	public EntityPMWitch(World world){
-		super(world);
-	}
+    public EntityPMWitch(World world){
+        super(world);
+    }
 
-	@Override
-	public void readEntityFromNBT(NBTTagCompound base){
-		// TODO: Load a tracker based on this entity's getPersistentID()
-		super.readEntityFromNBT(base);
-	}
+    @Override
+    public void readEntityFromNBT(NBTTagCompound base){
+        // TODO: Load a tracker based on this entity's getPersistentID()
+        super.readEntityFromNBT(base);
+    }
 }
 
