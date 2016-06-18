@@ -112,7 +112,7 @@ public class MadokaMagicaMod {
         // EntityRegistry.registerGlobalEntityID(EntityPMWitchMinion.class,"PMWitchMinion",entityID++,0x3F5505,0x4E6414);
         // EntityRegistry.registerGlobalEntityID(EntityIncubator.class,"Incubator",entityID++,0xFFFFFF,0xFF0000);
 
-        registerEntityWithEgg(EntityIncubator.class,"Incubator",entityID++,this,80,3,false,0xFFFFFF,0xFF0000);
+        registerEntityWithEgg(EntityIncubator.class,"Incubator",entityID++,80,3,false,0xFFFFFF,0xFF0000);
 
         // Overwrite EntityRenderer so that activateNextShader does nothing if PMEffects is still active
         // TODO: add some code that checks a config file for if this should even be done.
