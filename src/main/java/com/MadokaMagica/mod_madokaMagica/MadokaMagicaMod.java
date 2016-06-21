@@ -37,6 +37,8 @@ import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
+import com.MadokaMagica.mod_madokaMagica.MadokaMagicaConfig;
+
 import com.MadokaMagica.mod_madokaMagica.commands.CommandStartWitchTransformation;
 import com.MadokaMagica.mod_madokaMagica.commands.CommandStartPuellaMagiTransformation;
 import com.MadokaMagica.mod_madokaMagica.commands.CommandDisplayInformation;
@@ -51,12 +53,14 @@ import com.MadokaMagica.mod_madokaMagica.proxies.CommonProxy;
 import com.MadokaMagica.mod_madokaMagica.items.ItemSoulGem;
 import com.MadokaMagica.mod_madokaMagica.items.ItemGriefSeed;
 import com.MadokaMagica.mod_madokaMagica.items.placers.IncubatorMonsterPlacer;
+import com.MadokaMagica.mod_madokaMagica.items.placers.LabrynthEntrancePlacer;
 import com.MadokaMagica.mod_madokaMagica.trackers.PMDataTracker;
 import com.MadokaMagica.mod_madokaMagica.handlers.PMEventHandler;
 import com.MadokaMagica.mod_madokaMagica.effects.PMEffects;
 
 import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitchMinion;
 import com.MadokaMagica.mod_madokaMagica.entities.EntityIncubator;
+import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitchLabrynthEntrance;
 
 @Mod(modid=MadokaMagicaMod.MODID, version=MadokaMagicaMod.VERSION)
 public class MadokaMagicaMod {
@@ -77,12 +81,15 @@ public class MadokaMagicaMod {
     public static Item itemSoulGem;
     public static Item itemGriefSeed;
     public static Item incubatorSpawnEgg;
-
+    public static Item labrynthEntranceSpawnEgg;
     @SidedProxy(clientSide="com.MadokaMagica.mod_madokaMagica.proxies.ClientProxy",serverSide="com.MadokaMagica.mod_madokaMagica.proxies.ServerProxy")
     public static CommonProxy proxy;
 
     @EventHandler
     public void onPreInitialization(FMLPreInitializationEvent event){
+        // Load configuration
+        MadokaMagicaConfig.loadConfig(event);
+
         proxy.preinit(event);
     }
 
@@ -117,6 +124,10 @@ public class MadokaMagicaMod {
         registerEntityWithEgg(EntityIncubator.class,"Incubator",++entityID,80,3,false,0xFFFFFF,0xFF0000);
         incubatorSpawnEgg = new IncubatorMonsterPlacer("Incubator",0xFFFFFF,0xFF0000).setUnlocalizedName("spawn egg "+"Incubator".toLowerCase()).setTextureName("madokamagica:spawn egg");
         GameRegistry.registerItem(incubatorSpawnEgg,"spawnEgg"+"Incubator");
+
+        registerEntityWithEgg(EntityPMWitchLabrynthEntrance.class,"PMWitchLabrynthEntrance",++entityID,80,3,false,0xFFFFFF,0xFF0000);
+        labrynthEntranceSpawnEgg = new LabrynthEntrancePlacer("PMWitchLabrynthEntrance",0x000000,0x000000).setUnlocalizedName("spawn egg "+"Labrynth Entrance".toLowerCase()).setTextureName("madokamagica:spawn egg");
+        GameRegistry.registerItem(labrynthEntranceSpawnEgg,"spawnEgg"+"LabrynthEntrance");
 
         // Overwrite EntityRenderer so that activateNextShader does nothing if PMEffects is still active
         // TODO: add some code that checks a config file for if this should even be done.
