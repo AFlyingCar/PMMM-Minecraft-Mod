@@ -7,9 +7,9 @@ import net.minecraft.entity.ai.RandomPositionGenerator;
 import net.minecraft.util.Vec3;
 
 public class EntityAIWanderWithChunkBias extends EntityAIBase {
-	private double speed;
-	private EntityCreature entity;
-	private ChunkCoordinates chunk;
+	protected double speed;
+	protected EntityCreature entity;
+	protected ChunkCoordinates chunk;
 
 	private double x;
 	private double y;

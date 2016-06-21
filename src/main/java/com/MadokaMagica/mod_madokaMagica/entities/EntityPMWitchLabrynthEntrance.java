@@ -24,6 +24,7 @@ import com.MadokaMagica.mod_madokaMagica.managers.LabrynthManager;
 import com.MadokaMagica.mod_madokaMagica.trackers.PMDataTracker;
 import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitch;
 import com.MadokaMagica.mod_madokaMagica.entities.ai.EntityAIWanderWithChunkBias;
+import com.MadokaMagica.mod_madokaMagica.entities.ai.EntityAIWanderWithVillageBias;
 
 public class EntityPMWitchLabrynthEntrance extends EntityCreature{
     private Random rand;
@@ -43,6 +44,7 @@ public class EntityPMWitchLabrynthEntrance extends EntityCreature{
 
     private void setupAITasks(){
         this.tasks.taskEntries.clear();
+        /*
         this.tasks.addTask(0,new EntityAIWanderWithChunkBias(this,
             this.worldObj.villageCollectionObj.findNearestVillage(this.chunkCoordX,
                 this.chunkCoordY,
@@ -50,6 +52,8 @@ public class EntityPMWitchLabrynthEntrance extends EntityCreature{
                 this.dimension
             ).getCenter(), // We are just trying to get the chunk coordinates of the village, not the village itself. So who cares if we are there yet or not.
             0.05F)); // I'm just assuming that this is a good speed. Don't quote me on it though...
+        */
+        this.tasks.addTask(0,new EntityAIWanderWithVillageBias(this,0.05F));
     }
 
     @Override
