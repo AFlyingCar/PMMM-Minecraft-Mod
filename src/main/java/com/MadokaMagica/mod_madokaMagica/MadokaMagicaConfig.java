@@ -6,6 +6,7 @@ import net.minecraftforge.common.config.Configuration;
 
 public class MadokaMagicaConfig{
     public static boolean useDebugModels;
+    public static boolean enableCorruptionVisualEffects;
 
     public static void loadConfig(FMLPreInitializationEvent event){
         Configuration cfg = new Configuration(event.getSuggestedConfigurationFile());
@@ -14,6 +15,8 @@ public class MadokaMagicaConfig{
             cfg.load();
 
             useDebugModels = cfg.get("Debug","UseDebugModels",false).getBoolean(false);
+
+            enableCorruptionVisualEffects = cfg.get("Effects","EnableVisualEffects",false).getBoolean(false);
 
         }catch(Exception e){
             FMLLog.severe("OH GOD WHY?!\n");

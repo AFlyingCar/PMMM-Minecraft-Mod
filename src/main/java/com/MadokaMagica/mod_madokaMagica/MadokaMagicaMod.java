@@ -129,22 +129,23 @@ public class MadokaMagicaMod {
         labrynthEntranceSpawnEgg = new LabrynthEntrancePlacer("PMWitchLabrynthEntrance",0x000000,0x000000).setUnlocalizedName("spawn egg "+"Labrynth Entrance".toLowerCase()).setTextureName("madokamagica:spawn egg");
         GameRegistry.registerItem(labrynthEntranceSpawnEgg,"spawnEgg"+"LabrynthEntrance");
 
-        // Overwrite EntityRenderer so that activateNextShader does nothing if PMEffects is still active
-        // TODO: add some code that checks a config file for if this should even be done.
-        class OverriddenEntityRenderer extends EntityRenderer {
-            public OverriddenEntityRenderer(){
-                super(Minecraft.getMinecraft(),Minecraft.getMinecraft().getResourceManager());
+        if(MadokaMagicaConfig.enableCorruptionVisualEffects){
+            // Overwrite EntityRenderer so that activateNextShader does nothing if PMEffects is still active
+            class OverriddenEntityRenderer extends EntityRenderer {
+                public OverriddenEntityRenderer(){
+                    super(Minecraft.getMinecraft(),Minecraft.getMinecraft().getResourceManager());
+                }
+
+                @Override
+                public void activateNextShader(){
+                    if(PMEffects.failureCount < PMEffects.MAXIMUM_FAILURE_COUNT) return;
+                    super.activateNextShader();
+                }
             }
 
-            @Override
-            public void activateNextShader(){
-                if(PMEffects.failureCount < PMEffects.MAXIMUM_FAILURE_COUNT) return;
-                super.activateNextShader();
-            }
+            Minecraft.getMinecraft().entityRenderer = new OverriddenEntityRenderer();
+            ((SimpleReloadableResourceManager)Minecraft.getMinecraft().getResourceManager()).registerReloadListener(Minecraft.getMinecraft().entityRenderer);
         }
-
-        Minecraft.getMinecraft().entityRenderer = new OverriddenEntityRenderer();
-        ((SimpleReloadableResourceManager)Minecraft.getMinecraft().getResourceManager()).registerReloadListener(Minecraft.getMinecraft().entityRenderer);
     }
 
     @EventHandler
