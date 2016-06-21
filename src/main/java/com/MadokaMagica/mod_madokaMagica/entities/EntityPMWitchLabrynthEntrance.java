@@ -39,6 +39,8 @@ public class EntityPMWitchLabrynthEntrance extends EntityCreature{
     public EntityPMWitchLabrynthEntrance(World worldObj){
         super(worldObj);
 
+        rand = new Random();
+
         setupAITasks();
     }
 
@@ -59,6 +61,8 @@ public class EntityPMWitchLabrynthEntrance extends EntityCreature{
     @Override
     public void onEntityUpdate(){
         super.onEntityUpdate();
+
+        if(this.witch == null || this.linkedWorldObj == null) return; // We shouldn't do anything if the witch is null
 
         double chance = MIN_TELEPORT_CHANCE;
 
