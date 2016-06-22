@@ -12,6 +12,7 @@ import net.minecraftforge.client.event.RenderWorldEvent;
 import net.minecraftforge.client.event.sound.PlaySoundEvent17;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.event.entity.player.PlayerDestroyItemEvent;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.world.WorldEvent;
 
@@ -55,6 +56,14 @@ public class PMEventHandler{
         PMDataTracker tracker = new PMDataTracker(event.player);
         PlayerDataTrackerManager.getInstance().addDataTracker(tracker);
         tracker.loadTagData();
+    }
+
+    // If the soul gem becomes too damaged, then violently destroy it
+    @SubscribeEvent
+    public void onPlayerDestroyItem(PlayerDestroyItemEvent event){
+        if(event.original == null) return;
+        if(!(event.original.getItem() instanceof ItemSoulGem)) return;
+        ((ItemSoulGem)event.original.getItem()).destroySoulGem(event.original);
     }
 
     @SubscribeEvent
@@ -107,7 +116,8 @@ public class PMEventHandler{
         if(entity instanceof EntityPlayer){
             PMDataTracker pmdt = PlayerDataTrackerManager.getInstance().getTrackerByPlayer((EntityPlayer)entity);
             if(pmdt != null && pmdt.isTransformingIntoWitch()){
-                ItemSoulGem soulgem = ItemSoulGemManager.getInstance().getSoulGemByPlayer((EntityPlayer)entity);
+                // TODO: Fix this later (I can't be bothered to do it right now)
+                ItemSoulGem soulgem = null; //ItemSoulGemManager.getInstance().getPlayerForSoulGemStack((EntityPlayer)entity);
                 // Why the hell would soulgem even be null?
                 if(soulgem == null){
                     FMLLog.warning("Found null in itemSoulGemManager! This most likely means that the player is somehow turning into a witch without having a soulgem. Please consult a programmer.");
