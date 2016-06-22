@@ -54,8 +54,6 @@ import com.MadokaMagica.mod_madokaMagica.proxies.CommonProxy;
 
 import com.MadokaMagica.mod_madokaMagica.items.ItemSoulGem;
 import com.MadokaMagica.mod_madokaMagica.items.ItemGriefSeed;
-import com.MadokaMagica.mod_madokaMagica.items.placers.IncubatorMonsterPlacer;
-import com.MadokaMagica.mod_madokaMagica.items.placers.LabrynthEntrancePlacer;
 import com.MadokaMagica.mod_madokaMagica.trackers.PMDataTracker;
 import com.MadokaMagica.mod_madokaMagica.handlers.PMEventHandler;
 import com.MadokaMagica.mod_madokaMagica.effects.PMEffects;
