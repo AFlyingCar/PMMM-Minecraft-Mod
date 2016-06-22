@@ -19,22 +19,21 @@ import net.minecraft.nbt.NBTBase;
 import cpw.mods.fml.common.registry.GameRegistry;
 import net.minecraft.util.DamageSource;
 
+import com.MadokaMagica.mod_madokaMagica.MadokaMagicaMod;
+import com.MadokaMagica.mod_madokaMagica.MadokaMagicaConfig;
 import com.MadokaMagica.mod_madokaMagica.managers.PlayerDataTrackerManager;
 import com.MadokaMagica.mod_madokaMagica.managers.LabrynthManager;
 import com.MadokaMagica.mod_madokaMagica.trackers.PMDataTracker;
 import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitch;
 import com.MadokaMagica.mod_madokaMagica.entities.ai.EntityAIWanderWithChunkBias;
 import com.MadokaMagica.mod_madokaMagica.entities.ai.EntityAIWanderWithVillageBias;
+import com.MadokaMagica.mod_madokaMagica.entities.ai.EntityAIRandomTeleportPlayerOrVillager;
 
 public class EntityPMWitchLabrynthEntrance extends EntityCreature{
     private Random rand;
 
     public World linkedWorldObj; // TODO: Do we need this?
     public EntityPMWitch witch;
-
-    // All entities within 15 blocks have the possibility of being teleported
-    public static double MAX_TELEPORT_DISTANCE = 15.0;
-    public static double MIN_TELEPORT_CHANCE = 0.05; // 5%
 
     public EntityPMWitchLabrynthEntrance(World worldObj){
         super(worldObj);
@@ -56,51 +55,22 @@ public class EntityPMWitchLabrynthEntrance extends EntityCreature{
             0.05F)); // I'm just assuming that this is a good speed. Don't quote me on it though...
         */
         this.tasks.addTask(0,new EntityAIWanderWithVillageBias(this,0.05F));
+        this.tasks.addTask(0,new EntityAIRandomTeleportPlayerOrVillager(this));
     }
 
     @Override
     public void onEntityUpdate(){
         super.onEntityUpdate();
 
-        if(this.witch == null || this.linkedWorldObj == null) return; // We shouldn't do anything if the witch is null
-
-        double chance = MIN_TELEPORT_CHANCE;
-
-        // Get value
-        double val = rand.nextDouble();
-
-        // Don't even bother if the chance is less than what is possible
-        if(val > chance) return;
-
-        AxisAlignedBB boundingBox = AxisAlignedBB.getBoundingBox(this.posX-MAX_TELEPORT_DISTANCE,
-            this.posY-MAX_TELEPORT_DISTANCE,
-            this.posZ-MAX_TELEPORT_DISTANCE,
-            this.posX+MAX_TELEPORT_DISTANCE,
-            this.posY+MAX_TELEPORT_DISTANCE,
-            this.posZ+MAX_TELEPORT_DISTANCE);
-
-        // Get all nearby living entities
-        List entities = this.worldObj.getEntitiesWithinAABB(EntityLiving.class,boundingBox);
-
-        for(Object e : entities){
-            Entity entity = (EntityLiving)e;
-
-            // Only do anything if the entity is a player or villager. No monsters or animals
-            if(entity instanceof EntityPlayer){
-                // Basically, their potential as a percentage
-                PMDataTracker tracker = PlayerDataTrackerManager.getInstance().getTrackerByPlayer((EntityPlayer)entity);
-                chance += (double)(tracker.getPotential()/100F);
-                chance *= ((tracker.isPuellaMagi()) ? 0 : 1); // Puella Magi cannot be randomly sucked into a labrynth
-            }else if(entity instanceof EntityVillager){
-                // TODO: Maybe put this in an AI Task?
-                chance += (double)(rand.nextInt(20)/100.0); // Anywhere from a 5% chance, to a 25% chance
+        // If we don't have a witch or labrynth, then check if we should kill it or not
+        // If not, then we just won't do anything
+        if(this.witch == null || this.linkedWorldObj == null){
+            if(!MadokaMagicaConfig.killLabrynthEntranceWithoutWitchOrLabrynth){
+                return;
             }else{
-                continue;
+                setDead();
+                return;
             }
-
-            // Transport the entity if the chance is high enough
-            if(val < chance)
-                this.teleportEntity(entity);
         }
     }
 
