@@ -38,8 +38,8 @@ public class ItemGriefSeed extends ItemSoulGem{
             return stack;
         }
 
-        if(Helper.doesPlayerHaveItem(player,tracker.getSoulGem()))
-            tracker.getSoulGem().cleanse(this);
+        if(Helper.doesPlayerHaveItemStack(player,tracker.getSoulGem()))
+            ItemSoulGem.cleanse(tracker.getSoulGem(),stack);
 
         return stack;
     }

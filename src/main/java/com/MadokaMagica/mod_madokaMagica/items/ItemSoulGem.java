@@ -118,10 +118,20 @@ public class ItemSoulGem extends Item{
     }
 
     public void cleanse(ItemGriefSeed gs){
+        System.out.println("Calling Deprecated method ItemSoulGem().cleanse(ItemGriefSeed)\nPlease call static method ItemSoulGem.cleanse(ItemStack,ItemStack)");
         float subtract = ItemSoulGem.MAX_DESPAIR*0.1F; // 10% of MAX_DESPAIR
         if(subtract > despair) subtract = despair;
         gs.addDespair(subtract);
         despair -= subtract;
+    }
+
+    public static void cleanse(ItemStack soulgem,ItemStack griefseed){
+        float subtract = ItemSoulGem.MAX_DESPAIR*0.1F; // 10% of MAX_DESPAIR
+        float despair_sg = soulgem.getTagCompound().getFloat("SG_DESPAIR");
+        float despair_gs = griefseed.getTagCompound().getFloat("SG_DESPAIR");
+        if(subtract > despair_sg) subtract = despair_sg;
+        griefseed.getTagCompound().setFloat("SG_DESPAIR",despair_gs+subtract);
+        soulgem.getTagCompound().setFloat("SG_DESPAIR",despair_sg-subtract);
     }
 
     public void addDespair(float despair){
@@ -156,8 +166,12 @@ public class ItemSoulGem extends Item{
         super.onUpdate(stack,world,entity,par4,bool);
 
         float worldTime = player.worldObj.getTotalWorldTime();
-        if(worldTime % 23000 == 0)
-            despair += AMBIENT_DESPAIR;
+        if(worldTime % 23000 == 0){
+            despair += AMBIENT_DESPAIR; // This may no longer be needed
+            // Update the despair in the ItemStack
+            int nbtDespair = stack.getTagCompound().getInteger("SG_DESPAIR");
+            stack.getTagCompound().setFloat("SG_DESPAIR",nbtDespair+AMBIENT_DESPAIR);
+        }
 
         // TODO: Fix this random number thing
         if(this.canTransformIntoWitch() && (this.random.nextInt(100) == despair))
@@ -202,7 +216,7 @@ public class ItemSoulGem extends Item{
             this.setDespair(nbt.getInteger("SG_DESPAIR"));
         }else{
             nbt = new NBTTagCompound();
-            nbt.setInteger("SG_DESPAIR",0);
+            nbt.setFloat("SG_DESPAIR",0);
             stack.setTagCompound(nbt);
         }
 
