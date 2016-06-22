@@ -15,13 +15,13 @@ import cpw.mods.fml.relauncher.SideOnly;
 
 import com.MadokaMagica.mod_madokaMagica.factories.LabrynthGeneratorFactory;
 import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitch;
+import com.MadokaMagica.mod_madokaMagica.MadokaMagicaMod;
 
 public class LabrynthProvider extends WorldProvider{
     // The diameter of the labrynth
     public final static double MAX_LABRYNTH_WORLD_SIZE = 255.0; // TODO: Find better number than 255. Maybe generate a number?
     public final static double MIN_WITCH_DISTANCE = MAX_LABRYNTH_WORLD_SIZE/2.0;
 
-    private BiomeGenBase labrynthbiome;
     public boolean canSnow;
     public boolean canLightning;
     public double horizon;
@@ -30,13 +30,10 @@ public class LabrynthProvider extends WorldProvider{
     public IRenderHandler skyRenderer;
     public EntityPMWitch master;
 
-    public LabrynthProvider(BiomeGenBase lb,LabrynthGeneratorFactory lgf,EntityPMWitch owner){
-        this.labrynthbiome = lb;
+    public LabrynthProvider(){
         this.canSnow = false;
         this.hasNoSky = false;
         this.canLightning = false;
-        this.labrynthGeneratorFactory = lgf;
-        this.master = owner;
     }
 
     @Override
@@ -75,18 +72,13 @@ public class LabrynthProvider extends WorldProvider{
     @Override
     @SideOnly(Side.CLIENT)
     public String getSaveFolder(){
-        // Not sure how we are going to save this yet
+        // We do not save labrynths, as they are always changing (and because I'm a lazy POS, and don't want to try to save dynamic dimensions)
         return null;
     }
 
     @Override
-    public double getHorizon(){
-        return this.horizon;
-    }
-
-    @Override
     public BiomeGenBase getBiomeGenForCoords(int x, int z){
-        return this.labrynthbiome;
+        return MadokaMagicaMod.witchlabrynthbiome;
     }
 
     @Override
