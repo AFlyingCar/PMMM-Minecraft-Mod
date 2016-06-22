@@ -64,6 +64,7 @@ public class EntityPMWitchLabrynthEntrance extends EntityCreature{
 
         // If we don't have a witch or labrynth, then check if we should kill it or not
         // If not, then we just won't do anything
+        // TODO: Somehow add this check to EntityAIRandomTeleportPlayerOrVillager
         if(this.witch == null || this.linkedWorldObj == null){
             if(!MadokaMagicaConfig.killLabrynthEntranceWithoutWitchOrLabrynth){
                 return;
