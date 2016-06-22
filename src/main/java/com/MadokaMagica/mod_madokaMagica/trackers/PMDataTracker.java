@@ -36,7 +36,7 @@ public class PMDataTracker {
     public static final int MAX_POTENTIAL = 100;
     public static final int SWING_TOLERANCE = 3; // 3 seconds
     public Entity entity; // The entity being tracked
-    private ItemSoulGem playerSoulGem = null;
+    private ItemStack playerSoulGem = null;
 
     // Track the Player's likes and dislikes
     private Map<Integer,Float> like_entity_type = null; // A certain type of entity
@@ -102,7 +102,7 @@ public class PMDataTracker {
         loadTagData();
     }
 
-    public PMDataTracker(EntityPlayer nplayer, ItemSoulGem nplayerSG){
+    public PMDataTracker(EntityPlayer nplayer, ItemStack nplayerSG){
         this(nplayer);
         playerSoulGem = nplayerSG;
     }
@@ -241,7 +241,7 @@ public class PMDataTracker {
         tags.setFloat("PM_ENGINEERING_SCORE",getEngineeringScore()  );
         tags.setFloat("PM_ARCHITECT_SCORE",  getArchitectScore()    );
         tags.setFloat("PM_GREED_SCORE",      getGreedScore()        );
-        tags.setFloat("PM_PLAYER_STATE",     getPlayerState()       );
+        tags.setInteger("PM_PLAYER_STATE",   getPlayerState()       );
     }
 
     public void updateData(){
@@ -452,7 +452,7 @@ public class PMDataTracker {
         return this.entity;
     }
 
-    public ItemSoulGem getSoulGem(){
+    public ItemStack getSoulGem(){
         return playerSoulGem;
     }
 
@@ -582,8 +582,8 @@ public class PMDataTracker {
     }
 
     public float getCorruption(){
-        if(playerSoulGem != null)
-            return playerSoulGem.getDespair();
+        if(playerSoulGem != null && playerSoulGem.getTagCompound() != null)
+            return playerSoulGem.getTagCompound().getFloat("SG_DESPAIR");
         else
             return -1.0F;
     }
@@ -593,8 +593,8 @@ public class PMDataTracker {
     }
 
     public void setCorruption(float val){
-        if(playerSoulGem != null)
-            playerSoulGem.setDespair(val);
+        if(playerSoulGem != null && playerSoulGem.getTagCompound() != null)
+            playerSoulGem.getTagCompound().setFloat("SG_DESPAIR",val);
     }
 
     public void setArchitectScore(float val){
