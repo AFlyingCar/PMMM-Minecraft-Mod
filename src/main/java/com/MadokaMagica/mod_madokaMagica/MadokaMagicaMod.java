@@ -13,9 +13,11 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.Explosion;
 import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.client.event.sound.PlaySoundEvent17;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 
@@ -40,6 +42,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 
 import com.MadokaMagica.mod_madokaMagica.MadokaMagicaConfig;
 import com.MadokaMagica.mod_madokaMagica.MadokaMagicaItems;
+import com.MadokaMagica.mod_madokaMagica.MadokaMagicaBlocks;
 
 import com.MadokaMagica.mod_madokaMagica.commands.CommandStartWitchTransformation;
 import com.MadokaMagica.mod_madokaMagica.commands.CommandStartPuellaMagiTransformation;
@@ -52,15 +55,17 @@ import com.MadokaMagica.mod_madokaMagica.managers.ItemSoulGemManager;
 
 import com.MadokaMagica.mod_madokaMagica.proxies.CommonProxy;
 
-import com.MadokaMagica.mod_madokaMagica.items.ItemSoulGem;
-import com.MadokaMagica.mod_madokaMagica.items.ItemGriefSeed;
 import com.MadokaMagica.mod_madokaMagica.trackers.PMDataTracker;
 import com.MadokaMagica.mod_madokaMagica.handlers.PMEventHandler;
 import com.MadokaMagica.mod_madokaMagica.effects.PMEffects;
+import com.MadokaMagica.mod_madokaMagica.util.Helper;
 
 import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitchMinion;
 import com.MadokaMagica.mod_madokaMagica.entities.EntityIncubator;
 import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitchLabrynthEntrance;
+
+import com.MadokaMagica.mod_madokaMagica.world.biomes.BiomeWitchLabrynth;
+import com.MadokaMagica.mod_madokaMagica.world.LabrynthProvider;
 
 @Mod(modid=MadokaMagicaMod.MODID, version=MadokaMagicaMod.VERSION)
 public class MadokaMagicaMod {
@@ -82,6 +87,8 @@ public class MadokaMagicaMod {
             return MadokaMagicaItems.item_soulgem;
         }
     };
+
+    public static BiomeGenBase witchlabrynthbiome;
 
     private static PlayerDataTrackerManager playerDataTrackerManager;
     private static ItemSoulGemManager itemSoulGemManager;
@@ -107,6 +114,11 @@ public class MadokaMagicaMod {
         proxy.init(event);
 
         MadokaMagicaItems.loadItems();
+        MadokaMagicaBlocks.loadBlocks();
+
+        MadokaMagicaMod.witchlabrynthbiome = new BiomeWitchLabrynth(Helper.getNextUnusedBiomeID());
+        if(!DimensionManager.registerProviderType(MadokaMagicaConfig.labrynthProviderID,LabrynthProvider.class,false))
+            throw new IllegalStateException("There is a provider ID conflict between LabrynthProvider from MadokaMagica and another provider type. Check your configuration.");
 
         wtransform_music = PositionedSoundRecord.func_147673_a(new ResourceLocation(MadokaMagicaMod.MODID + ":transformmusic"));
 
