@@ -452,6 +452,10 @@ public class PMDataTracker {
         return this.entity;
     }
 
+    public ItemSoulGem getSoulGem(){
+        return playerSoulGem;
+    }
+
     public EntityPlayer getPlayer(){
         System.out.println("WARNING! Attempted to call deprecated method getPlayer()! Please use getEntity() instead.");
         return null;
@@ -697,6 +701,14 @@ public class PMDataTracker {
             return ((EntityPlayer)entity).getDisplayName();
         }else{
             return entity.getPersistentID().toString();
+        }
+    }
+
+    public String getEntityName(){
+        if(player_state <= 1){
+            return ((EntityPlayer)entity).getDisplayName();
+        }else{
+            return ((EntityLiving)entity).getCustomNameTag();
         }
     }
 }
