@@ -24,6 +24,7 @@ import net.minecraft.village.Village;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.MathHelper;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.oredict.OreDictionary;
 
@@ -310,4 +311,21 @@ public class Helper{
         tracker.randomize();
         return tracker;
     }
+
+    public static boolean doesPlayerHaveItemStack(EntityPlayer player, ItemStack stack){
+        return player.inventoryContainer.getInventory().contains(stack);
+    }
+
+    public static boolean doesPlayerHaveItem(EntityPlayer player, Item item){
+        for(Object obj : player.inventoryContainer.getInventory())
+            if(((ItemStack)obj).getItem() == item) return true;
+        return false;
+    }
+
+    public static boolean doesPlayerHaveItemType(EntityPlayer player, Class<? extends Item> type){
+        for(Object obj : player.inventoryContainer.getInventory())
+            if(type.isInstance(((ItemStack)obj).getItem())) return true;
+        return false;
+    }
 }
+
