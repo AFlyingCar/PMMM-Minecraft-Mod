@@ -1,17 +1,19 @@
 package com.MadokaMagica.mod_madokaMagica.util;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
+import java.util.List;
+import java.util.UUID;
+import java.util.Random;
 import java.util.Iterator;
+import java.util.ArrayList;
 import java.lang.Math;
 import java.nio.IntBuffer;
 import java.nio.ByteBuffer;
-import java.util.UUID;
 
 import org.lwjgl.opengl.GL11;
 
 import net.minecraft.world.World;
+import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.MinecraftServer;
@@ -26,6 +28,7 @@ import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.MathHelper;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.block.Block;
 import net.minecraftforge.oredict.OreDictionary;
 
 import com.MadokaMagica.mod_madokaMagica.trackers.PMDataTracker;
@@ -326,6 +329,45 @@ public class Helper{
         for(Object obj : player.inventoryContainer.getInventory())
             if(type.isInstance(((ItemStack)obj).getItem())) return true;
         return false;
+    }
+
+    public static int getNextUnusedBiomeID(){
+        BiomeGenBase[] biomes = BiomeGenBase.getBiomeGenArray();
+        for(int i=0;i<biomes.length;i++)
+            if(biomes[i] == null)
+                return i;
+        System.out.println("Warning! Reached end of biomeList; No more biome IDs available! Everybody panic!");
+        return -1; // If there are no more biome IDs left available
+    }
+
+    public static int[] getRandomBlockWithinAABB(AxisAlignedBB box,World world,Random rand){
+        int randX = (int)((rand.nextDouble()*(box.maxX-box.minX))+box.minX);
+        int randY = (int)((rand.nextDouble()*(box.maxY-box.minY))+box.minY);
+        int randZ = (int)((rand.nextDouble()*(box.maxZ-box.minZ))+box.minZ);
+
+        return new int[]{randX,randY,randZ};
+    }
+
+    public static int[] getRandomBlockWithinAABBOfType(AxisAlignedBB box, World world, Random rand, Block block){
+        Block b = null;
+        int[] point;
+        int counter=0;
+        int maxTryRate = (int)((box.maxX-box.minX)*
+                               (box.maxY-box.minY)*
+                               (box.maxZ-box.minZ)
+                              );
+        
+        while(b == null && counter < maxTryRate){
+            point = getRandomBlockWithinAABB(box,world,rand);
+            if(world.getBlock(point[0],point[1],point[2]) == block)
+                return point;
+        }
+        return null;
+    }
+
+    public static boolean getPercentageChance(double chance, Random rand){
+        double num = rand.nextDouble()*100;
+        return num < chance;
     }
 }
 
