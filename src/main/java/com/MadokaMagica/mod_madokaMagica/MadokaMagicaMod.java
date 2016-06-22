@@ -2,6 +2,7 @@ package com.MadokaMagica.mod_madokaMagica;
 
 import java.util.ArrayList;
 
+import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.ISound;
@@ -69,6 +70,19 @@ public class MadokaMagicaMod {
 
     @Instance
     public static MadokaMagicaMod instance;
+
+    public static final CreativeTabs PMMMCreativeTab = new CreativeTabs("madokamagica"){
+        @Override
+        @SideOnly(Side.CLIENT)
+        public String getTranslatedTabLabel(){
+            return "Madoka Magica";
+        }
+
+        @Override
+        public Item getTabIconItem(){
+            return MadokaMagicaMod.itemSoulGem;
+        }
+    };
 
     private static PlayerDataTrackerManager playerDataTrackerManager;
     private static ItemSoulGemManager itemSoulGemManager;
