@@ -39,6 +39,7 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
 import com.MadokaMagica.mod_madokaMagica.MadokaMagicaConfig;
+import com.MadokaMagica.mod_madokaMagica.MadokaMagicaItems;
 
 import com.MadokaMagica.mod_madokaMagica.commands.CommandStartWitchTransformation;
 import com.MadokaMagica.mod_madokaMagica.commands.CommandStartPuellaMagiTransformation;
@@ -80,7 +81,7 @@ public class MadokaMagicaMod {
 
         @Override
         public Item getTabIconItem(){
-            return MadokaMagicaMod.itemSoulGem;
+            return MadokaMagicaItems.item_soulgem;
         }
     };
 
@@ -92,10 +93,6 @@ public class MadokaMagicaMod {
 
     public static int entityID=348;
 
-    public static Item itemSoulGem;
-    public static Item itemGriefSeed;
-    public static Item incubatorSpawnEgg;
-    public static Item labrynthEntranceSpawnEgg;
     @SidedProxy(clientSide="com.MadokaMagica.mod_madokaMagica.proxies.ClientProxy",serverSide="com.MadokaMagica.mod_madokaMagica.proxies.ServerProxy")
     public static CommonProxy proxy;
 
@@ -111,15 +108,15 @@ public class MadokaMagicaMod {
     public void onInitialization(FMLInitializationEvent event){
         proxy.init(event);
 
+        MadokaMagicaItems.loadItems();
+
         wtransform_music = PositionedSoundRecord.func_147673_a(new ResourceLocation(MadokaMagicaMod.MODID + ":transformmusic"));
-        itemSoulGem = (new ItemSoulGem()).setUnlocalizedName("itemSoulGem");
-        itemGriefSeed = (new ItemGriefSeed()).setUnlocalizedName("itemGriefSeed");
 
         playerDataTrackerManager = PlayerDataTrackerManager.getInstance();
         itemSoulGemManager = ItemSoulGemManager.getInstance();
 
-        GameRegistry.registerItem(itemSoulGem,"Soul Gem");
-        GameRegistry.registerItem(itemGriefSeed,"Grief Seed");
+        GameRegistry.registerItem(MadokaMagicaItems.item_soulgem,"Soul Gem");
+        GameRegistry.registerItem(MadokaMagicaItems.item_griefseed,"Grief Seed");
 
         FMLCommonHandler.instance().bus().register(new PMEventHandler());
         MinecraftForge.EVENT_BUS.register(new PMEventHandler());
@@ -136,12 +133,10 @@ public class MadokaMagicaMod {
         // EntityRegistry.registerGlobalEntityID(EntityIncubator.class,"Incubator",entityID++,0xFFFFFF,0xFF0000);
 
         registerEntityWithEgg(EntityIncubator.class,"Incubator",++entityID,80,3,false,0xFFFFFF,0xFF0000);
-        incubatorSpawnEgg = new IncubatorMonsterPlacer("Incubator",0xFFFFFF,0xFF0000).setUnlocalizedName("spawn egg "+"Incubator".toLowerCase()).setTextureName("madokamagica:spawn egg");
-        GameRegistry.registerItem(incubatorSpawnEgg,"spawnEgg"+"Incubator");
+        GameRegistry.registerItem(MadokaMagicaItems.item_incubatormonsterplacer,"spawnEgg"+"Incubator");
 
         registerEntityWithEgg(EntityPMWitchLabrynthEntrance.class,"PMWitchLabrynthEntrance",++entityID,80,3,false,0xFFFFFF,0xFF0000);
-        labrynthEntranceSpawnEgg = new LabrynthEntrancePlacer("PMWitchLabrynthEntrance",0x000000,0x000000).setUnlocalizedName("spawn egg "+"Labrynth Entrance".toLowerCase()).setTextureName("madokamagica:spawn egg");
-        GameRegistry.registerItem(labrynthEntranceSpawnEgg,"spawnEgg"+"LabrynthEntrance");
+        GameRegistry.registerItem(MadokaMagicaItems.item_labrynthentranceplacer,"spawnEgg"+"LabrynthEntrance");
 
         if(MadokaMagicaConfig.enableCorruptionVisualEffects){
             // Overwrite EntityRenderer so that activateNextShader does nothing if PMEffects is still active
