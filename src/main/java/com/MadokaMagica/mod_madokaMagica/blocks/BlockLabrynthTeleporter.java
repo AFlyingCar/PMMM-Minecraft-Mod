@@ -13,6 +13,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.Entity;
@@ -20,6 +21,10 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.passive.EntityVillager;
 
 import com.MadokaMagica.mod_madokaMagica.MadokaMagicaConfig;
+import com.MadokaMagica.mod_madokaMagica.managers.LabrynthManager;
+import com.MadokaMagica.mod_madokaMagica.managers.PlayerDataTrackerManager;
+import com.MadokaMagica.mod_madokaMagica.trackers.PMDataTracker;
+import com.MadokaMagica.mod_madokaMagica.items.ItemSoulGem;
 
 // Basically it is an invisible block that teleports any player or villager touching it
 public class BlockLabrynthTeleporter extends BlockContainer { 
@@ -30,19 +35,26 @@ public class BlockLabrynthTeleporter extends BlockContainer {
     public class TileEntityLabrynthTeleporter extends TileEntity{
         public int decayCounter = 0; // Counter until the time of decay
         public boolean placedByPlayer;
+        public boolean stabilized;
+        public World linked;
 
         public TileEntityLabrynthTeleporter(World world,boolean placedByPlayer){
             this.worldObj = world;
             this.placedByPlayer = placedByPlayer;
+            this.stabilized = false;
         }
 
         @Override
         public void updateEntity(){
-            if(placedByPlayer) return;
+            if(placedByPlayer || stabilized) return;
 
             decayCounter++;
             if(decayCounter >= MAX_DECAY_WAIT_TIME)
                 this.worldObj.setBlockToAir(this.xCoord,this.yCoord,this.zCoord); 
+        }
+
+        public void setLink(World linked){
+            this.linked = linked;
         }
     }
 
@@ -54,20 +66,45 @@ public class BlockLabrynthTeleporter extends BlockContainer {
 
 
     @Override
-    public TileEntity createNewTileEntity(World world,int par2){
+    public TileEntity createNewTileEntity(World world,int metadata){
         TileEntity e = new TileEntityLabrynthTeleporter(world,this.wasPlacedByPlayer);
+        ((TileEntityLabrynthTeleporter)e).setLink(LabrynthManager.getInstance().retrieveEntrance(metadata).linkedWorldObj);
         wasPlacedByPlayer = false;
         return e;
     }
 
     @Override
     public void onBlockAdded(World world, int x, int y, int z){
-        if(wasPlacedByPlayer) return;
-
         // This block can only exist in the Overworld and in Labrynths (the exit)
-        if(world.provider.dimensionId != 0 || world.provider.dimensionId != MadokaMagicaConfig.labrynthDimensionID)
+        if((world.provider.dimensionId != 0 || world.provider.dimensionId != MadokaMagicaConfig.labrynthDimensionID) && !wasPlacedByPlayer){
             world.setBlockToAir(x,y,z);
+            return;
+        }
 
+        // Create the tile entity
+        world.setTileEntity(x,y,z,this.createNewTileEntity(world,world.getBlockMetadata(x,y,z)));
+
+        // Stabilize it if it was placed by a player
+        if(wasPlacedByPlayer){
+            stabilizeEntrance(world,x,y,z);
+        }
+
+    }
+
+    @Override
+    public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer player, int side, float hitX, float hitY, float hitZ){
+        PMDataTracker tracker = PlayerDataTrackerManager.getInstance().getTrackerByPlayer(player);
+        if(tracker != null && tracker.isPuellaMagi()){
+            ItemStack current_item = player.inventory.getCurrentItem();
+            if(current_item != null && current_item.getItem() instanceof ItemSoulGem){
+                // TODO: Do something which shows a visual effect of an entrance opening
+                // Also allow the player to travel through it
+                // Stabilize the entrance
+                this.stabilizeEntrance(world,x,y,z);
+                System.out.println("Player meets all the requirements to open entrance, but this hasn't been implemented yet!");
+            }
+        }
+        return false;
     }
 
     @Override
@@ -101,12 +138,12 @@ public class BlockLabrynthTeleporter extends BlockContainer {
     @SideOnly(Side.CLIENT)
     public int getRenderBlockPass(){
         // Alpha block
-        return 1;
+        return MadokaMagicaConfig.useDebugModels ? 0 : 1;
     }
 
     @Override
     public boolean renderAsNormalBlock(){
-        return false;
+        return !MadokaMagicaConfig.useDebugModels;
     }
 
     @Override
@@ -116,7 +153,7 @@ public class BlockLabrynthTeleporter extends BlockContainer {
 
     @Override
     public boolean isOpaqueCube(){
-        return false;
+        return !MadokaMagicaConfig.useDebugModels;
     }
 
     @Override
@@ -135,16 +172,30 @@ public class BlockLabrynthTeleporter extends BlockContainer {
     @Override
     @SideOnly(Side.CLIENT)
     public boolean shouldSideBeRendered(IBlockAccess iba, int x, int y, int z, int side){
-        return false;
+        if(!MadokaMagicaConfig.useDebugModels)
+            return false;
+        else
+            return super.shouldSideBeRendered(iba,x,y,z,side);
     }
 
     @Override
     public MapColor getMapColor(int i){
-        return MapColor.airColor;
+        if(MadokaMagicaConfig.useDebugModels)
+            return MapColor.airColor;
+        else
+            return MapColor.pinkColor; // So that is easily visible
     }
 
     public int getToDimension(World world){
         return world.provider.dimensionId == 0 ? MadokaMagicaConfig.labrynthDimensionID : 0;
+    }
+
+    public void stabilizeEntrance(World world, int x, int y, int z){
+        TileEntity te = world.getTileEntity(x,y,z);
+        if(te instanceof TileEntityLabrynthTeleporter){
+            TileEntityLabrynthTeleporter telt = (TileEntityLabrynthTeleporter)te;
+            telt.stabilized = true;
+        }
     }
 }
 
