@@ -15,6 +15,8 @@ import net.minecraft.init.Blocks;
 
 import com.MadokaMagica.mod_madokaMagica.util.Helper;
 import com.MadokaMagica.mod_madokaMagica.MadokaMagicaBlocks;
+import com.MadokaMagica.mod_madokaMagica.managers.LabrynthManager;
+import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitchLabrynthEntrance;
 
 public class EntityAIRandomTeleportPlayerOrVillager extends EntityAIBase {
     // All entities within 15 blocks have the possibility of being teleported
@@ -61,7 +63,9 @@ public class EntityAIRandomTeleportPlayerOrVillager extends EntityAIBase {
             if(Helper.getPercentageChance(MIN_TELEPORT_CHANCE,new Random())){
                 int[] point = Helper.getRandomBlockWithinAABBOfType(bbox,entity.worldObj,new Random(),Blocks.air);
                 if(point != null){
-                    entity.worldObj.setBlock(point[0],point[1],point[2],MadokaMagicaBlocks.labrynthTeleporter,0,1|2);
+                    // Do this so that we can properly set the entrance link in the TileEntity
+                    int id = LabrynthManager.getInstance().storeLabrynthEntranceToRetrieveLater((EntityPMWitchLabrynthEntrance)this.entity);
+                    entity.worldObj.setBlock(point[0],point[1],point[2],MadokaMagicaBlocks.labrynthTeleporter,id,1|2);
                     return false;
                 }
             }
