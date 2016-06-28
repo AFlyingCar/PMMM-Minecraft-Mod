@@ -15,6 +15,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 
 import com.MadokaMagica.mod_madokaMagica.factories.LabrynthGeneratorFactory;
 import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitch;
+import com.MadokaMagica.mod_madokaMagica.trackers.PMDataTracker;
 import com.MadokaMagica.mod_madokaMagica.MadokaMagicaMod;
 
 public class LabrynthProvider extends WorldProvider{
@@ -28,7 +29,8 @@ public class LabrynthProvider extends WorldProvider{
     public String witchName;
     public LabrynthGeneratorFactory labrynthGeneratorFactory;
     public IRenderHandler skyRenderer;
-    public EntityPMWitch master;
+    public EntityPMWitch owner;
+    public PMDataTracker tracker;
 
     public LabrynthProvider(){
         this.canSnow = false;
@@ -83,7 +85,7 @@ public class LabrynthProvider extends WorldProvider{
 
     @Override
     public IChunkProvider createChunkGenerator(){
-        return this.labrynthGeneratorFactory.create(this);
+        return this.labrynthGeneratorFactory.create();
     }
 
     @Override
@@ -105,8 +107,8 @@ public class LabrynthProvider extends WorldProvider{
 
     @Override
     public ChunkCoordinates getRandomizedSpawnPoint(){
-        int x = MathHelper.getRandomIntegerInRange(this.worldObj.rand, (int)(this.master.posX+MIN_WITCH_DISTANCE), (int)(MAX_LABRYNTH_WORLD_SIZE));
-        int z = MathHelper.getRandomIntegerInRange(this.worldObj.rand, (int)(this.master.posZ+MIN_WITCH_DISTANCE), (int)(MAX_LABRYNTH_WORLD_SIZE));
+        int x = MathHelper.getRandomIntegerInRange(this.worldObj.rand, (int)(this.owner.posX+MIN_WITCH_DISTANCE), (int)(MAX_LABRYNTH_WORLD_SIZE));
+        int z = MathHelper.getRandomIntegerInRange(this.worldObj.rand, (int)(this.owner.posZ+MIN_WITCH_DISTANCE), (int)(MAX_LABRYNTH_WORLD_SIZE));
         // TODO: Find a better Y value
         return new ChunkCoordinates(x, 25, z);
     }

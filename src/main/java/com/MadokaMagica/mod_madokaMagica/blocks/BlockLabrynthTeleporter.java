@@ -29,13 +29,17 @@ public class BlockLabrynthTeleporter extends BlockContainer {
 
     public class TileEntityLabrynthTeleporter extends TileEntity{
         public int decayCounter = 0; // Counter until the time of decay
+        public boolean placedByPlayer;
 
-        public TileEntityLabrynthTeleporter(World world){
+        public TileEntityLabrynthTeleporter(World world,boolean placedByPlayer){
             this.worldObj = world;
+            this.placedByPlayer = placedByPlayer;
         }
 
         @Override
         public void updateEntity(){
+            if(placedByPlayer) return;
+
             decayCounter++;
             if(decayCounter >= MAX_DECAY_WAIT_TIME)
                 this.worldObj.setBlockToAir(this.xCoord,this.yCoord,this.zCoord); 
@@ -51,7 +55,9 @@ public class BlockLabrynthTeleporter extends BlockContainer {
 
     @Override
     public TileEntity createNewTileEntity(World world,int par2){
-        return new TileEntityLabrynthTeleporter(world);
+        TileEntity e = new TileEntityLabrynthTeleporter(world,this.wasPlacedByPlayer);
+        wasPlacedByPlayer = false;
+        return e;
     }
 
     @Override
@@ -61,6 +67,7 @@ public class BlockLabrynthTeleporter extends BlockContainer {
         // This block can only exist in the Overworld and in Labrynths (the exit)
         if(world.provider.dimensionId != 0 || world.provider.dimensionId != MadokaMagicaConfig.labrynthDimensionID)
             world.setBlockToAir(x,y,z);
+
     }
 
     @Override
