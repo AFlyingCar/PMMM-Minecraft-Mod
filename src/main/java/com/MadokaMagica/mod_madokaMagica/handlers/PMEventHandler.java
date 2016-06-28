@@ -30,6 +30,7 @@ import com.MadokaMagica.mod_madokaMagica.managers.ItemSoulGemManager;
 import com.MadokaMagica.mod_madokaMagica.managers.PlayerDataTrackerManager;
 import com.MadokaMagica.mod_madokaMagica.events.MadokaMagicaCreateWitchEvent;
 import com.MadokaMagica.mod_madokaMagica.events.MadokaMagicaCreateModelEvent;
+import com.MadokaMagica.mod_madokaMagica.events.PreMadokaMagicaWitchDeathEvent;
 import com.MadokaMagica.mod_madokaMagica.events.MadokaMagicaWitchTransformationEvent;
 import com.MadokaMagica.mod_madokaMagica.events.MadokaMagicaPuellaMagiTransformationEvent;
 import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitchLabrynthEntrance;
@@ -129,6 +130,8 @@ public class PMEventHandler{
 
                 MinecraftForge.EVENT_BUS.post(new MadokaMagicaCreateWitchEvent(pmdt));
             }
+        }else if(entity instanceof EntityPMWitch){
+            MinecraftForge.EVENT_BUS.post(new PreMadokaMagicaWitchDeathEvent((EntityPMWitch)entity));
         }
         return true;
     }
