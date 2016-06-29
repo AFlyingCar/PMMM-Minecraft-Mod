@@ -3,6 +3,7 @@ package com.MadokaMagica.mod_madokaMagica.items;
 import java.util.Random;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import com.google.common.collect.Sets;
 
 import cpw.mods.fml.relauncher.Side;
@@ -29,6 +30,7 @@ import com.MadokaMagica.mod_madokaMagica.managers.ItemSoulGemManager;
 import com.MadokaMagica.mod_madokaMagica.events.MadokaMagicaWitchTransformationEvent;
 import com.MadokaMagica.mod_madokaMagica.items.ItemSoulGem;
 import com.MadokaMagica.mod_madokaMagica.items.ItemGriefSeed;
+import com.MadokaMagica.mod_madokaMagica.util.Helper;
 
 public class ItemSoulGem extends Item{
     public final static float MAX_DESPAIR = 100.0F;
@@ -89,12 +91,16 @@ public class ItemSoulGem extends Item{
         random = new Random();
     }
 
-    public float getDespair(){
-        return despair;
+    public float getDespair(ItemStack stack){
+        return stack.getTagCompound().getFloat("SG_DESPAIR");
     }
 
-    public void setDespair(float val){
-        despair = val;
+    public void setDespair(ItemStack stack, float val){
+        stack.getTagCompound().setFloat("SG_DESPAIR",val);
+    }
+    
+    public void addDespair(ItemStack stack, float val){
+        this.setDespair(stack,val+this.getDespair(stack));
     }
 
 /*
@@ -104,9 +110,15 @@ public class ItemSoulGem extends Item{
     }
 */
 
-    public void randomBuffPlayer(){
-        // some stuff
-        despair += ItemSoulGem.BUFF_PLAYER_DESPAIR;
+    // TODO: Make this method smarter
+    public void randomBuffPlayer(ItemStack stack){
+        this.addDespair(stack,ItemSoulGem.BUFF_PLAYER_DESPAIR);
+        switch(random.nextInt()*2){
+            case 0:
+                boostJump();
+            case 1:
+                boostRun();
+        }
     }
 
     protected void boostJump(){
@@ -134,18 +146,48 @@ public class ItemSoulGem extends Item{
         soulgem.getTagCompound().setFloat("SG_DESPAIR",despair_sg-subtract);
     }
 
+    @Deprecated
     public void addDespair(float despair){
         this.despair += despair;
     }
 
+    @Deprecated
     public boolean canTransformIntoWitch(){
         return despair >= ItemSoulGem.MAX_DESPAIR;
     }
 
+    public boolean canTransformIntoWitch(ItemStack stack){
+        return this.getDespair(stack) >= ItemSoulGem.MAX_DESPAIR;
+    }
+
+    @Deprecated
     protected void transformIntoWitch(){
         // MadokaMagicaEventManager.getInstance().startEvent(new MadokaMagicaWitchTransformationEvent(this.playerData));
         // MadokaMagicaWitchTransformationEvent.getInstance().activate(this.playerData);
         MinecraftForge.EVENT_BUS.post(new MadokaMagicaWitchTransformationEvent(this.playerData));
+    }
+
+    protected void transformIntoWitch(ItemStack stack){
+        MinecraftForge.EVENT_BUS.post(new MadokaMagicaWitchTransformationEvent(this.getPlayerDataTrackerFor(stack)));
+    }
+
+    // Returns a PMDataTracker for a player tied to ItemStack if one exists. Otherwise, returns null
+    public PMDataTracker getPlayerDataTrackerFor(ItemStack stack){
+        NBTTagCompound nbt = stack.getTagCompound();
+        if(nbt != null){
+            if(nbt.hasKey("PLAYER_UUID_MOST_SIG") && nbt.hasKey("PLAYER_UUID_LEAST_SIG")){
+                return PlayerDataTrackerManager.getInstance().getTrackerByPlayer(
+                        Helper.getPlayerOnServerByUUID(
+                            new UUID(
+                                nbt.getLong("PLAYER_UUID_MOST_SIG"),
+                                nbt.getLong("PLAYER_UUID_LEAST_SIG")
+                                )
+                            )
+                        );
+            }
+        }
+        System.out.println("No Player exists for this stack.");
+        return null;
     }
 
     // If the soul gem gets destroyed, kill the player
@@ -158,7 +200,7 @@ public class ItemSoulGem extends Item{
             stack.damageItem(stack.getMaxDamage()+1,this.player); // Add 1 as well as the max damage to ensure that it is broken
             this.player.setDead();
         }
-        System.out.println("Player is null!");
+        System.out.println("Player is null! Skipping.");
     }
 
     @Override
@@ -174,7 +216,7 @@ public class ItemSoulGem extends Item{
         }
 
         // TODO: Fix this random number thing
-        if(this.canTransformIntoWitch() && (this.random.nextInt(100) == despair))
+        if(this.canTransformIntoWitch(stack) && (this.random.nextInt(100) == despair))
             this.transformIntoWitch();
     }
 
@@ -212,13 +254,14 @@ public class ItemSoulGem extends Item{
     public void onCreated(ItemStack stack, World world, EntityPlayer player){
         super.onCreated(stack,world,player);
         NBTTagCompound nbt = stack.getTagCompound();
-        if(nbt != null){
-            this.setDespair(nbt.getInteger("SG_DESPAIR"));
-        }else{
+        if(nbt == null)
             nbt = new NBTTagCompound();
-            nbt.setFloat("SG_DESPAIR",0);
-            stack.setTagCompound(nbt);
-        }
+
+        nbt.setLong("PLAYER_UUID_MOST_SIG",player.getUniqueID().getMostSignificantBits());
+        nbt.setLong("PLAYER_UUID_LEAST_SIG",player.getUniqueID().getLeastSignificantBits());
+        nbt.setFloat("SG_DESPAIR",0);
+
+        stack.setTagCompound(nbt);
 
         PMDataTracker tracker = PlayerDataTrackerManager.getInstance().getTrackerByPlayer(player);
 
@@ -235,9 +278,9 @@ public class ItemSoulGem extends Item{
     public void addInformation(ItemStack stack, EntityPlayer player, List list, boolean bool){
         String sgORgs = (this instanceof ItemGriefSeed)?"Grief Seed":"Soul Gem";
         list.add(sgORgs + " of " + playerData.getEntityName());
-        list.add("Despair: " + this.getDespair() + "%");
+        list.add("Despair: " + this.getDespair(stack) + "%");
 
-        if((this.getDespair()/MAX_DESPAIR)*100 > 75)
+        if((this.getDespair(stack)/MAX_DESPAIR)*100 > 75)
             addDespairTooHighInformation(list);
     }
 
