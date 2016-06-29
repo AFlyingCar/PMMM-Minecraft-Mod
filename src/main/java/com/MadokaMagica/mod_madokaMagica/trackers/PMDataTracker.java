@@ -456,6 +456,7 @@ public class PMDataTracker {
         return playerSoulGem;
     }
 
+    @Deprecated
     public EntityPlayer getPlayer(){
         System.out.println("WARNING! Attempted to call deprecated method getPlayer()! Please use getEntity() instead.");
         return null;
