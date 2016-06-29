@@ -193,12 +193,30 @@ public class ItemSoulGem extends Item{
     // If the soul gem gets destroyed, kill the player
     // We kill the bat man
     public void destroySoulGem(ItemStack stack){
-        if(this.player != null){
-            this.player.worldObj.playSoundAtEntity(this.player,"madokamagica:shatter",50,1.0F);
+        PMDataTracker player_tracker = getPlayerDataTrackerFor(stack);
+        if(player_tracker == null){
+            System.out.println("getPlayerDataTrackerFor(ItemStack) returned null. Either no EntityPlayer exists for this ItemStack or ItemStack does not contain an ItemSoulGem/ItemGriefSeed.");
+            return;
+        }
+        Entity entity = player_tracker.getEntity();
+        if(entity == null){
+            System.out.println("getEntity() returned null! WHAT HAPPENED?!");
+            return;
+        }
+
+        if(!(entity instanceof EntityPlayer)){
+            System.out.println("entity is not an instance of EntityPlayer. This shouldn't happen because only EntityPlayer's can have an ItemSoulGem object.");
+            return;
+        }
+
+        EntityPlayer player = (EntityPlayer)entity;
+
+        if(player != null){
+            player.worldObj.playSoundAtEntity(player,"madokamagica:shatter",50,1.0F);
             // TODO: What does the last boolean mean?
-            this.player.worldObj.createExplosion(this.player,this.player.posX,this.player.posY,this.player.posZ,ItemSoulGem.SOUL_GEM_SHATTER_EXPLOSION_RADIUS,true);
-            stack.damageItem(stack.getMaxDamage()+1,this.player); // Add 1 as well as the max damage to ensure that it is broken
-            this.player.setDead();
+            player.worldObj.createExplosion(player,player.posX,player.posY,player.posZ,ItemSoulGem.SOUL_GEM_SHATTER_EXPLOSION_RADIUS,true);
+            stack.damageItem(stack.getMaxDamage()+1,player); // Add 1 as well as the max damage to ensure that it is broken
+            player.setDead();
         }
         System.out.println("Player is null! Skipping.");
     }
@@ -217,7 +235,7 @@ public class ItemSoulGem extends Item{
 
         // TODO: Fix this random number thing
         if(this.canTransformIntoWitch(stack) && (this.random.nextInt(100) == despair))
-            this.transformIntoWitch();
+            this.transformIntoWitch(stack);
     }
 
     public boolean isBlockSoft(Block block){
@@ -236,12 +254,28 @@ public class ItemSoulGem extends Item{
 
     @Override
     public boolean onBlockDestroyed(ItemStack stack, World world, Block block, int x, int y, int z,EntityLivingBase entity){
-        if(!isBlockSoft(block))
+        if(!isBlockSoft(block)){
             this.destroySoulGem(stack);
-        else if(isBlockHurt(block))
-            this.player.attackEntityFrom(new DamageSource("Damaged Soul Gem").setDamageBypassesArmor().setMagicDamage(),ItemSoulGem.BLOCK_HURT_DAMAGE_AMOUNT);
-        else
+        }else if(isBlockHurt(block)){
+            PMDataTracker tracker = getPlayerDataTrackerFor(stack);
+            if(tracker == null){
+                System.out.println("getPlayerDataTrackerFor(ItemStack) returned null. Either no EntityPlayer exists for this ItemStack or ItemStack does not contain an ItemSoulGem/ItemGriefSeed.");
+                return false;
+            }
+            Entity track_entity = tracker.getEntity();
+            if(track_entity == null){
+                System.out.println("getEntity() returned null! WHAT HAPPENED?!");
+                return false;
+            }
+            if(!(track_entity instanceof EntityPlayer)){
+                System.out.println("entity is not an instance of EntityPlayer. This shouldn't happen because only EntityPlayer's can have an ItemSoulGem object.");
+                return false;
+            }
+            EntityPlayer player = (EntityPlayer)track_entity;
+            player.attackEntityFrom(new DamageSource("Damaged Soul Gem").setDamageBypassesArmor().setMagicDamage(),ItemSoulGem.BLOCK_HURT_DAMAGE_AMOUNT);
+        }else{
             stack.damageItem(1,entity);
+        }
 
         // IMPORTANT NOTE: If this item becomes too damaged, then it will be destroyed through the destroySoulGem method
         // Unfortunately, there is no easy way to do this through the Item class.
@@ -254,14 +288,15 @@ public class ItemSoulGem extends Item{
     public void onCreated(ItemStack stack, World world, EntityPlayer player){
         super.onCreated(stack,world,player);
         NBTTagCompound nbt = stack.getTagCompound();
-        if(nbt == null)
+        if(nbt == null){
             nbt = new NBTTagCompound();
+            stack.setTagCompound(nbt);
+        }
 
         nbt.setLong("PLAYER_UUID_MOST_SIG",player.getUniqueID().getMostSignificantBits());
         nbt.setLong("PLAYER_UUID_LEAST_SIG",player.getUniqueID().getLeastSignificantBits());
         nbt.setFloat("SG_DESPAIR",0);
 
-        stack.setTagCompound(nbt);
 
         PMDataTracker tracker = PlayerDataTrackerManager.getInstance().getTrackerByPlayer(player);
 
@@ -288,3 +323,4 @@ public class ItemSoulGem extends Item{
         list.add("Despair is at dangerous levels! Acquire a Grief Seed before it is too late!");
     }
 }
+
