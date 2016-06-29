@@ -5,6 +5,7 @@ import java.util.Random;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.MapColor;
@@ -38,11 +39,13 @@ public class BlockLabrynthTeleporter extends BlockContainer {
         public int decayCounter = 0; // Counter until the time of decay
         public boolean placedByPlayer;
         public boolean stabilized;
+        public boolean hasPrintedWarningMessage;
         public World linked;
 
         public TileEntityLabrynthTeleporter(World world,boolean placedByPlayer){
             this.worldObj = world;
             this.placedByPlayer = placedByPlayer;
+            this.hasPrintedWarningMessage = false;
             this.stabilized = false;
         }
 
@@ -121,6 +124,31 @@ public class BlockLabrynthTeleporter extends BlockContainer {
     public void onEntityCollidedWithBlock(World world, int x, int y, int z, Entity entity){
         // NULL check
         if(entity == null) return;
+        TileEntity te = world.getTileEntity(x,y,z);
+        if(te == null || !(te instanceof TileEntityLabrynthTeleporter)){
+            System.out.println("No TileEntityLabrynthTeleporter exists at (" + x + "," + y + "," + z + ") despite there being a BlockLabrynthTeleporter there.");
+            if(MadokaMagicaConfig.deleteBlockLabrynthTeleporterWithoutTileEntityOrLinkedWorld){
+                System.out.println("Removing...");
+                world.setBlockToAir(x,y,z);
+            }
+            return;
+        }
+
+        TileEntityLabrynthTeleporter telt = (TileEntityLabrynthTeleporter)te;
+
+        if(telt.linked == null){
+            // Make sure we don't spam the console with our messages
+            if(!telt.hasPrintedWarningMessage)
+                System.out.println("TileEntity does not have a linked World object. Was the block at (" + x + "," + y + "," + z + ") placed by a player?");
+            
+            if(MadokaMagicaConfig.deleteBlockLabrynthTeleporterWithoutTileEntityOrLinkedWorld){
+                if(!telt.hasPrintedWarningMessage)
+                    System.out.println("Removing...");
+                world.setBlockToAir(x,y,z);
+            }
+            telt.hasPrintedWarningMessage = true;
+            return;
+        }
 
         if(entity instanceof EntityPlayer || entity instanceof EntityVillager){
             if(entity.ridingEntity != null)
@@ -130,7 +158,8 @@ public class BlockLabrynthTeleporter extends BlockContainer {
             // If there is no riddenByEntity (null), then it should immediately exit
             onEntityCollidedWithBlock(world,x,y,z,entity.riddenByEntity);
 
-            entity.travelToDimension(getToDimension(world));
+            int toDimension = getToDimension(world);
+            entity.travelToDimension(toDimension);
         }
     }
 
@@ -154,7 +183,7 @@ public class BlockLabrynthTeleporter extends BlockContainer {
 
     @Override
     public boolean renderAsNormalBlock(){
-        return !MadokaMagicaConfig.useDebugModels;
+        return MadokaMagicaConfig.useDebugModels;
     }
 
     @Override
@@ -164,7 +193,12 @@ public class BlockLabrynthTeleporter extends BlockContainer {
 
     @Override
     public boolean isOpaqueCube(){
-        return !MadokaMagicaConfig.useDebugModels;
+        return MadokaMagicaConfig.useDebugModels;
+    }
+
+    @Override
+    public AxisAlignedBB getCollisionBoundingBoxFromPool(World world, int x, int y, int z){
+        return null;
     }
 
     @Override
