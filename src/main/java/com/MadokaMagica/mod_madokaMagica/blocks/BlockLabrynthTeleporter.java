@@ -19,12 +19,14 @@ import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.passive.EntityVillager;
+import net.minecraftforge.common.util.ForgeDirection;
 
 import com.MadokaMagica.mod_madokaMagica.MadokaMagicaConfig;
 import com.MadokaMagica.mod_madokaMagica.managers.LabrynthManager;
 import com.MadokaMagica.mod_madokaMagica.managers.PlayerDataTrackerManager;
 import com.MadokaMagica.mod_madokaMagica.trackers.PMDataTracker;
 import com.MadokaMagica.mod_madokaMagica.items.ItemSoulGem;
+import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitchLabrynthEntrance;
 
 // Basically it is an invisible block that teleports any player or villager touching it
 public class BlockLabrynthTeleporter extends BlockContainer { 
@@ -61,15 +63,23 @@ public class BlockLabrynthTeleporter extends BlockContainer {
     public BlockLabrynthTeleporter(){
         super(Material.portal);
         // The teleporters give off a soft glow
-        this.setLightLevel(1.0F);
+        this.setLightLevel(0.5F);
     }
-
 
     @Override
     public TileEntity createNewTileEntity(World world,int metadata){
         TileEntity e = new TileEntityLabrynthTeleporter(world,this.wasPlacedByPlayer);
-        ((TileEntityLabrynthTeleporter)e).setLink(LabrynthManager.getInstance().retrieveEntrance(metadata).linkedWorldObj);
         wasPlacedByPlayer = false;
+        if(e == null){
+            System.out.println("We have a NULL TileEntity! EVERYBODY PANIC!");
+            return null;
+        }
+        EntityPMWitchLabrynthEntrance entrance = LabrynthManager.getInstance().retrieveEntrance(metadata);
+        if(entrance == null){
+            System.out.println("retrieveEntrance returned NULL. This means either we were placed by a player in Creative Mode (fucking cheater) or something has gone horribly horribly wrong.");
+            return e;
+        }
+        ((TileEntityLabrynthTeleporter)e).setLink(entrance.linkedWorldObj);
         return e;
     }
 
@@ -82,13 +92,13 @@ public class BlockLabrynthTeleporter extends BlockContainer {
         }
 
         // Create the tile entity
-        world.setTileEntity(x,y,z,this.createNewTileEntity(world,world.getBlockMetadata(x,y,z)));
+        // Check if this creates the TileEntity properly
+        //world.setTileEntity(x,y,z,this.createNewTileEntity(world,world.getBlockMetadata(x,y,z)));
 
         // Stabilize it if it was placed by a player
         if(wasPlacedByPlayer){
             stabilizeEntrance(world,x,y,z);
         }
-
     }
 
     @Override
@@ -132,6 +142,7 @@ public class BlockLabrynthTeleporter extends BlockContainer {
 
     @Override
     public void updateTick(World world, int x, int y, int z, Random r){
+        super.updateTick(world,x,y,z,r);
     }
 
     @Override
@@ -165,7 +176,10 @@ public class BlockLabrynthTeleporter extends BlockContainer {
     @Override
     @SideOnly(Side.CLIENT)
     public void registerBlockIcons(IIconRegister iiconregister){
-        this.blockIcon = iiconregister.registerIcon("air"); // TODO: Does this work?
+        if(MadokaMagicaConfig.useDebugModels)
+            this.blockIcon = iiconregister.registerIcon("stone");
+        else
+            this.blockIcon = iiconregister.registerIcon("air"); // TODO: Fix this
     }
 
     // We don't want to render this block at all
@@ -173,7 +187,7 @@ public class BlockLabrynthTeleporter extends BlockContainer {
     @SideOnly(Side.CLIENT)
     public boolean shouldSideBeRendered(IBlockAccess iba, int x, int y, int z, int side){
         if(!MadokaMagicaConfig.useDebugModels)
-            return false;
+            return iba.isSideSolid(x,y,z,ForgeDirection.getOrientation(side),true);
         else
             return super.shouldSideBeRendered(iba,x,y,z,side);
     }
