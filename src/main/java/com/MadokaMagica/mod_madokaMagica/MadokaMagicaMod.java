@@ -116,6 +116,8 @@ public class MadokaMagicaMod {
         MadokaMagicaItems.loadItems();
         MadokaMagicaBlocks.loadBlocks();
 
+        proxy.registerBlocks();
+
         MadokaMagicaMod.witchlabrynthbiome = new BiomeWitchLabrynth(Helper.getNextUnusedBiomeID());
         if(!DimensionManager.registerProviderType(MadokaMagicaConfig.labrynthProviderID,LabrynthProvider.class,false))
             throw new IllegalStateException("There is a provider ID conflict between LabrynthProvider from MadokaMagica and another provider type. Check your configuration.");
