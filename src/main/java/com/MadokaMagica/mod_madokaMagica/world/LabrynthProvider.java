@@ -74,8 +74,14 @@ public class LabrynthProvider extends WorldProvider{
     @Override
     @SideOnly(Side.CLIENT)
     public String getSaveFolder(){
-        // We do not save labrynths, as they are always changing (and because I'm a lazy POS, and don't want to try to save dynamic dimensions)
-        return null;
+        try{
+            if(this.dimensionId == 0)
+                return "";
+            return "MadokaMagicaLabrynths/" + this.dimensionId;
+        }catch(Exception e){
+            // Yolo
+        }
+        return "";
     }
 
     @Override
@@ -85,7 +91,17 @@ public class LabrynthProvider extends WorldProvider{
 
     @Override
     public IChunkProvider createChunkGenerator(){
-        return this.labrynthGeneratorFactory.create();
+        WorldServer server = MinecraftServer.getServer().getEntityWorld();
+        if(server instanceof LabrynthWorldServer){
+            return ((LabrynthWorldServer)server).createChunkProvider();
+        }
+        // This method shouldn't ever be called if we aren't in a Labrynth, and a Labrynth should never have a WorldServer that isn't a LabrynthWorldServer
+        return null;
+    }
+
+    @Override
+    public boolean isSurfaceWorld(){
+        return false;
     }
 
     @Override
