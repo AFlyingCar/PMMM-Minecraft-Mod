@@ -7,6 +7,7 @@ import com.MadokaMagica.mod_madokaMagica.world.LabrynthProvider;
 import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitch;
 import com.MadokaMagica.mod_madokaMagica.factories.LabrynthGeneratorFactoryFactory;
 
+@Deprecated
 public class LabrynthProviderFactory{
     public static LabrynthProvider generate(PMDataTracker pd,EntityPMWitch witch){
         final EntityPMWitch fwitch = witch;
