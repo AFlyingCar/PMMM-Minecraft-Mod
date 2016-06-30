@@ -28,16 +28,19 @@ import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitch;
 import com.MadokaMagica.mod_madokaMagica.entities.ai.EntityAIWanderWithChunkBias;
 import com.MadokaMagica.mod_madokaMagica.entities.ai.EntityAIWanderWithVillageBias;
 import com.MadokaMagica.mod_madokaMagica.entities.ai.EntityAIRandomTeleportPlayerOrVillager;
+import com.MadokaMagica.mod_madokaMagica.factories.LabrynthFactory.LabrynthDetails;
 
 public class EntityPMWitchLabrynthEntrance extends EntityCreature{
     private Random rand;
 
     public World linkedWorldObj; // TODO: Do we need this?
+    public LabrynthDetails labrynthDetails;
     public EntityPMWitch witch;
 
-    public EntityPMWitchLabrynthEntrance(World worldObj){
-        super(worldObj);
+    public EntityPMWitchLabrynthEntrance(LabrynthDetails details){
+        super(details.world);
 
+        labrynthDetails = details;
         rand = new Random();
 
         setupAITasks();
@@ -132,12 +135,43 @@ public class EntityPMWitchLabrynthEntrance extends EntityCreature{
     @Override
     public void writeEntityToNBT(NBTTagCompound rootTag){
         // TODO: Finish this method
+
+        // Save LabrynthDetails object to NBT here, so we can rebuild it later
+        NBTTagCompound detailsTag = new NBTTagCompound(); // Tag just for the Labrynth details
+        NBTTagCompound worldTag = new NBTTagCompound(); // Tag just for the world shit
+        detailsTag.setInteger("dimID",labrynthDetails.dimID);
+        detailsTag.setString("dimName",labrynthDetails.dimName);
+        labrynthDetails.writeToNBT(worldTag);
+        detailsTag.setTag("world",worldTag);
+        rootTag.setTag("PMMM LABRYNTH DETAILS",detailsTag);
+
         super.writeEntityToNBT(rootTag);
     }
 
     @Override
     public void readEntityFromNBT(NBTTagCompound rootTag){
         // TODO: Finish this method
+
+        NBTTagCompound detailstag = rootTag.getCompoundTag("PMMM LABRYNTH DETAILS");
+        if(!(detailstag.hasKey("dimID") && detailstag.hasKey("dimName") && detailstag.hasKey("world")){
+            System.out.println("Found LabrynthEntrance entity without any Labrynth data saved. Killing.");
+            this.setDead();
+            return;
+        }
+        int dimID = detailstag.getInteger("dimID");
+        String dimName = detailstag.getString("dimName");
+        NBTTagCompound worldTag = detailstag.getCompoundTag("world");
+        LabrynthWorldServer worldServer = LabrynthWorldServer.loadFromNBT(worldTag);
+        if(worldServer == null){
+            System.out.println("Failed to load LabrynthWorldServer from NBT.");
+            this.setDead();
+            return;
+        }
+        LabrynthDetails details = new LabrynthDetails();
+        details.dimID = dimID;
+        details.dimName = dimName;
+        details.world = worldServer;
+
         super.readEntityFromNBT(rootTag);
     }
 
