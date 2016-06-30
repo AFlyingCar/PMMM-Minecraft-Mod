@@ -369,5 +369,10 @@ public class Helper{
         double num = rand.nextDouble()*100;
         return num < chance;
     }
+
+    public static EntityLiving getEntityByUUID(UUID id){
+        // TODO: Finish this method
+        return null;
+    }
 }
 
