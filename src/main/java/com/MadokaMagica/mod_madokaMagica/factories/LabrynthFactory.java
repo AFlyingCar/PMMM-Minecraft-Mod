@@ -8,16 +8,19 @@ import com.MadokaMagica.mod_madokaMagica.world.LabrynthWorldServer;
 import com.MadokaMagica.mod_madokaMagica.factories.LabrynthProviderFactory;
 import com.MadokaMagica.mod_madokaMagica.factories.LabrynthWorldServerFactory;
 
+import com.MadokaMagica.mod_madokaMagica.trackers.PMDataTracker;
+import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitch;
+
 public class LabrynthFactory{
-    public class LabrynthDetails{
-        int dimID;
-        String dimName;
-        LabrynthWorldServer world;
+    public static class LabrynthDetails{
+        public int dimID;
+        public String dimName;
+        public LabrynthWorldServer world;
     }
 
     public static LabrynthDetails createLabrynth(PMDataTracker tracker){
         Integer dimID = DimensionManager.getNextFreeDimId();
-        String dimName = "Labrynth"; // TODO: Find a way to auto-generate labrynths
+        String dimName = "Labrynth"; // TODO: Find a way to auto-generate labrynth names
         String worldType = ""; // TODO: Set this properly
         int providerID;
 
@@ -35,6 +38,21 @@ public class LabrynthFactory{
         details.world = (LabrynthWorldServer)customWorldServer;
 
         return details;
+    }
+
+    public static void freeLabrynth(PMDataTracker tracker){
+        freeLabrynth(tracker.entity.worldObj.provider.dimensionId);
+    }
+
+    public static void freeLabrynth(EntityPMWitch witch){
+        freeLabrynth(witch.worldObj.provider.dimensionId);
+    }
+
+    public static void freeLabrynth(int id){
+        if(DimensionManager.isDimensionRegistered(id) && DimensionManager.getProvider(id) instanceof LabrynthProvider){
+            DimensionManager.unregisterDimension(id);
+            // TODO: Find some way to remove the specified dimension from DimensionManager.dimensionMap
+        }
     }
 }
 
