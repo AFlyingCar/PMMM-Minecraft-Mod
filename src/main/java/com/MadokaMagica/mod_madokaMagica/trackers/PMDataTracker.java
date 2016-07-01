@@ -63,6 +63,7 @@ public class PMDataTracker {
      * 1 - Puella Magi
      * 2 - Witch
      * 3 - Minion
+     * -1 - Unknown
      */
     private int player_state = 0;
 
@@ -100,6 +101,8 @@ public class PMDataTracker {
         player_state = 0;
 
         loadTagData();
+
+        ready = true;
     }
 
     public PMDataTracker(EntityPlayer nplayer, ItemStack nplayerSG){
@@ -119,10 +122,11 @@ public class PMDataTracker {
 
         potential = 0;//calculatePotential();
         playerswinglasttime = entity.worldObj.getTotalWorldTime();
+        player_state = 3;
 
         loadTagData();
 
-        player_state = 3;
+        ready = true;
     }
 
     public PMDataTracker(EntityPMWitch witch){
@@ -134,10 +138,36 @@ public class PMDataTracker {
 
         potential = calculatePotential();
         playerswinglasttime = entity.worldObj.getTotalWorldTime();
+        player_state = 2;
 
         loadTagData();
 
-        player_state = 2;
+        ready = true;
+    }
+
+    public PMDataTracker(){
+        entity = null;
+        like_entity_type = new HashMap<Integer,Float>();
+        liked_entities = new HashMap<Integer,Float>();
+        like_level = new HashMap<Integer,Float>();
+        nearbyEntitiesMap = new HashMap<Entity,Float>();
+        this.ready = false;
+    }
+
+    public void setEntity(Entity entity){
+        this.entity = entity;
+        potential = calculatePotential();
+        playerswinglasttime = entity.worldObj.getTotalWorldTime();
+        loadTagData();
+        if(entity instanceof EntityPlayer)
+            player_state = 0;
+        else if(entity instanceof EntityPMWitch)
+            player_state = 2;
+        else if(entity instanceof EntityPMWitchMinion)
+            player_state = 3;
+        else
+            player_state = -1;
+        ready = true;
     }
 
     public boolean isReady(){
