@@ -118,22 +118,47 @@ public class MadokaMagicaMod {
 
         proxy.registerBlocks();
 
+        /****************************\
+         * DIMENSIONAL REGISTRATION *
+        \****************************/
+
         MadokaMagicaMod.witchlabrynthbiome = new BiomeWitchLabrynth(Helper.getNextUnusedBiomeID());
+
         if(!DimensionManager.registerProviderType(MadokaMagicaConfig.labrynthProviderID,LabrynthProvider.class,false))
             throw new IllegalStateException("There is a provider ID conflict between LabrynthProvider from MadokaMagica and another provider type. Check your configuration.");
 
+        /***********************\
+         * SOUND  REGISTRATION *
+        \***********************/
+
         wtransform_music = PositionedSoundRecord.func_147673_a(new ResourceLocation(MadokaMagicaMod.MODID + ":transformmusic"));
+
+        /**************************\
+         * MANAGER INITIALIZATION *
+        \**************************/
 
         playerDataTrackerManager = PlayerDataTrackerManager.getInstance();
         itemSoulGemManager = ItemSoulGemManager.getInstance();
 
+        /*********************\
+         * ITEM REGISTRATION *
+        \*********************/
+
         GameRegistry.registerItem(MadokaMagicaItems.item_soulgem,"Soul Gem");
         GameRegistry.registerItem(MadokaMagicaItems.item_griefseed,"Grief Seed");
+
+        /************************\
+         * HANDLER REGISTRATION *
+        \************************/
 
         FMLCommonHandler.instance().bus().register(new PMEventHandler());
         MinecraftForge.EVENT_BUS.register(new PMEventHandler());
 
         // GameRegistry.addShapelessRecipe(new ItemStack(itemSoulGem,1,0),new ItemStack(itemSoulGem,1,0),new ItemStack(itemGriefSeed,1,0));
+
+        /***********************\
+         * ENTITY REGISTRATION *
+        \***********************/
 
         /*
         EntityRegistry.registerModEntity(MobPMWitch.class, "PMWitch", properties.PMWitchEntityID,this,70,1,false);
@@ -149,6 +174,10 @@ public class MadokaMagicaMod {
 
         registerEntityWithEgg(EntityPMWitchLabrynthEntrance.class,"PMWitchLabrynthEntrance",++entityID,80,3,false,0xFFFFFF,0xFF0000);
         GameRegistry.registerItem(MadokaMagicaItems.item_labrynthentranceplacer,"spawnEgg"+"LabrynthEntrance");
+
+        /****************************\
+         * DANGEROUS HACKS AND SHIT *
+        \****************************/
 
         if(MadokaMagicaConfig.enableCorruptionVisualEffects){
             // Overwrite EntityRenderer so that activateNextShader does nothing if PMEffects is still active
