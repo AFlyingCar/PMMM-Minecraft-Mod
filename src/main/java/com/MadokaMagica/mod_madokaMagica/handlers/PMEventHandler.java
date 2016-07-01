@@ -25,20 +25,27 @@ import cpw.mods.fml.common.eventhandler.EventPriority;
 import com.MadokaMagica.mod_madokaMagica.items.ItemSoulGem;
 import com.MadokaMagica.mod_madokaMagica.effects.PMEffects;
 import com.MadokaMagica.mod_madokaMagica.trackers.PMDataTracker;
+
 import com.MadokaMagica.mod_madokaMagica.managers.IncubatorManager;
 import com.MadokaMagica.mod_madokaMagica.managers.ItemSoulGemManager;
 import com.MadokaMagica.mod_madokaMagica.managers.PlayerDataTrackerManager;
+
 import com.MadokaMagica.mod_madokaMagica.events.MadokaMagicaCreateWitchEvent;
 import com.MadokaMagica.mod_madokaMagica.events.MadokaMagicaCreateModelEvent;
 import com.MadokaMagica.mod_madokaMagica.events.PreMadokaMagicaWitchDeathEvent;
 import com.MadokaMagica.mod_madokaMagica.events.MadokaMagicaWitchTransformationEvent;
 import com.MadokaMagica.mod_madokaMagica.events.MadokaMagicaPuellaMagiTransformationEvent;
+
 import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitchLabrynthEntrance;
 import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitch;
 import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitchMinion;
+
 import com.MadokaMagica.mod_madokaMagica.factories.EntityPMWitchFactory;
 import com.MadokaMagica.mod_madokaMagica.factories.RenderPMWitchMinionFactory;
 import com.MadokaMagica.mod_madokaMagica.factories.EntityPMWitchLabrynthEntranceFactory;
+import com.MadokaMagica.mod_madokaMagica.factories.LabrynthFactory;
+import com.MadokaMagica.mod_madokaMagica.factories.LabrynthFactory.LabrynthDetails;
+
 import com.MadokaMagica.mod_madokaMagica.renderers.RenderPMWitchMinion;
 import com.MadokaMagica.mod_madokaMagica.renderers.RenderPMWitchMinionHolder;
 
@@ -136,6 +143,12 @@ public class PMEventHandler{
         return true;
     }
 
+    @SubscribeEvent
+    public boolean onPreMadokaMagicaWitchDeath(PreMadokaMagicaWitchDeathEvent event){
+        LabrynthFactory.freeLabrynth(event.entity.tracker);
+        return true;
+    }
+
     @SubscribeEvent(priority = EventPriority.NORMAL)
     public boolean onServerChat(ServerChatEvent event){
         if(IncubatorManager.getInstance().isPlayerNearIncubator(event.player)){
@@ -174,21 +187,12 @@ public class PMEventHandler{
     public boolean onCreateWitch(MadokaMagicaCreateWitchEvent event){
         PMDataTracker tracker = event.playerTracker;
 
-        EntityPMWitchFactory pmwf = new EntityPMWitchFactory();
-        EntityPMWitch witch = pmwf.createWitch(tracker);
+        LabrynthDetails details = LabrynthFactory.createLabrynth(tracker);
+        EntityPMWitchLabrynthEntrance labrynthentrance = EntityPMWitchLabrynthEntranceFactory.createWitchLabrynthEntrance(details);
+        EntityPMWitch witch = EntityPMWitchFactory.createWitch(tracker);
 
-        EntityPMWitchLabrynthEntranceFactory pmwlef = new EntityPMWitchLabrynthEntranceFactory();
-        // It spawns in whatever world the player transformed in
-        EntityPMWitchLabrynthEntrance entrance = pmwlef.createWitchLabrynthEntrance(witch,tracker.entity.worldObj);
-        if(entrance == null){
-            System.out.println("An error occurred in onCreateWitch(MadokaMagicaCreateWitchEvent)! EntityPMWitchLabrynthEntranceFactory.createWitchLabrynthEntrance(...) returned null!");
-            return false;
-        }
-
-        // TODO: Somehow generate the world inside the labrynth and set it to the entrance BEFORE we spawn everything
-
-        tracker.entity.worldObj.spawnEntityInWorld(entrance);
-        entrance.linkedWorldObj.spawnEntityInWorld(witch);
+        tracker.entity.worldObj.spawnEntityInWorld(labrynthentrance);
+        details.world.spawnEntityInWorld(witch);
         return true;
     }
 
