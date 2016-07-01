@@ -5,10 +5,12 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldType;
+import net.minecraft.world.WorldServer;
 import net.minecraft.world.biome.WorldChunkManager;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.MathHelper;
+import net.minecraft.server.MinecraftServer;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -91,7 +93,7 @@ public class LabrynthProvider extends WorldProvider{
 
     @Override
     public IChunkProvider createChunkGenerator(){
-        WorldServer server = MinecraftServer.getServer().getEntityWorld();
+        WorldServer server = (WorldServer)MinecraftServer.getServer().getEntityWorld();
         if(server instanceof LabrynthWorldServer){
             return ((LabrynthWorldServer)server).createChunkProvider();
         }
