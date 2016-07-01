@@ -29,6 +29,7 @@ import com.MadokaMagica.mod_madokaMagica.entities.ai.EntityAIWanderWithChunkBias
 import com.MadokaMagica.mod_madokaMagica.entities.ai.EntityAIWanderWithVillageBias;
 import com.MadokaMagica.mod_madokaMagica.entities.ai.EntityAIRandomTeleportPlayerOrVillager;
 import com.MadokaMagica.mod_madokaMagica.factories.LabrynthFactory.LabrynthDetails;
+import com.MadokaMagica.mod_madokaMagica.world.LabrynthWorldServer; 
 
 public class EntityPMWitchLabrynthEntrance extends EntityCreature{
     private Random rand;
@@ -37,8 +38,8 @@ public class EntityPMWitchLabrynthEntrance extends EntityCreature{
     public LabrynthDetails labrynthDetails;
     public EntityPMWitch witch;
 
-    public EntityPMWitchLabrynthEntrance(LabrynthDetails details){
-        super(details.world);
+    public EntityPMWitchLabrynthEntrance(World world, LabrynthDetails details){
+        super(world);
 
         labrynthDetails = details;
         rand = new Random();
@@ -46,19 +47,21 @@ public class EntityPMWitchLabrynthEntrance extends EntityCreature{
         setupAITasks();
     }
 
+    public EntityPMWitchLabrynthEntrance(World world){
+        super(world);
+        labrynthDetails = new LabrynthDetails();
+        rand = new Random();
+        setupAITasks();
+
+        System.out.println("Size of Entrance task list: " + this.tasks.taskEntries.size());
+        System.out.println("Size of Entrance targetTask list: " + this.targetTasks.taskEntries.size());
+    }
+
     private void setupAITasks(){
         this.tasks.taskEntries.clear();
-        /*
-        this.tasks.addTask(0,new EntityAIWanderWithChunkBias(this,
-            this.worldObj.villageCollectionObj.findNearestVillage(this.chunkCoordX,
-                this.chunkCoordY,
-                this.chunkCoordZ,
-                this.dimension
-            ).getCenter(), // We are just trying to get the chunk coordinates of the village, not the village itself. So who cares if we are there yet or not.
-            0.05F)); // I'm just assuming that this is a good speed. Don't quote me on it though...
-        */
+        this.targetTasks.taskEntries.clear();
         this.tasks.addTask(0,new EntityAIWanderWithVillageBias(this,0.05F));
-        this.tasks.addTask(0,new EntityAIRandomTeleportPlayerOrVillager(this));
+        this.tasks.addTask(1,new EntityAIRandomTeleportPlayerOrVillager(this));
     }
 
     @Override
@@ -140,8 +143,13 @@ public class EntityPMWitchLabrynthEntrance extends EntityCreature{
         NBTTagCompound detailsTag = new NBTTagCompound(); // Tag just for the Labrynth details
         NBTTagCompound worldTag = new NBTTagCompound(); // Tag just for the world shit
         detailsTag.setInteger("dimID",labrynthDetails.dimID);
-        detailsTag.setString("dimName",labrynthDetails.dimName);
-        labrynthDetails.writeToNBT(worldTag);
+        // Make sure we don't keep getting NullPointerExceptions and IllegalArugmentExceptions
+        // We're still getting them...
+        if(labrynthDetails.dimName != null && !labrynthDetails.dimName.equals(""))
+            detailsTag.setString("dimName",labrynthDetails.dimName);
+        else
+            detailsTag.setString("dimName","Labrynth Details");
+        labrynthDetails.world.writeToNBT(worldTag);
         detailsTag.setTag("world",worldTag);
         rootTag.setTag("PMMM LABRYNTH DETAILS",detailsTag);
 
@@ -153,7 +161,7 @@ public class EntityPMWitchLabrynthEntrance extends EntityCreature{
         // TODO: Finish this method
 
         NBTTagCompound detailstag = rootTag.getCompoundTag("PMMM LABRYNTH DETAILS");
-        if(!(detailstag.hasKey("dimID") && detailstag.hasKey("dimName") && detailstag.hasKey("world")){
+        if(!(detailstag.hasKey("dimID") && detailstag.hasKey("dimName") && detailstag.hasKey("world"))){
             System.out.println("Found LabrynthEntrance entity without any Labrynth data saved. Killing.");
             this.setDead();
             return;
@@ -179,5 +187,16 @@ public class EntityPMWitchLabrynthEntrance extends EntityCreature{
     public boolean attackEntityFrom(DamageSource source, float what){
         // TODO: Find out what the second parameter is supposed to represent
         return false;
+    }
+
+    // We don't want this to go to a dimension it shouldn't go to (Hint: It shouldn't go to any dimension, and should stay where it is, alone and unloved until its death)
+    @Override
+    public void travelToDimension(int dimID){
+        return;
+    }
+
+    @Override
+    public boolean isAIEnabled(){
+        return true;
     }
 }
