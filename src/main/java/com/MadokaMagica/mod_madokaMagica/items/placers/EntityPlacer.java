@@ -133,6 +133,10 @@ public class EntityPlacer extends ItemMonsterPlacer {
             spawnNameFull = MadokaMagicaMod.MODID+"."+spawnName;
             if(EntityList.stringToClassMapping.containsKey(spawnNameFull)){
                 entity = (EntityLiving)EntityList.createEntityByName(spawnNameFull,world);
+                if(entity == null){
+                    System.out.println("EntityList.createEntity(" + spawnNameFull + "," + world + "(of type World) returned null!");
+                    return null;
+                }
                 entity.setLocationAndAngles(x,y,z,MathHelper.wrapAngleTo180_float(world.rand.nextFloat()*360.0F),0.0F);
                 world.spawnEntityInWorld(entity);
                 entity.onSpawnWithEgg((IEntityLivingData)null);
