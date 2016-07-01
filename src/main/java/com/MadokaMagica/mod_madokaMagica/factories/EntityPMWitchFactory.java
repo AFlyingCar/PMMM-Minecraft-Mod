@@ -4,7 +4,7 @@ import com.MadokaMagica.mod_madokaMagica.trackers.PMDataTracker;
 import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitch;
 
 public class EntityPMWitchFactory {
-	public EntityPMWitch createWitch(PMDataTracker tracker){
+	public static EntityPMWitch createWitch(PMDataTracker tracker){
 		// TODO: Finish this method
 		EntityPMWitch witch = new EntityPMWitch(tracker);
 
