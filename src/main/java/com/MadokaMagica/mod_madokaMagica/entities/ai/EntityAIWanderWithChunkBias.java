@@ -25,6 +25,11 @@ public class EntityAIWanderWithChunkBias extends EntityAIBase {
 
 	@Override
 	public boolean shouldExecute(){
+        if(this.entity == null || this.chunk == null){
+            System.out.println("Either entity is null or chunk is null. (Both will crash your game).");
+            return false;
+        }
+
 		if (this.entity.getRNG().nextInt(120) != 0){
             return false;
         }else{
@@ -66,11 +71,11 @@ public class EntityAIWanderWithChunkBias extends EntityAIBase {
 		double rz = Math.random();
 
 		// What is the sign we need to make sure we go in the right direction
-		int sign = chunk.posX < entity.posX ? -1 : 1;
+		int sign = ((chunk.posX < entity.posX) || (chunk.posZ < entity.posZ)) ? -1 : 1;
 
 		// Apply random numbers
-		x += rx > 0.05F ? 0 : (rx*xdiff*sign);
-		y += ry > 0.05F ? 0 : (ry*ydiff*sign);
-		z += rz > 0.05F ? 0 : (rz*zdiff*sign);
+		x += rx > 0.5F ? 0 : (rx*xdiff*sign);
+		y += ry > 0.5F ? 0 : (ry*ydiff*sign);
+		z += rz > 0.5F ? 0 : (rz*zdiff*sign);
 	}
 }
