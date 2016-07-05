@@ -9,3 +9,4 @@ build/
 forge-*-changelog.txt
 out/
 
+/bin/
