@@ -138,7 +138,9 @@ public class EntityPMWitchLabrynthEntrance extends EntityCreature{
     @Override
     public void writeEntityToNBT(NBTTagCompound rootTag){
         // TODO: Finish this method
+        rootTag.setInteger("Linked Dimension ID",this.labrynthDetails.dimID);
 
+        /*
         // Save LabrynthDetails object to NBT here, so we can rebuild it later
         NBTTagCompound detailsTag = new NBTTagCompound(); // Tag just for the Labrynth details
         NBTTagCompound worldTag = new NBTTagCompound(); // Tag just for the world shit
@@ -152,7 +154,7 @@ public class EntityPMWitchLabrynthEntrance extends EntityCreature{
         labrynthDetails.world.writeToNBT(worldTag);
         detailsTag.setTag("world",worldTag);
         rootTag.setTag("PMMM LABRYNTH DETAILS",detailsTag);
-
+        */
         super.writeEntityToNBT(rootTag);
     }
 
@@ -160,6 +162,13 @@ public class EntityPMWitchLabrynthEntrance extends EntityCreature{
     public void readEntityFromNBT(NBTTagCompound rootTag){
         // TODO: Finish this method
 
+        // Fail if we don't have this tag, because without it we don't know where to go
+        if(!rootTag.hasKey("Linked Dimension ID")) return;
+        int linkedDimID = rootTag.getInteger("Linked Dimension ID");
+        this.labrynthDetails = LabrynthManager.getInstance().getDetailsByDimID(linkedDimID);
+        // NOTE: Maybe we should throw an error if labrynthDetails is null?
+
+        /*
         NBTTagCompound detailstag = rootTag.getCompoundTag("PMMM LABRYNTH DETAILS");
         if(!(detailstag.hasKey("dimID") && detailstag.hasKey("dimName") && detailstag.hasKey("world"))){
             System.out.println("Found LabrynthEntrance entity without any Labrynth data saved. Killing.");
@@ -179,6 +188,7 @@ public class EntityPMWitchLabrynthEntrance extends EntityCreature{
         details.dimID = dimID;
         details.dimName = dimName;
         details.world = worldServer;
+        */
 
         super.readEntityFromNBT(rootTag);
     }

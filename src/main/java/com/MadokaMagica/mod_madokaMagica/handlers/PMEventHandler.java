@@ -15,6 +15,8 @@ import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.player.PlayerDestroyItemEvent;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.world.WorldEvent;
+import net.minecraftforge.event.world.WorldEvent.Save;
+import net.minecraftforge.event.world.WorldEvent.Load;
 
 import cpw.mods.fml.common.FMLLog;
 import cpw.mods.fml.common.gameevent.PlayerEvent;
@@ -29,6 +31,7 @@ import com.MadokaMagica.mod_madokaMagica.trackers.PMDataTracker;
 import com.MadokaMagica.mod_madokaMagica.managers.IncubatorManager;
 import com.MadokaMagica.mod_madokaMagica.managers.ItemSoulGemManager;
 import com.MadokaMagica.mod_madokaMagica.managers.PlayerDataTrackerManager;
+import com.MadokaMagica.mod_madokaMagica.managers.LabrynthManager;
 
 import com.MadokaMagica.mod_madokaMagica.events.MadokaMagicaCreateWitchEvent;
 import com.MadokaMagica.mod_madokaMagica.events.MadokaMagicaCreateModelEvent;
@@ -66,6 +69,11 @@ public class PMEventHandler{
         tracker.loadTagData();
     }
 
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public void onWorldLoad(WorldEvent.Load event){
+        LabrynthManager.getInstance().loadAll();
+    }
+
     // If the soul gem becomes too damaged, then violently destroy it
     @SubscribeEvent
     public void onPlayerDestroyItem(PlayerDestroyItemEvent event){
@@ -74,10 +82,12 @@ public class PMEventHandler{
         ((ItemSoulGem)event.original.getItem()).destroySoulGem(event.original);
     }
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onWorldSave(WorldEvent.Save event){
         if(PlayerDataTrackerManager.getInstance() != null)
             PlayerDataTrackerManager.getInstance().saveAllTrackers();
+
+        LabrynthManager.getInstance().saveAll();
     }
 
     @SubscribeEvent
@@ -193,6 +203,9 @@ public class PMEventHandler{
 
         tracker.entity.worldObj.spawnEntityInWorld(labrynthentrance);
         details.world.spawnEntityInWorld(witch);
+
+        LabrynthManager.getInstance().registerLabrynthDetails(details);
+
         return true;
     }
 
