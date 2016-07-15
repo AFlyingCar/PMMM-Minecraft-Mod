@@ -155,7 +155,6 @@ public class PMEventHandler{
 
     @SubscribeEvent
     public boolean onPreMadokaMagicaWitchDeath(PreMadokaMagicaWitchDeathEvent event){
-        LabrynthFactory.freeLabrynth(event.entity.tracker);
         return true;
     }
 

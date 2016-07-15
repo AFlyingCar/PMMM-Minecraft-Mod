@@ -45,20 +45,5 @@ public class LabrynthFactory{
 
         return details;
     }
-
-    public static void freeLabrynth(PMDataTracker tracker){
-        freeLabrynth(tracker.entity.worldObj.provider.dimensionId);
-    }
-
-    public static void freeLabrynth(EntityPMWitch witch){
-        freeLabrynth(witch.worldObj.provider.dimensionId);
-    }
-
-    public static void freeLabrynth(int id){
-        if(DimensionManager.isDimensionRegistered(id) && DimensionManager.getProvider(id) instanceof LabrynthProvider){
-            DimensionManager.unregisterDimension(id);
-            // TODO: Find some way to remove the specified dimension from DimensionManager.dimensionMap
-        }
-    }
 }
 
