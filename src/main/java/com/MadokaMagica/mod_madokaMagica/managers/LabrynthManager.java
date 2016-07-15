@@ -26,8 +26,12 @@ public class LabrynthManager{
 
     private List<LabrynthDetails> allDetails;
 
+    private boolean dirty;
+
 	private LabrynthManager(){
         entrances = new EntityPMWitchLabrynthEntrance[4096];
+        allDetails = new ArrayList<LabrynthDetails>();
+        dirty = true; // Save the first time it is loaded no matter what (This is for testing purposes)
         next = 0;
 		// TODO: Finish this method
 	}
@@ -58,11 +62,49 @@ public class LabrynthManager{
 
     public void registerLabrynthDetails(LabrynthDetails details){
         allDetails.add(details);
+        this.markDirty(false);
+    }
+
+    public void markDirty(boolean dirty){
+        this.dirty = dirty;
+    }
+
+    public boolean isDirty(){
+        return this.dirty;
     }
 
     public void saveAll(){
+        this.saveAll(false);
+    }
+
+    public void saveAll(boolean force){
+        // Don't save if the data isn't dirty or if we aren't supposed to force it
+        if(!this.dirty && !force) return;
+
         File file = getLabrynthDataFile();
         NBTTagCompound nbt = new NBTTagCompound();
+
+        // See Java, now this try-catch makes sense
+        try{
+            // Create the file if it doesn't already exist
+            if(!file.exists()){
+                file.getParentFile().mkdirs();
+                file.createNewFile();
+            }
+        }catch(IOException exception){
+            String msg = "FATAL ERROR: UNABLE TO WRITE TO ";
+            // This one though, does not
+            try{
+                msg += file.getCanonicalPath();
+            }catch(IOException e){
+                msg+="LABRYNTH SAVE FILE FILE";
+                System.out.println(e.getMessage());
+            }
+            System.out.println(msg);
+            System.out.println(exception.getMessage());
+            exception.printStackTrace();
+            return;
+        }
 
         int count = 0;
 
@@ -94,8 +136,11 @@ public class LabrynthManager{
             // What if I want to create a crash report for the player?!
             // DID YOU EVER THINK OF THAT?!
         }
+
+        this.dirty = false;
     }
 
+    // Don't check dirty here, because this doesn't actually write any data to a file
     public void save(LabrynthDetails details,NBTTagCompound nbt){
         nbt.setString("dimName",details.dimName);
         nbt.setInteger("dimID",details.dimID);
@@ -124,6 +169,8 @@ public class LabrynthManager{
 
         int detailsNum = nbt.getInteger("MAX DETAILS");
 
+        this.allDetails.clear(); // Clear the array if it already has stuff in it (It shouldn't, as we are loading up a new world)
+
         for(int i=0; i<detailsNum; i++){
             String id = ""+i;
             NBTTagCompound dnbt = nbt.getCompoundTag(id);
@@ -132,9 +179,16 @@ public class LabrynthManager{
     }
 
     public File getLabrynthDataFile(){
-        String rootPath = DimensionManager.getCurrentSaveRootDirectory().getAbsolutePath();
-        File newFile = new File(rootPath+"MadokaMagica/LabrynthSaveData.dat");
-        return newFile;
+        try{
+            String rootPath = DimensionManager.getCurrentSaveRootDirectory().getCanonicalPath();
+            File newFile = new File(rootPath+"/MadokaMagica/LabrynthSaveData.dat");
+            return newFile;
+        }catch(IOException e){
+            // Why the fuck do I need a whole fucking exception handling just for a fucking canonical path java?!
+        }
+        // http://imgur.com/QIvjr2b
+        System.out.println("OH GOD! WHAT THE FUCK JUST HAPPENED?! AAAAAAAAAAAAAAAAAAAAAAHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH");
+        return null;
     }
 
     public void load(NBTTagCompound nbt){
