@@ -73,6 +73,7 @@ public class ItemSoulGem extends Item{
     public static final Set hurtBlocks = Sets.newHashSet(new Block[] {Blocks.fire});
 
     protected float despair;
+    protected static ItemSoulGem instance;
     public EntityPlayer player;
     public PMDataTracker playerData;
     public Random random;
@@ -80,6 +81,7 @@ public class ItemSoulGem extends Item{
     public ItemSoulGem(){
         super();
         random = new Random();
+        ItemSoulGem.instance = this;
         // setTextureName();
     }
 
@@ -144,6 +146,86 @@ public class ItemSoulGem extends Item{
         if(subtract > despair_sg) subtract = despair_sg;
         griefseed.getTagCompound().setFloat("SG_DESPAIR",despair_gs+subtract);
         soulgem.getTagCompound().setFloat("SG_DESPAIR",despair_sg-subtract);
+
+        // When we cleanse the soulgem, the grief seed used will have its traits altered slightly based on the cleanser
+        instance.alterGriefSeed(ItemSoulGem.getOwner(soulgem),ItemGriefSeed.getOwner(griefseed));
+    }
+
+    public static PMDataTracker getOwner(ItemStack soulgem){
+        // Loooooooooong sanity check
+        if(soulgem == null ||
+           soulgem.getTagCompound() == null ||
+           !soulgem.getTagCompound().hasKey("PLAYER_UUID_LEAST_SIG") ||
+           !soulgem.getTagCompound().hasKey("PLAYER_UUID_MOST_SIG"))
+                return null;
+
+        return PlayerDataTrackerManager.getInstance().getTrackerByPlayer(
+                    Helper.getPlayerOnServerByUUID(
+                        new UUID(
+                            soulgem.getTagCompound().getLong("PLAYER_UUID_MOST_SIG"),
+                            soulgem.getTagCompound().getLong("PLAYER_UUID_LEAST_SIG")
+                        )
+                    )
+               );
+    }
+
+    public void alterGriefSeed(PMDataTracker soulgem, PMDataTracker griefseed){
+        if(soulgem == null || griefseed == null){
+            System.out.println("Warning! Either soulgem or griefseed was null!");
+            return;
+        }
+
+        // Maximum amount of traits we are going to alter at once
+        final int MAX_TRAITS_TO_ALTER = 2;
+        int last_used = 0;
+
+        for(int i=0; i<MAX_TRAITS_TO_ALTER; i++){ 
+            int r = (int)(random.nextFloat() * 11); // There are 11 traits stored in PMDataTracker
+            // Don't alter the same value twice
+            if(r == last_used){
+                i--;
+                continue;
+            }
+
+            switch(r){
+                case 0:
+                    griefseed.setArchitectScore((float)(griefseed.getArchitectScore() + soulgem.getArchitectScore()*(random.nextFloat()*(0.25))));
+                    break;
+                case 1:
+                    griefseed.setEngineeringScore((float)(griefseed.getEngineeringScore() + soulgem.getEngineeringScore()*(random.nextFloat()*(0.25))));
+                    break;
+                case 2:
+                    griefseed.setGreedScore((float)(griefseed.getGreedScore() + soulgem.getGreedScore()*(random.nextFloat()*(0.25))));
+                    break;
+                case 3:
+                    griefseed.setWaterScore((float)(griefseed.getWaterScore() + soulgem.getWaterScore()*(random.nextFloat()*(0.25))));
+                    break;
+                case 4:
+                    griefseed.setNatureScore((float)(griefseed.getNatureScore() + soulgem.getNatureScore()*(random.nextFloat()*(0.25))));
+                    break;
+                case 5:
+                    griefseed.setDayScore((float)(griefseed.getDayScore() + soulgem.getDayScore()*(random.nextFloat()*(0.25))));
+                    break;
+                case 6:
+                    griefseed.setNightScore((float)(griefseed.getNightScore() + soulgem.getNightScore()*(random.nextFloat()*(0.25))));
+                    break;
+                case 7:
+                    griefseed.setHeroScore((float)(griefseed.getHeroScore() + soulgem.getHeroScore()*(random.nextFloat()*(0.25))));
+                    break;
+                case 8:
+                    griefseed.setVillainScore((float)(griefseed.getVillainScore() + soulgem.getVillainScore()*(random.nextFloat()*(0.25))));
+                    break;
+                case 9:
+                    griefseed.setPassiveScore((float)(griefseed.getPassiveScore() + soulgem.getPassiveScore()*(random.nextFloat()*(0.25))));
+                    break;
+                case 10:
+                    griefseed.setAggressiveScore((float)(griefseed.getAggressiveScore() + soulgem.getAggressiveScore()*(random.nextFloat()*(0.25))));
+                    break;
+                default:
+                    System.out.println("Unknown random value " + r + "! Please check the Random Number Generator (tm)");
+            }
+            last_used = r;
+        }
     }
 
     @Deprecated

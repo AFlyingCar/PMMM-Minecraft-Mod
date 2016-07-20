@@ -1,6 +1,7 @@
 package com.MadokaMagica.mod_madokaMagica.items;
 
 import java.util.List;
+import java.util.UUID;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
@@ -57,5 +58,20 @@ public class ItemGriefSeed extends ItemSoulGem{
     @Override
     public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity){
         return true;
+    }
+
+    public static PMDataTracker getOwner(ItemStack griefseed){
+        // Loooooooooong sanity check
+        if(griefseed == null ||
+           griefseed.getTagCompound() == null ||
+           !griefseed.getTagCompound().hasKey("PLAYER_UUID_LEAST_SIG") ||
+           !griefseed.getTagCompound().hasKey("PLAYER_UUID_MOST_SIG"))
+                return null;
+        return PlayerDataTrackerManager.getInstance().getTrackerByIdentifier(
+                    new UUID(
+                        griefseed.getTagCompound().getLong("PLAYER_UUID_LEAST_SIG"),
+                        griefseed.getTagCompound().getLong("PLAYER_UUID_MOST_SIG")
+                    ).toString()
+               );
     }
 }
