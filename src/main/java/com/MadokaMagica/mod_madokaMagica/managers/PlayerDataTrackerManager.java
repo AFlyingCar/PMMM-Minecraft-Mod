@@ -25,7 +25,9 @@ public class PlayerDataTrackerManager{
         datatrackers.put(""+tracker.getIdentifierName(),tracker);
 	}
 
+    @Deprecated
 	public PMDataTracker getTrackerByPlayer(EntityPlayer p){
+        System.out.println("DEPRECATED! Use getTrackerByIdentifier(String) instead!");
         if(datatrackers.containsKey(p.getDisplayName()))
             return datatrackers.get(""+p.getDisplayName());
         return null;
@@ -37,8 +39,16 @@ public class PlayerDataTrackerManager{
         */
 	}
 
+    @Deprecated
     public PMDataTracker getTrackerByUUID(UUID uuid){
+        System.out.println("DEPRECATED! Use getTrackerByIdentifier(String) instead!");
         return getTrackerByPlayer(Helper.getPlayerOnServerByUUID(uuid));
+    }
+
+    public PMDataTracker getTrackerByIdentifier(String identifier){
+        if(datatrackers.containsKey(identifier))
+            return datatrackers.get(identifier);
+        return null;
     }
 
     public void saveAndRemoveTracker(PMDataTracker pmdt){
