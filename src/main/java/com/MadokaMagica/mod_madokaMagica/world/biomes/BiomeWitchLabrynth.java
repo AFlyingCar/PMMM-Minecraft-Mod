@@ -13,6 +13,7 @@ public class BiomeWitchLabrynth extends BiomeGenBase{
         this.spawnableMonsterList.clear();
         this.spawnableCreatureList.clear();
         this.spawnableCaveCreatureList.clear();
+        this.spawnableWaterCreatureList.clear();
     }
 }
 
