@@ -18,7 +18,15 @@ import cpw.mods.fml.relauncher.SideOnly;
 import com.MadokaMagica.mod_madokaMagica.factories.LabrynthGeneratorFactory;
 import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitch;
 import com.MadokaMagica.mod_madokaMagica.trackers.PMDataTracker;
+import com.MadokaMagica.mod_madokaMagica.managers.LabrynthManager;
 import com.MadokaMagica.mod_madokaMagica.MadokaMagicaMod;
+
+/*****************\
+ * IMPORTANT IDEA*
+\*****************/
+
+// TODO: Maybe have each labrynth act as a giant structure, with randomly generated entrances that are chosen at random when a plyaer enters
+// Basically, randomly generate a maze, with a few entrances and the witch at the center
 
 public class LabrynthProvider extends WorldProvider{
     // The diameter of the labrynth
@@ -27,6 +35,11 @@ public class LabrynthProvider extends WorldProvider{
 
     public boolean canSnow;
     public boolean canLightning;
+    public boolean canRSI; // Can Rain, Snow, Ice
+    public boolean perpetualRainAndThunder;
+    public boolean hasWeather;
+    public boolean hasSun;
+    public boolean hasStars;
     public double horizon;
     public String witchName;
     public LabrynthGeneratorFactory labrynthGeneratorFactory;
@@ -35,9 +48,15 @@ public class LabrynthProvider extends WorldProvider{
     public PMDataTracker tracker;
 
     public LabrynthProvider(){
+        // TODO: Move this stuff into LabrynthWorldServer, and have that class handle this shit
+        // By default, labrynths have no weather
         this.canSnow = false;
         this.hasNoSky = false;
         this.canLightning = false;
+        this.canRSI = false;
+        this.perpetualRainAndThunder = false;
+        this.hasWeather = false;
+        this.hasSun = false;
     }
 
     @Override
@@ -53,6 +72,61 @@ public class LabrynthProvider extends WorldProvider{
     @Override
     public boolean canDoLightning(Chunk chunk){
         return this.canLightning;
+    }
+
+    @Override
+    public boolean canDoRainSnowIce(Chunk chunk){
+        return this.canRSI;
+    }
+
+    @Override
+    public float getSunBrightness(float par1){
+        if(this.hasSun){
+            return super.getSunBrightness(par1);
+        }
+        return 0.0F;
+    }
+
+    @Override
+    public float getStarBrightness(float par1){
+        if(this.hasStars){
+            return super.getStarBrightness(par1);
+        }
+        return 0.0F;
+    }
+
+    @Override
+    public float getSunBrightnessFactor(float par1){
+        if(this.hasSun){
+            return super.getSunBrightnessFactor(par1);
+        }
+        return 0.0F;
+    }
+
+    @Override
+    public boolean shouldMapSpin(String p1, double p2, double p3, double p4){ 
+        return true;
+    }
+
+    @Override
+    public void resetRainAndThunder(){
+        if(!this.perpetualRainAndThunder){
+            super.resetRainAndThunder();
+        }
+    }
+
+    @Override
+    public void updateWeather(){
+        if(this.hasWeather){
+            super.updateWeather();
+        }
+    }
+
+    @Override
+    public void calculateInitialWeather(){
+        if(this.hasWeather){
+            super.calculateInitialWeather();
+        }
     }
 
     @Override
@@ -111,23 +185,15 @@ public class LabrynthProvider extends WorldProvider{
         return this.witchName;
     }
 
-    // TODO: Figure out if this method even exists anymore
-    // @Override
-    public static WorldProvider getProviderForDimension(int dimID){
-        // Alright, so I've finally figured out what this method is supposed to do.
-        // Based on net/minecraft/world/WorldProvider.java (lines:195-198) and net/minecraftforge/common/DimensionManager.java (lines:285-306)
-        //  I've ascertained that this method is supposed to return a NEW WorldProvider object every time it is called
-        //  Because I need a variable number of dimensions, I think I should implement my own dimension manager, and somehow modify this method to return that
-        // So, TODO: Finish this method
-
-        return null;
-    }
-
     @Override
     public ChunkCoordinates getRandomizedSpawnPoint(){
+        /*
         int x = MathHelper.getRandomIntegerInRange(this.worldObj.rand, (int)(this.owner.posX+MIN_WITCH_DISTANCE), (int)(MAX_LABRYNTH_WORLD_SIZE));
         int z = MathHelper.getRandomIntegerInRange(this.worldObj.rand, (int)(this.owner.posZ+MIN_WITCH_DISTANCE), (int)(MAX_LABRYNTH_WORLD_SIZE));
-        // TODO: Find a better Y value
-        return new ChunkCoordinates(x, 25, z);
+        int y = this.worldObj.getTopSolidOrLiquidBlock(x,z);
+        return new ChunkCoordinates(x,y,z);
+        */
+        return LabrynthManager.getInstance().getRandomStartingLocation();
     }
+
 }
