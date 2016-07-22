@@ -9,6 +9,7 @@ import net.minecraftforge.common.DimensionManager;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.world.WorldServer;
+import net.minecraft.util.ChunkCoordinates;
 
 import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitch;
 import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitchLabrynthEntrance;
@@ -236,5 +237,10 @@ public class LabrynthManager{
                     return;
             }
         }
+    }
+
+    public ChunkCoordinates getRandomStartingLocation(){
+        // TODO: Finish this method
+        return null;
     }
 }
