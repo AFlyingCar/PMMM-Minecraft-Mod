@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.ArrayList;
 
 import net.minecraft.world.WorldServer;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraftforge.common.DimensionManager;
 
 import com.MadokaMagica.mod_madokaMagica.world.LabrynthProvider;
@@ -22,7 +23,7 @@ public class LabrynthFactory{
         public boolean markForDestruction;
         public LabrynthWorldServer world;
         public float sizeMultiplier; // Multiplies by the size of the labrynth (changes based on the strength of the witch, the stronger the witch the bigger the labrynth)
-        public List<int[]> startingLocations;
+        public List<AxisAlignedBB> startingLocations;
     }
 
     public static LabrynthDetails createLabrynth(PMDataTracker tracker){
@@ -38,7 +39,7 @@ public class LabrynthFactory{
         details.dimName = dimName;
         details.world = (LabrynthWorldServer)customWorldServer;
         details.sizeMultiplier = 1; // TODO: Set this value properly
-        details.startingLocations = new ArrayList<int[]>();
+        details.startingLocations = new ArrayList<AxisAlignedBB>();
 
         LabrynthManager.getInstance().registerDetailsWithDimensionManager(details);
 
