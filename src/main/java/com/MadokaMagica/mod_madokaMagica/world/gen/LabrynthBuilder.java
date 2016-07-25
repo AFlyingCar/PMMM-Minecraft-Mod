@@ -2,10 +2,12 @@ package com.MadokaMagica.mod_madokaMagica.world.gen;
 
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Map.Entry;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Random;
 
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.World;
 import net.minecraft.block.Block;
 
@@ -55,6 +57,10 @@ public class LabrynthBuilder {
 
         public int type;
 
+        public boolean spawnable;
+
+        public AxisAlignedBB boundingBox;
+
         // An array specifying all doors that a part has
         public List<Door> doors;
 
@@ -72,12 +78,15 @@ public class LabrynthBuilder {
 
         List<LabrynthPart> parts = new ArrayList<LabrynthPart>();
 
-        LabrynthBuilder.buildLabrynthWalls(details.world,details.sizeMultiplier,0);
+        LabrynthBuilder.buildLabrynthBoundaries(details.world,details.sizeMultiplier,0);
         LabrynthBuilder.buildLabrynthParts(parts,details);
-        LabrynthBuilder.placeLabrynthParts(parts,details);
+
+        // Create all of the bounding boxes for each part
         for(LabrynthPart part : parts){
-            LabrynthBuilder.designateStartingLocation(details,part);
+            createBoundingBox(part);
         }
+
+        LabrynthBuilder.placeLabrynthParts(parts,details);
 
         return true;
     }
@@ -322,39 +331,56 @@ public class LabrynthBuilder {
     }
 
     public static void placeLabrynthParts(List<LabrynthPart> parts,LabrynthDetails details){
+        // Place every part
+        for(LabrynthPart part : parts){
+            // Place every block in each part
+            for(Entry<int[],Block> block : part.blocks.entrySet()){
+                int[] pos = block.getKey();
+                details.world.setBlock(pos[0],pos[1],pos[2],block.getValue(),0,2);
+            }
+
+            // Tell LabrynthDetails if this spot is spawnable
+            if(part.spawnable){
+                details.startingLocations.add(part.boundingBox);
+            }
+        }
     }
 
     // The walls of every labrynth is to be a labrynthTeleporter
     // The world, the radius multiplier, the thickness of the walls
-    public static void buildLabrynthWalls(World world,float mult,int thickness){
+    public static void buildLabrynthBoundaries(World world,float mult,int thickness){
         float radius = (LabrynthBuilder.DEFAULT_RADIUS * mult) + thickness;
 
         int xsize = (int)radius*2;
         int ysize = (int)radius*2;
         int zsize = (int)radius*2;
 
+        // TODO: Maybe make the walls out of bedrock instead?
+        // Or maybe make it randomized?
+        final Block wallBlock = MadokaMagicaBlocks.labrynthTeleporter;
+
         for(int x=0;x<=xsize;x++){
             for(int z=0;z<=zsize;z++){
-                world.setBlock(x,0,z,MadokaMagicaBlocks.labrynthTeleporter,0,2);
-                world.setBlock(x,ysize,z,MadokaMagicaBlocks.labrynthTeleporter,0,2);
+                world.setBlock(x,0,z,wallBlock,0,2);
+                world.setBlock(x,ysize,z,wallBlock,0,2);
             }
 
             for(int y=0;y<=ysize;y++){
-                world.setBlock(x,y,0,MadokaMagicaBlocks.labrynthTeleporter,0,2);
-                world.setBlock(x,y,zsize,MadokaMagicaBlocks.labrynthTeleporter,0,2);
+                world.setBlock(x,y,0,wallBlock,0,2);
+                world.setBlock(x,y,zsize,wallBlock,0,2);
             }
         }
 
         for(int y=0;y<=ysize;y++){
             for(int z=0;z<=zsize;z++){
-                world.setBlock(0,y,z,MadokaMagicaBlocks.labrynthTeleporter,0,2);
-                world.setBlock(xsize,y,z,MadokaMagicaBlocks.labrynthTeleporter,0,2);
+                world.setBlock(0,y,z,wallBlock,0,2);
+                world.setBlock(xsize,y,z,wallBlock,0,2);
             }
         }
 
         if(thickness != 0){
             try{
-                buildLabrynthWalls(world,mult,thickness-1);
+                buildLabrynthBoundaries(world,mult,thickness-1);
             }catch(StackOverflowError soe){
                 // We've reached maximum recursion depth, time to leave
                 System.out.println("WARNING! Thickness level was too big and recursion went too deep.");
@@ -363,6 +389,7 @@ public class LabrynthBuilder {
         }
     }
 
+    /*
     public static void designateStartingLocation(LabrynthDetails details,LabrynthPart part){
         int[] starting = new int[3]; //{x,y,z}
 
@@ -372,6 +399,11 @@ public class LabrynthBuilder {
             starting[2] = part.z;
             details.startingLocations.add(starting);
         }
+    }
+    */
+
+    public static void createBoundingBox(LabrynthPart part){
+        part.boundingBox = AxisAlignedBB.getBoundingBox(part.x,part.y,part.z,part.width,part.height,part.depth);
     }
 }
 
