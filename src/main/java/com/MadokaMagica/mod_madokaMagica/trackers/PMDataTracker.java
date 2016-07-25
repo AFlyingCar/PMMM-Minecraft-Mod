@@ -1,5 +1,6 @@
 package com.MadokaMagica.mod_madokaMagica.trackers;
 
+import java.util.UUID;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.List;
@@ -31,6 +32,9 @@ import com.MadokaMagica.mod_madokaMagica.managers.PlayerDataTrackerManager;
 // IMPORTANT
 // TODO: Re-write part of this class later so that it is more compatible with Witches and Minions
 // IMPORTANT
+
+// NOTE: These classes may quickly fill up save-files if there are lots of witches
+//       We should come up with a way to clean up these objects if they start to get out of control
 
 public class PMDataTracker {
     public static final int MAX_POTENTIAL = 100;
@@ -100,8 +104,6 @@ public class PMDataTracker {
         playerswinglasttime = entity.worldObj.getTotalWorldTime();
         player_state = 0;
 
-        loadTagData();
-
         ready = true;
     }
 
@@ -124,8 +126,6 @@ public class PMDataTracker {
         playerswinglasttime = entity.worldObj.getTotalWorldTime();
         player_state = 3;
 
-        loadTagData();
-
         ready = true;
     }
 
@@ -139,8 +139,6 @@ public class PMDataTracker {
         potential = calculatePotential();
         playerswinglasttime = entity.worldObj.getTotalWorldTime();
         player_state = 2;
-
-        loadTagData();
 
         ready = true;
     }
@@ -176,55 +174,115 @@ public class PMDataTracker {
 
     public void loadTagData(){
         NBTTagCompound tags = entity.getEntityData();
+
+        String failure = "Failed to load PMDataTracker tags! Save data is missing ";
+
+        if(tags.hasKey("ENTITY_UUID_MOST_SIG") && tags.hasKey("ENTITY_UUID_LEAST_SIG")){
+            UUID uuid = new UUID(tags.getLong("ENTITY_UUID_MOST_SIG"),
+                                 tags.getLong("ENTITY_UUID_LEAST_SIG")
+                                );
+            entity = Helper.getEntityFromUUID(uuid);
+        }else{
+            System.out.println(failure + "ENTITY_UUID_MOST_SIG or ENITTY_UUID_LEAST_SIG!");
+            return;
+        }
+
         // Get the player's potential
         if(tags.hasKey("PM_POTENTIAL")){
             potential = tags.getFloat("PM_POTENTIAL");
+        }else{
+            System.out.println(failure + "PM_POTENTIAL!");
+            return;
         }
 
         // Get Hero/Villain scores
         if(tags.hasKey("PM_HERO_SCORE")){
             heroScore = tags.getFloat("PM_HERO_SCORE");
+        }else{
+            System.out.println(failure + "PM_HERO_SCORE!");
+            return;
         }
         if(tags.hasKey("PM_VILLAIN_SCORE")){
             villainScore = tags.getFloat("PM_VILLAIN_SCORE");
+        }else{
+            System.out.println(failure + "PM_VILLAIN_SCORE!");
+            return;
         }
 
         // Get Aggressive/Passive score
         if(tags.hasKey("PM_AGGRESSIVE_SCORE")){
             aggressiveScore = tags.getFloat("PM_AGGRESSIVE_SCORE");
+        }else{
+            System.out.println(failure + "PM_AGGRESSIVE_SCORE!");
+            return;
         }
         if(tags.hasKey("PM_PASSIVE_SCORE")){
             passiveScore = tags.getFloat("PM_PASSIVE_SCORE");
+        }else{
+            System.out.println(failure + "PM_PASSIVE_SCORE!");
+            return;
         }
 
         // Enviroment-based scores
         if(tags.hasKey("PM_NATURE_SCORE")){
             natureScore = tags.getFloat("PM_NATURE_SCORE");
+        }else{
+            System.out.println(failure + "PM_NATURE_SCORE!");
+            return;
         }
         if(tags.hasKey("PM_DAY_SCORE")){
             dayScore = tags.getFloat("PM_DAY_SCORE");
+        }else{
+            System.out.println(failure + "PM_DAY_SCORE!");
+            return;
         }
         if(tags.hasKey("PM_NIGHT_SCORE")){
             dayScore = tags.getFloat("PM_NIGHT_SCORE");
+        }else{
+            System.out.println(failure + "PM_NIGHT_SCORE!");
+            return;
         }
 
         // engineering-type score
         if(tags.hasKey("PM_ENGINEERING_SCORE")){
             engineeringScore = tags.getFloat("PM_ENGINEERING_SCORE");
+        }else{
+            System.out.println(failure + "PM_ENGINEERING_SCORE!");
+            return;
         }
+
         if(tags.hasKey("PM_ARCHITECT_SCORE")){
             architectScore = tags.getFloat("PM_ARCHITECT_SCORE");
+        }else{
+            System.out.println(failure + "PM_ARCHITECT_SCORE!");
+            return;
         }
+
         if(tags.hasKey("PM_GREED_SCORE")){
             greedScore = tags.getFloat("PM_GREED_SCORE");
+        }else{
+            System.out.println(failure + "PM_GREED_SCORE!");
+            return;
         }
 
         if(tags.hasKey("PM_LIKES_LEVEL")){
             int[] level_data = tags.getIntArray("PM_LIKES_LEVEL");
             float like_amt = Helper.unpackFloat(level_data[1]);
             like_level.put(new Integer(level_data[0]),new Float(like_amt));
+        }else{
+            System.out.println(failure + "PM_LIKES_LEVEL!");
+            return;
         }
-        if(tags.hasKey("PM_LIKES_ENTITY")){
+
+        if(tags.hasKey("PM_PLAYER_STATE")){
+            player_state = tags.getInteger("PM_PLAYER_STATE");
+        }else{
+            System.out.println(failure + "PM_PLAYER_STATE!");
+            return;
+        }
+
+        // TODO: Rewrite this so that it actually fucking works (also re-enable it
+        if(tags.hasKey("PM_LIKES_ENTITY") && false){
             // list = [Integer,Float,Integer,Float,Integer,Float,...]
             int[] list = tags.getIntArray("PM_LIKES_ENTITY");
             // Maybe implement a sanity check here?
@@ -238,8 +296,13 @@ public class PMDataTracker {
                     val=Helper.unpackFloat(list[i]);
                 liked_entities.put(new Integer(id),new Float(val));
             }
+        }else{
+            System.out.println(failure + "PM_LIKES_ENTITY!");
+            return;
         }
-        if(tags.hasKey("PM_LIKES_ENTITY_TYPE")){
+
+        // TODO: Rewrite this so that it actually fucking works
+        if(tags.hasKey("PM_LIKES_ENTITY_TYPE") && false){
             int[] list = tags.getIntArray("PM_LIKES_ENTITY_TYPE");
             // Maybe implement a sanity check here?
             //   list MUST have an even number of elements
@@ -252,10 +315,9 @@ public class PMDataTracker {
                     val=Helper.unpackFloat(list[i]);
                 like_entity_type.put(new Integer(id),new Float(val));
             }
-        }
-
-        if(tags.hasKey("PM_PLAYER_STATE")){
-            player_state = tags.getInteger("PM_PLAYER_STATE");
+        }else{
+            System.out.println(failure + "PM_LIKES_ENTITY_TYPE!");
+            return;
         }
     }
 
@@ -272,6 +334,13 @@ public class PMDataTracker {
         tags.setFloat("PM_ARCHITECT_SCORE",  getArchitectScore()    );
         tags.setFloat("PM_GREED_SCORE",      getGreedScore()        );
         tags.setInteger("PM_PLAYER_STATE",   getPlayerState()       );
+        
+        tags.setTag("PM_LIKES_ENTITY",new NBTTagCompound());
+        tags.setTag("PM_LIKES_ENTITY_TYPE",new NBTTagCompound());
+
+        // Save the Entity's UUID number
+        tags.setLong("ENTITY_UUID_MOST_SIG",  entity.getUniqueID().getMostSignificantBits()  );
+        tags.setLong("ENTITY_UUID_LEAST_SIG", entity.getUniqueID().getLeastSignificantBits() );
     }
 
     public void updateData(){
@@ -382,6 +451,7 @@ public class PMDataTracker {
         updatedatatimer = 0;
     }
 
+    // TODO: Move these Event-subscription methods into an actual event-handler class
     @SubscribeEvent
     public void onEntityItemPickup(EntityItemPickupEvent event){
         if(event.entityPlayer == this.entity){
@@ -406,7 +476,8 @@ public class PMDataTracker {
                 }else if(event.source.getEntity() instanceof EntityVillager){
                     this.villainScore += (((EntityLiving)event.source.getEntity()).getMaxHealth()/event.ammount);
                 }else if(event.source.getEntity() instanceof EntityPlayer){
-                    PMDataTracker targetTracker = PlayerDataTrackerManager.getInstance().getTrackerByPlayer((EntityPlayer)event.source.getEntity());
+                    // TODO: Add some code here that increments hero score if the other player is a villain, and villain score if the other player is a hero
+                    PMDataTracker targetTracker = PlayerDataTrackerManager.getInstance().getTrackerByUUID(event.source.getEntity().getPersistentID());
                     this.heroScore += (((EntityLiving)event.source.getEntity()).getMaxHealth()/event.ammount) + Math.abs(1/(targetTracker.getHeroScore() - this.heroScore));
                     this.villainScore += (((EntityLiving)event.source.getEntity()).getMaxHealth()/event.ammount) + Math.abs(1/(targetTracker.getVillainScore() - this.villainScore));
                 }
