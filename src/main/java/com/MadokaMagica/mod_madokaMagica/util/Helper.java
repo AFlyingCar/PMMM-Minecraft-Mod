@@ -369,5 +369,22 @@ public class Helper{
         double num = rand.nextDouble()*100;
         return num < chance;
     }
+
+    public static Entity getEntityFromUUID(UUID uuid,World world){
+        for(Object e : world.getLoadedEntityList()){
+            if(!(e instanceof Entity)){
+                System.out.println("WARNING! FOUND UNKNOWN TYPE IN World#getLoadedEntityList()! ALL TYPES MUST BE OF Entity!");
+                return null;
+            }
+            if(((Entity)e).getPersistentID() == uuid)
+                return (Entity)e;
+        }
+        System.out.println("WARNING! Could not find Entity with persistent ID matching " + uuid);
+        return null;
+    }
+
+    public static Entity getEntityFromUUID(UUID uuid){
+        return getEntityFromUUID(uuid,MinecraftServer.getServer().getEntityWorld());
+    }
 }
 
