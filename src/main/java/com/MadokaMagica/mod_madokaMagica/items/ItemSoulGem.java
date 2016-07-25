@@ -159,12 +159,10 @@ public class ItemSoulGem extends Item{
            !soulgem.getTagCompound().hasKey("PLAYER_UUID_MOST_SIG"))
                 return null;
 
-        return PlayerDataTrackerManager.getInstance().getTrackerByPlayer(
-                    Helper.getPlayerOnServerByUUID(
-                        new UUID(
-                            soulgem.getTagCompound().getLong("PLAYER_UUID_MOST_SIG"),
-                            soulgem.getTagCompound().getLong("PLAYER_UUID_LEAST_SIG")
-                        )
+        return PlayerDataTrackerManager.getInstance().getTrackerByUUID(
+                    new UUID(
+                        soulgem.getTagCompound().getLong("PLAYER_UUID_MOST_SIG"),
+                        soulgem.getTagCompound().getLong("PLAYER_UUID_LEAST_SIG")
                     )
                );
     }
@@ -258,14 +256,12 @@ public class ItemSoulGem extends Item{
         NBTTagCompound nbt = stack.getTagCompound();
         if(nbt != null){
             if(nbt.hasKey("PLAYER_UUID_MOST_SIG") && nbt.hasKey("PLAYER_UUID_LEAST_SIG")){
-                return PlayerDataTrackerManager.getInstance().getTrackerByPlayer(
-                        Helper.getPlayerOnServerByUUID(
-                            new UUID(
-                                nbt.getLong("PLAYER_UUID_MOST_SIG"),
-                                nbt.getLong("PLAYER_UUID_LEAST_SIG")
-                                )
-                            )
-                        );
+                return PlayerDataTrackerManager.getInstance().getTrackerByUUID(
+                        new UUID(
+                            nbt.getLong("PLAYER_UUID_MOST_SIG"),
+                            nbt.getLong("PLAYER_UUID_LEAST_SIG")
+                        )
+                    );
             }
         }
         System.out.println("No Player exists for this stack.");
@@ -380,7 +376,7 @@ public class ItemSoulGem extends Item{
         nbt.setFloat("SG_DESPAIR",0);
 
 
-        PMDataTracker tracker = PlayerDataTrackerManager.getInstance().getTrackerByPlayer(player);
+        PMDataTracker tracker = PlayerDataTrackerManager.getInstance().getTrackerByUUID(player.getPersistentID());
 
         ItemSoulGemManager.getInstance().registerSoulGem(stack,tracker);
     }

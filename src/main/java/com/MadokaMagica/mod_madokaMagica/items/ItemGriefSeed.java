@@ -27,9 +27,9 @@ public class ItemGriefSeed extends ItemSoulGem{
     public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player){
         super.onItemRightClick(stack,world,player);
 
-        PMDataTracker tracker = PlayerDataTrackerManager.getInstance().getTrackerByPlayer(player);
+        PMDataTracker tracker = PlayerDataTrackerManager.getInstance().getTrackerByUUID(player.getPersistentID());
         if(tracker == null){
-            System.out.println("getTrackerByPlayer returned NULL!");
+            System.out.println("getTrackerByUUID returned NULL!");
             return stack;
         }
 
@@ -70,21 +70,21 @@ public class ItemGriefSeed extends ItemSoulGem{
            !griefseed.getTagCompound().hasKey("PLAYER_UUID_LEAST_SIG") ||
            !griefseed.getTagCompound().hasKey("PLAYER_UUID_MOST_SIG"))
                 return null;
-        return PlayerDataTrackerManager.getInstance().getTrackerByIdentifier(
+        return PlayerDataTrackerManager.getInstance().getTrackerByUUID(
                     new UUID(
                         griefseed.getTagCompound().getLong("PLAYER_UUID_LEAST_SIG"),
                         griefseed.getTagCompound().getLong("PLAYER_UUID_MOST_SIG")
-                    ).toString()
+                    )
                );
     }
 
     // Create an EntityItem from a EntityPMWitch object
     public Entity createEntity(EntityPMWitch entity){
-        Entity item = new EntityItem(witch.worldObj,entity.posX,entity.posY,entity.posZ);
+        Entity item = new EntityItem(entity.worldObj,entity.posX,entity.posY,entity.posZ);
         NBTTagCompound nbt = item.getEntityData();
         // Just another sanity check. 
         if(nbt == null){
-            System.out.println("ERROR! FAILED TO CREATE EntityItem->EntityPMWitch!");
+            System.out.println("ERROR! FAILED TO CREATE EntityItem from EntityPMWitch!");
             return null;
         }
 
@@ -93,7 +93,7 @@ public class ItemGriefSeed extends ItemSoulGem{
         // It's simple, we track the data tracker
         //      - The Entity "TrackerMan"
 
-        nbt.setTagCompound("EntityPMWitchData",data);
+        nbt.setTag("EntityPMWitchData",data);
         nbt.setBoolean("HAS_ENTITYPMWITCH_DATA",false); // TODO: Set this back to true once the above TODO has been completed
 
         return item;

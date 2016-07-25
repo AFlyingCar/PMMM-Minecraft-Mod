@@ -106,7 +106,7 @@ public class BlockLabrynthTeleporter extends BlockContainer {
 
     @Override
     public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer player, int side, float hitX, float hitY, float hitZ){
-        PMDataTracker tracker = PlayerDataTrackerManager.getInstance().getTrackerByPlayer(player);
+        PMDataTracker tracker = PlayerDataTrackerManager.getInstance().getTrackerByUUID(player.getPersistentID());
         if(tracker != null && tracker.isPuellaMagi()){
             ItemStack current_item = player.inventory.getCurrentItem();
             if(current_item != null && current_item.getItem() instanceof ItemSoulGem){

@@ -49,7 +49,7 @@ public class CommandDisplayInformation extends CommandBase{
             sendChat(getCommandSenderAsPlayer(sender),"Unknown player " + command[0]);
             return;
         }
-        PMDataTracker pmdt = PlayerDataTrackerManager.getInstance().getTrackerByPlayer(target);
+        PMDataTracker pmdt = PlayerDataTrackerManager.getInstance().getTrackerByUUID(target.getPersistentID());
         if(pmdt != null)
             for(String s : pmdt.toString().split("\n"))
                 sendChat(target,s);

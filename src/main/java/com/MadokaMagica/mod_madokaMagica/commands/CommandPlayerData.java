@@ -54,7 +54,7 @@ public class CommandPlayerData extends CommandBase {
             return;
         }
 
-        PMDataTracker pmdt = PlayerDataTrackerManager.getInstance().getTrackerByUsername(command[0]);
+        PMDataTracker pmdt = PlayerDataTrackerManager.getInstance().getTrackerByUUID(senderAsPlayer.worldObj.getPlayerEntityByName(command[0]).getPersistentID());
 
         if(pmdt == null){
             sendChat(senderAsPlayer,"Error: The target does not have a data tracker!");

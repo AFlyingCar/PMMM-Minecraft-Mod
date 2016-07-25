@@ -50,7 +50,7 @@ public class CommandStartWitchTransformation extends CommandBase{
             sendChat(getCommandSenderAsPlayer(sender),"Unknown player: " + command[0]);
             return;
         }
-        PMDataTracker tracker = PlayerDataTrackerManager.getInstance().getTrackerByPlayer(target);
+        PMDataTracker tracker = PlayerDataTrackerManager.getInstance().getTrackerByUUID(target.getPersistentID());
         if(!tracker.isTransformingIntoWitch()){
             MinecraftForge.EVENT_BUS.post(new MadokaMagicaWitchTransformationEvent(tracker));
         }
