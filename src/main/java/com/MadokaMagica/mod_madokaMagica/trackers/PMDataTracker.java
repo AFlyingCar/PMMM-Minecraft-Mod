@@ -813,4 +813,8 @@ public class PMDataTracker {
             return ((EntityLiving)entity).getCustomNameTag();
         }
     }
+
+    public UUID getEntityUUID(){
+        return entity.getPersistentID();
+    }
 }
