@@ -8,10 +8,13 @@ import net.minecraft.world.World;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.block.Block;
+import net.minecraft.nbt.NBTTagCompound;
 
 import com.MadokaMagica.mod_madokaMagica.items.ItemSoulGem;
 import com.MadokaMagica.mod_madokaMagica.util.Helper;
+import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitch;
 import com.MadokaMagica.mod_madokaMagica.trackers.PMDataTracker;
 import com.MadokaMagica.mod_madokaMagica.managers.PlayerDataTrackerManager;
 
@@ -74,4 +77,26 @@ public class ItemGriefSeed extends ItemSoulGem{
                     ).toString()
                );
     }
+
+    // Create an EntityItem from a EntityPMWitch object
+    public Entity createEntity(EntityPMWitch entity){
+        Entity item = new EntityItem(witch.worldObj,entity.posX,entity.posY,entity.posZ);
+        NBTTagCompound nbt = item.getEntityData();
+        // Just another sanity check. 
+        if(nbt == null){
+            System.out.println("ERROR! FAILED TO CREATE EntityItem->EntityPMWitch!");
+            return null;
+        }
+
+        NBTTagCompound data = new NBTTagCompound();
+        // TODO: Somehow make it so that this can keep track of the EntityPMWitch object's PMDataTracker object
+        // It's simple, we track the data tracker
+        //      - The Entity "TrackerMan"
+
+        nbt.setTagCompound("EntityPMWitchData",data);
+        nbt.setBoolean("HAS_ENTITYPMWITCH_DATA",false); // TODO: Set this back to true once the above TODO has been completed
+
+        return item;
+    }
 }
+
