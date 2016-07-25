@@ -1,5 +1,6 @@
 package com.MadokaMagica.mod_madokaMagica.handlers;
 
+import java.util.UUID;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -57,13 +58,14 @@ public class PMEventHandler{
     // If they do not, create one
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event){
-        PMDataTracker oldTracker = PlayerDataTrackerManager.getInstance().getTrackerByUsername(event.player.getDisplayName());
+        PMDataTracker oldTracker = PlayerDataTrackerManager.getInstance().getTrackerByUUID(event.player.getPersistentID());
         if(oldTracker != null){
                 oldTracker.entity = event.player;
                 oldTracker.loadTagData();
                 return;
         }
-        System.out.println("getTrackerByUsername returned null. Calling new PMDataTracker(...);");
+        // This should only happen if the player is brand new, and has never had a PMDataTracker assigned to them
+        System.out.println("getTrackerByUUID returned null. Calling new PMDataTracker(...);");
         PMDataTracker tracker = new PMDataTracker(event.player);
         PlayerDataTrackerManager.getInstance().addDataTracker(tracker);
         tracker.loadTagData();
@@ -132,7 +134,7 @@ public class PMEventHandler{
 
         // If it is an EntityPlayer and if that player is currently turning into a witch
         if(entity instanceof EntityPlayer){
-            PMDataTracker pmdt = PlayerDataTrackerManager.getInstance().getTrackerByPlayer((EntityPlayer)entity);
+            PMDataTracker pmdt = PlayerDataTrackerManager.getInstance().getTrackerByUUID(entity.getPersistentID());
             if(pmdt != null && pmdt.isTransformingIntoWitch()){
                 // TODO: Fix this later (I can't be bothered to do it right now)
                 ItemSoulGem soulgem = null; //ItemSoulGemManager.getInstance().getPlayerForSoulGemStack((EntityPlayer)entity);
@@ -168,7 +170,7 @@ public class PMEventHandler{
 
     @SubscribeEvent
     public boolean onRenderWorld(RenderWorldEvent.Post event){
-        for(Entry<String,PMDataTracker> trackerset : PlayerDataTrackerManager.getInstance().getTrackers().entrySet()){
+        for(Entry<UUID,PMDataTracker> trackerset : PlayerDataTrackerManager.getInstance().getTrackers().entrySet()){
             //if(trackerset.getValue() >= )
             // NOTE: We should test this, because maybe we want to only update these every x render events?
             //      The problem with this though is that that could make the effects flicker due to not updating often enough, which we don't want
