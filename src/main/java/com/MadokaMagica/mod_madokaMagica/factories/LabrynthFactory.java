@@ -1,5 +1,8 @@
 package com.MadokaMagica.mod_madokaMagica.factories;
 
+import java.util.List;
+import java.util.ArrayList;
+
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.DimensionManager;
 
@@ -18,6 +21,8 @@ public class LabrynthFactory{
         public String dimName;
         public boolean markForDestruction;
         public LabrynthWorldServer world;
+        public float sizeMultiplier; // Multiplies by the size of the labrynth (changes based on the strength of the witch, the stronger the witch the bigger the labrynth)
+        public List<int[]> startingLocations;
     }
 
     public static LabrynthDetails createLabrynth(PMDataTracker tracker){
@@ -32,6 +37,8 @@ public class LabrynthFactory{
         details.dimID = dimID;
         details.dimName = dimName;
         details.world = (LabrynthWorldServer)customWorldServer;
+        details.sizeMultiplier = 1; // TODO: Set this value properly
+        details.startingLocations = new ArrayList<int[]>();
 
         LabrynthManager.getInstance().registerDetailsWithDimensionManager(details);
 
