@@ -7,7 +7,9 @@ import java.util.Map.Entry;
 import net.minecraft.world.Explosion;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.monster.IMob;
 
@@ -74,7 +76,6 @@ public class PMEventHandler{
         System.out.println("getTrackerByUUID returned null. Calling new PMDataTracker(...);");
         PMDataTracker tracker = new PMDataTracker(event.player);
         PlayerDataTrackerManager.getInstance().addDataTracker(tracker);
-        tracker.loadTagData();
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
@@ -251,6 +252,13 @@ public class PMEventHandler{
 
         if(event.source.getSourceOfDamage() instanceof EntityPlayer){
             tracker = PlayerDataTrackerManager.getInstance().getTrackerByUUID(event.source.getSourceOfDamage().getPersistentID());
+
+            // Do this whole thing because I just spent 10 fucking minutes getting errors saying: Cannot cast EntityPlayerMP to EntityLivingBase, and cannot assign Entity to EntityLivingBase
+            //   Because some asshole decided to make the function's signature say it returns an Entity, and then apparently, buried in some code somewhere, decided to make it return an EntityClientPlayerMP
+            //   WHAT THE FUCK IS WRONG WITH YOU PEOPLE
+            //   Also, why the hell is there an EntityPlayer class, an EntityPlayerMP class, an EntityClientPlayerMP class, an EntityPlayerSP class, and an AbstractClientPlayer class, all in different fucking directories
+            //   I spent so much time just trying to follow the strain of logic of where this shit was!
+            EntityLivingBase source = event.source.getEntity().getClass() == EntityLiving.class ? ((EntityLiving)event.source.getEntity()) : (EntityPlayer)event.source.getEntity();
         
             if(Helper.isPlayerInVillage(event.source.getSourceOfDamage())){
                 if(event.source.getEntity() instanceof IMob){
@@ -260,14 +268,14 @@ public class PMEventHandler{
                 }else if(event.source.getEntity() instanceof EntityPlayer){
                     // TODO: Add some code here that increments hero score if the other player is a villain, and villain score if the other player is a hero
                     PMDataTracker targetTracker = PlayerDataTrackerManager.getInstance().getTrackerByUUID(event.source.getEntity().getPersistentID());
-                    tracker.setHeroScore(tracker.getHeroScore() + (((EntityLiving)event.source.getEntity()).getMaxHealth()/event.ammount) + Math.abs(1/(targetTracker.getHeroScore() - tracker.getHeroScore())));
-                    tracker.setHeroScore(tracker.getVillainScore() + (((EntityLiving)event.source.getEntity()).getMaxHealth()/event.ammount) + Math.abs(1/(targetTracker.getVillainScore() - tracker.getVillainScore())));
+                    tracker.setHeroScore(tracker.getHeroScore() + (source.getMaxHealth()/event.ammount) + Math.abs(1/(targetTracker.getHeroScore() - tracker.getHeroScore())));
+                    tracker.setHeroScore(tracker.getVillainScore() + (source.getMaxHealth()/event.ammount) + Math.abs(1/(targetTracker.getVillainScore() - tracker.getVillainScore())));
                 }
             }
             // NOTE: Maybe add something here to check for the player's home?
             // As in, they are defending their property?
             // Their home could just be considered the chunks that they spend the most time in on average
-            tracker.setAggressiveScore(tracker.getAggressiveScore() + (((EntityLiving)event.source.getEntity()).getMaxHealth()/event.ammount));
+            tracker.setAggressiveScore(tracker.getAggressiveScore() + (source.getMaxHealth()/event.ammount));
         }else if(event.source.getEntity() instanceof EntityPlayer){
             tracker = PlayerDataTrackerManager.getInstance().getTrackerByUUID(event.source.getEntity().getPersistentID());
             // TODO: Add something here to check if the player is running away
