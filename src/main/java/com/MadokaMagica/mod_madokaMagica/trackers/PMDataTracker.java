@@ -10,18 +10,10 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.item.ItemStack;
-
-import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
-import net.minecraftforge.event.entity.living.LivingAttackEvent;
-
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.eventhandler.EventPriority;
 
 import com.MadokaMagica.mod_madokaMagica.util.Helper;
 import com.MadokaMagica.mod_madokaMagica.items.ItemSoulGem;
@@ -451,48 +443,6 @@ public class PMDataTracker {
         updatedatatimer = 0;
     }
 
-    // TODO: Move these Event-subscription methods into an actual event-handler class
-    @SubscribeEvent
-    public void onEntityItemPickup(EntityItemPickupEvent event){
-        if(event.entityPlayer == this.entity){
-            // Is the time since last swinging less than the tolerance level
-            if(Math.abs(this.entity.worldObj.getTotalWorldTime()-this.playerswinglasttime) <= PMDataTracker.SWING_TOLERANCE){
-                // Was it actually an ore?
-                if(Helper.isItemOre(event.item.getEntityItem())){
-                    // How many things were in the stack?
-                    this.greedScore += 1*(event.item.getEntityItem().stackSize);
-                }
-            }
-        }
-    }
-
-    // We MUST make sure that we check for this, unless of course we aren't checking for it
-    @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public void onEntityLivingAttacked(LivingAttackEvent event){
-        if(event.source.getSourceOfDamage() == this.entity){
-            if(Helper.isPlayerInVillage(event.source.getSourceOfDamage())){
-                if(event.source.getEntity() instanceof IMob){
-                    this.heroScore += (((EntityLiving)event.source.getEntity()).getMaxHealth()/event.ammount);
-                }else if(event.source.getEntity() instanceof EntityVillager){
-                    this.villainScore += (((EntityLiving)event.source.getEntity()).getMaxHealth()/event.ammount);
-                }else if(event.source.getEntity() instanceof EntityPlayer){
-                    // TODO: Add some code here that increments hero score if the other player is a villain, and villain score if the other player is a hero
-                    PMDataTracker targetTracker = PlayerDataTrackerManager.getInstance().getTrackerByUUID(event.source.getEntity().getPersistentID());
-                    this.heroScore += (((EntityLiving)event.source.getEntity()).getMaxHealth()/event.ammount) + Math.abs(1/(targetTracker.getHeroScore() - this.heroScore));
-                    this.villainScore += (((EntityLiving)event.source.getEntity()).getMaxHealth()/event.ammount) + Math.abs(1/(targetTracker.getVillainScore() - this.villainScore));
-                }
-            }
-            // NOTE: Maybe add something here to check for the player's home?
-            // As in, they are defending their property?
-            // Their home could just be considered the chunks that they spend the most time in on average
-            this.aggressiveScore += (((EntityLiving)event.source.getEntity()).getMaxHealth()/event.ammount);
-        }else if(event.source.getEntity() == this.entity){
-            // TODO: Add something here to check if the player is running away
-            // And we can't just check if the player is getting hit
-            // Maybe check if the player is near the monster and hasn't attacked at all?
-        }
-    }
-
     // NOTE: Maybe do something here if Entity e is in liked_entities?
     private void cleanNearbyEntitiesMap(){
         float ctime = entity.worldObj.getTotalWorldTime();
@@ -751,6 +701,14 @@ public class PMDataTracker {
 
     public int getUpdateEffectsTime(){
         return updateeffectstimer;
+    }
+
+    public long getPlayerSwingLastTime(){ 
+        return playerswinglasttime;
+    }
+
+    public boolean getPlayerSwinging(){
+        return playerswinging;
     }
 
     public void resetEffectsTimer(){

@@ -4,16 +4,21 @@ import java.util.UUID;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import net.minecraft.entity.Entity;
 import net.minecraft.world.Explosion;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.passive.EntityVillager;
+import net.minecraft.entity.monster.IMob;
 
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.client.event.RenderWorldEvent;
 import net.minecraftforge.client.event.sound.PlaySoundEvent17;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
+import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.player.PlayerDestroyItemEvent;
+import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.event.world.WorldEvent.Save;
@@ -25,6 +30,7 @@ import cpw.mods.fml.common.eventhandler.Event;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.eventhandler.EventPriority;
 
+import com.MadokaMagica.mod_madokaMagica.util.Helper;
 import com.MadokaMagica.mod_madokaMagica.items.ItemSoulGem;
 import com.MadokaMagica.mod_madokaMagica.effects.PMEffects;
 import com.MadokaMagica.mod_madokaMagica.trackers.PMDataTracker;
@@ -223,6 +229,53 @@ public class PMEventHandler{
         }
 
         return true;
+    }
+
+    @SubscribeEvent
+    public void onEntityItemPickup(EntityItemPickupEvent event){
+        PMDataTracker tracker = PlayerDataTrackerManager.getInstance().getTrackerByUUID(event.entityPlayer.getPersistentID());
+        // Is the time since last swinging less than the tolerance level
+        if(Math.abs(tracker.entity.worldObj.getTotalWorldTime()-tracker.getPlayerSwingLastTime()) <= PMDataTracker.SWING_TOLERANCE){
+            // Was it actually an ore?
+            if(Helper.isItemOre(event.item.getEntityItem())){
+                // How many things were in the stack?
+                tracker.setGreedScore(tracker.getGreedScore() + 1*(event.item.getEntityItem().stackSize));
+            }
+        }
+    }
+
+    // We MUST make sure that we check for this, unless of course we aren't checking for it
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public void onEntityLivingAttacked(LivingAttackEvent event){
+        PMDataTracker tracker;
+
+        if(event.source.getSourceOfDamage() instanceof EntityPlayer){
+            tracker = PlayerDataTrackerManager.getInstance().getTrackerByUUID(event.source.getSourceOfDamage().getPersistentID());
+        
+            if(Helper.isPlayerInVillage(event.source.getSourceOfDamage())){
+                if(event.source.getEntity() instanceof IMob){
+                    tracker.setHeroScore(tracker.getHeroScore() + (((EntityLiving)event.source.getEntity()).getMaxHealth()/event.ammount));
+                }else if(event.source.getEntity() instanceof EntityVillager){
+                    tracker.setVillainScore(tracker.getVillainScore() + (((EntityLiving)event.source.getEntity()).getMaxHealth()/event.ammount));
+                }else if(event.source.getEntity() instanceof EntityPlayer){
+                    // TODO: Add some code here that increments hero score if the other player is a villain, and villain score if the other player is a hero
+                    PMDataTracker targetTracker = PlayerDataTrackerManager.getInstance().getTrackerByUUID(event.source.getEntity().getPersistentID());
+                    tracker.setHeroScore(tracker.getHeroScore() + (((EntityLiving)event.source.getEntity()).getMaxHealth()/event.ammount) + Math.abs(1/(targetTracker.getHeroScore() - tracker.getHeroScore())));
+                    tracker.setHeroScore(tracker.getVillainScore() + (((EntityLiving)event.source.getEntity()).getMaxHealth()/event.ammount) + Math.abs(1/(targetTracker.getVillainScore() - tracker.getVillainScore())));
+                }
+            }
+            // NOTE: Maybe add something here to check for the player's home?
+            // As in, they are defending their property?
+            // Their home could just be considered the chunks that they spend the most time in on average
+            tracker.setAggressiveScore(tracker.getAggressiveScore() + (((EntityLiving)event.source.getEntity()).getMaxHealth()/event.ammount));
+        }else if(event.source.getEntity() instanceof EntityPlayer){
+            tracker = PlayerDataTrackerManager.getInstance().getTrackerByUUID(event.source.getEntity().getPersistentID());
+            // TODO: Add something here to check if the player is running away
+            // And we can't just check if the player is getting hit
+            // Maybe check if the player is near the monster and hasn't attacked at all?
+        }else{
+            return;
+        }
     }
 }
 
