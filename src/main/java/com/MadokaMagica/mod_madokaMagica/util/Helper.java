@@ -133,7 +133,8 @@ public class Helper{
         //   Also, find out if the first three are chunk coordinates or something else
         Village nearest = e.worldObj.villageCollectionObj.findNearestVillage(e.chunkCoordX,e.chunkCoordY,e.chunkCoordZ,e.dimension);
         // Is the player within the village's radius. Ignore Y coordinate
-        return (Math.abs(nearest.getCenter().posX - e.posX) < nearest.getVillageRadius()) && (Math.abs(nearest.getCenter().posZ - e.posZ) < nearest.getVillageRadius());
+        // If the village is null, then no villages exist and, by extension, the player is not inside of a village
+        return nearest == null || ((Math.abs(nearest.getCenter().posX - e.posX) < nearest.getVillageRadius()) && (Math.abs(nearest.getCenter().posZ - e.posZ) < nearest.getVillageRadius()));
     }
 
     public static boolean isEntityUnderground(Entity e){
