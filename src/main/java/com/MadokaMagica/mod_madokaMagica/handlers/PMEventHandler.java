@@ -81,6 +81,7 @@ public class PMEventHandler{
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onWorldLoad(WorldEvent.Load event){
         LabrynthManager.getInstance().loadAll();
+        PlayerDataTrackerManager.getInstance().loadPersistentFile();
     }
 
     // If the soul gem becomes too damaged, then violently destroy it

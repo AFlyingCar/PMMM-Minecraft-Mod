@@ -141,6 +141,7 @@ public class PMDataTracker {
         liked_entities = new HashMap<Integer,Float>();
         like_level = new HashMap<Integer,Float>();
         nearbyEntitiesMap = new HashMap<Entity,Float>();
+        playerswinglasttime = 0;
         this.ready = false;
     }
 
@@ -169,6 +170,8 @@ public class PMDataTracker {
 
         String failure = "Failed to load PMDataTracker tags! Save data is missing ";
 
+        // We shouldn't need to do this anymore, since the entity is actually set later
+        /*
         if(tags.hasKey("ENTITY_UUID_MOST_SIG") && tags.hasKey("ENTITY_UUID_LEAST_SIG")){
             UUID uuid = new UUID(tags.getLong("ENTITY_UUID_MOST_SIG"),
                                  tags.getLong("ENTITY_UUID_LEAST_SIG")
@@ -178,6 +181,7 @@ public class PMDataTracker {
             System.out.println(failure + "ENTITY_UUID_MOST_SIG or ENITTY_UUID_LEAST_SIG!");
             return;
         }
+        */
 
         // Get the player's potential
         if(tags.hasKey("PM_POTENTIAL")){
@@ -330,9 +334,11 @@ public class PMDataTracker {
         tags.setTag("PM_LIKES_ENTITY",new NBTTagCompound());
         tags.setTag("PM_LIKES_ENTITY_TYPE",new NBTTagCompound());
 
+        /*
         // Save the Entity's UUID number
         tags.setLong("ENTITY_UUID_MOST_SIG",  entity.getUniqueID().getMostSignificantBits()  );
         tags.setLong("ENTITY_UUID_LEAST_SIG", entity.getUniqueID().getLeastSignificantBits() );
+        */
     }
 
     public void updateData(){

@@ -85,6 +85,51 @@ public class PlayerDataTrackerManager{
         return datatrackers;
     }
 
+    public boolean loadPersistentFile(){
+        System.out.println("Loading Persistent File.");
+        File file = getPDTMDataFile();
+        if(file == null){
+            System.out.println("ERROR: getPDTMDataFile returned null. Unable to load Persistent Data for PlayerDataTrackerManager");
+            return false;
+        }
+        NBTTagCompound data;
+
+        try{
+            data = CompressedStreamTools.read(file);
+        }catch(IOException exception){
+            System.out.println("An error occurred when reading persistent data for PlayerDataTrackerManager.");
+            exception.printStackTrace();
+            return false;
+        }
+
+        if(!data.hasKey("TrackerAmount")){
+            System.out.println("ERROR: PlayerDataTrackerManagerSaveData.dat does not contain a tag TrackerAmount. Unable to continue loading data.");
+            return false;
+        }
+        int trackerAmount = data.getInteger("TrackerAmount");
+        int c=0;
+
+        for(int i=0; i<trackerAmount;i++){
+            NBTTagCompound trackerNBT = data.getCompoundTag(""+i);
+            if(trackerNBT.hasKey("UUID_MOST_SIG") && trackerNBT.hasKey("UUID_LEAST_SIG")){
+                // Load up an empty data tracker, which will be filled later
+                // This way, every UUID that has existed will have a data tracker in memory, even if that data tracker is empty
+                // This is fine, since it will actually be loaded anyways (and they should never be used when a player isn't logged in/a witch doesn't exist)
+                datatrackers.put(new UUID(trackerNBT.getLong("UUID_MOST_SIG"),
+                                          trackerNBT.getLong("UUID_LEAST_SIG")
+                                         ),
+                                 new PMDataTracker()
+                        );
+                c++;
+            }else{
+                System.out.println("ERROR: A saved data tracker is missing required tags UUID_MOST_SIG or UUID_LEAST_SIG. Unable to proceed with loading PMDataTracker #" + i);
+            }
+        }
+
+        System.out.println("Found " + c + " valid Trackers.");
+        return true;
+    }
+
     public boolean writePersistentFile(){
         File file = getPDTMDataFile();
         if(file == null){
@@ -98,8 +143,10 @@ public class PlayerDataTrackerManager{
             NBTTagCompound trackerEntry = new NBTTagCompound();
             trackerEntry.setLong("UUID_MOST_SIG",trackerset.getKey().getMostSignificantBits());
             trackerEntry.setLong("UUID_LEAST_SIG",trackerset.getKey().getLeastSignificantBits());
+            trackerset.getValue().writeTags(trackerEntry);
             data.setTag(""+i,trackerEntry);
         }
+        System.out.println("Saving Signatures for " + i + " valid data trackers.");
         data.setInteger("TrackerAmount",i);
 
         try{
