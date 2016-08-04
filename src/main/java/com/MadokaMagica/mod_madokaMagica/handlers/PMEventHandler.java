@@ -80,8 +80,36 @@ public class PMEventHandler{
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onWorldLoad(WorldEvent.Load event){
-        LabrynthManager.getInstance().loadAll();
-        PlayerDataTrackerManager.getInstance().loadPersistentFile();
+        // Only load labrynths if they haven't been done so yet
+        // This fixes a problem where we tried to load labrynths multiple times (we must only do it once)
+        if(!LabrynthManager.getInstance().haveLabrynthsLoaded()){
+            // Make sure that the load methods run correctly before saying that they have actually loaded
+            if(LabrynthManager.getInstance().loadAll()){
+                LabrynthManager.getInstance().setHasLoaded(true);
+            }
+        }
+        if(PlayerDataTrackerManager.getInstance().havePMDataTrackersBeenLoaded()){
+            // Make sure that the load methods run correctly before saying that they have actually loaded
+            if(PlayerDataTrackerManager.getInstance().loadPersistentFile()){
+                PlayerDataTrackerManager.getInstance().setHasLoaded(true);
+            }
+        }
+    }
+
+    // Make sure that when the world is unloaded, we reset all of the data in the trackers
+    // We need to make sure we do this, otherwise we'll have garbage data left over if we try to switch between one world into another
+    // I'm not entirely sure what would happen if we didn't 'unload all data'
+    // I'm pretty sure it would be something bad, so it's probably best to do so regardless
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public void onWorldUnload(WorldEvent.Unload event){
+        if(LabrynthManager.getInstance().haveLabrynthsLoaded()){
+            LabrynthManager.getInstance().unloadAllData();
+            LabrynthManager.getInstance().setHasLoaded(false);
+        }
+        if(PlayerDataTrackerManager.getInstance().havePMDataTrackersBeenLoaded()){
+            PlayerDataTrackerManager.getInstance().unloadAllData();
+            PlayerDataTrackerManager.getInstance().setHasLoaded(false);
+        }
     }
 
     // If the soul gem becomes too damaged, then violently destroy it
