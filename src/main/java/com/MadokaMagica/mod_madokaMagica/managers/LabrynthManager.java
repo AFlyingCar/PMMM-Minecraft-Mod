@@ -27,12 +27,14 @@ public class LabrynthManager{
     private List<LabrynthDetails> allDetails;
 
     private boolean dirty;
+    private boolean hasLoaded;
 
 	private LabrynthManager(){
         entrances = new EntityPMWitchLabrynthEntrance[4096];
         allDetails = new ArrayList<LabrynthDetails>();
         dirty = true; // Save the first time it is loaded no matter what (This is for testing purposes)
         next = 0;
+        hasLoaded = false;
 		// TODO: Finish this method
 	}
 
@@ -43,6 +45,19 @@ public class LabrynthManager{
             }
         }
         return null;
+    }
+
+    // WARNING! This method will not save all data! We must make sure that this data is saved before calling this method!
+    public void unloadAllData(){
+        System.out.println("Unloading data for LabrynthManager.");
+        // Clear the list
+        for(int i=0; i<entrances.length; i++){
+            entrances[i] = null;
+        }
+        next = 0;
+        // Clear the other list
+        allDetails.clear();
+        dirty = false;
     }
 
 	public WorldServer loadLabrynth(EntityPMWitch witch){
@@ -148,13 +163,15 @@ public class LabrynthManager{
     }
 
     // From file
-    public void loadAll(){
+    public boolean loadAll(){
+        System.out.println("Loading all saved Labrynths...");
+
         File file = getLabrynthDataFile();
         if(!file.exists()){
             // We don't need to bother trying to read labrynth data if none was written
             // That would just be silly
             System.out.println("No Labrynth data file found.");
-            return;
+            return false;
         }
         NBTTagCompound nbt;
 
@@ -164,7 +181,7 @@ public class LabrynthManager{
             System.out.println("FATAL ERROR: UNABLE TO READ LABRYNTH DATA");
             exception.printStackTrace();
             //throw exception;
-            return;
+            return false;
         }
 
         int detailsNum = nbt.getInteger("MAX DETAILS");
@@ -176,6 +193,8 @@ public class LabrynthManager{
             NBTTagCompound dnbt = nbt.getCompoundTag(id);
             load(dnbt);
         }
+
+        return true;
     }
 
     public File getLabrynthDataFile(){
@@ -236,5 +255,13 @@ public class LabrynthManager{
                     return;
             }
         }
+    }
+
+    public boolean haveLabrynthsLoaded(){
+        return hasLoaded;
+    }
+
+    public void setHasLoaded(boolean loaded){
+        hasLoaded = loaded;
     }
 }

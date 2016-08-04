@@ -22,9 +22,18 @@ public class PlayerDataTrackerManager{
 	private HashMap<UUID,PMDataTracker> datatrackers;
 	private static PlayerDataTrackerManager instance;
 
+    private boolean hasLoaded;
+
 	private PlayerDataTrackerManager(){
 		datatrackers = new HashMap<UUID,PMDataTracker>();
+        hasLoaded = false;
 	}
+
+    // WARNING! This method will not save all data! We must make sure that this data is saved before calling this method!
+    public void unloadAllData(){
+        System.out.println("Unloading data for PlayerDataTrackerManager");
+        datatrackers.clear(); // Clear the list
+    }
 
 	public void addDataTracker(PMDataTracker tracker){
         datatrackers.put(tracker.getEntityUUID(),tracker);
@@ -169,6 +178,14 @@ public class PlayerDataTrackerManager{
             exception.printStackTrace();
             return null;
         }
+    }
+
+    public boolean havePMDataTrackersBeenLoaded(){
+        return hasLoaded;
+    }
+
+    public void setHasLoaded(boolean loaded){
+        hasLoaded = loaded;
     }
 
 	public static PlayerDataTrackerManager getInstance(){
