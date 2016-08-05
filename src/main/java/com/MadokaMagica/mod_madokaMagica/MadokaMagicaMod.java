@@ -49,6 +49,7 @@ import com.MadokaMagica.mod_madokaMagica.commands.CommandStartPuellaMagiTransfor
 import com.MadokaMagica.mod_madokaMagica.commands.CommandDisplayInformation;
 import com.MadokaMagica.mod_madokaMagica.commands.CommandTestWish;
 import com.MadokaMagica.mod_madokaMagica.commands.CommandPlayerData;
+import com.MadokaMagica.mod_madokaMagica.commands.CommandInspectManager;
 
 import com.MadokaMagica.mod_madokaMagica.managers.PlayerDataTrackerManager;
 import com.MadokaMagica.mod_madokaMagica.managers.ItemSoulGemManager;
@@ -211,6 +212,7 @@ public class MadokaMagicaMod {
         event.registerServerCommand( CommandDisplayInformation.getInstance() );
         event.registerServerCommand( CommandPlayerData.getInstance() );
         event.registerServerCommand( CommandTestWish.getInstance() );
+        event.registerServerCommand( CommandInspectManager.getInstance() );
     }
 
     @EventHandler
@@ -219,6 +221,7 @@ public class MadokaMagicaMod {
         itemSoulGemManager.manage();
     }
 
+    // Do we need to move this method too?
     // Jesus Christ this method looks like shit.
     @SideOnly(Side.CLIENT)
     @SubscribeEvent
