@@ -85,6 +85,8 @@ public class PMDataTracker {
 
     private boolean currentlyTransformingIntoWitch;
 
+    private boolean dirty;
+
     public PMDataTracker(EntityPlayer nplayer){
         entity = nplayer;
         like_entity_type = new HashMap<Integer,Float>();
@@ -97,11 +99,13 @@ public class PMDataTracker {
         player_state = 0;
 
         ready = true;
+        this.dirty = true;
     }
 
     public PMDataTracker(EntityPlayer nplayer, ItemStack nplayerSG){
         this(nplayer);
         playerSoulGem = nplayerSG;
+        this.dirty = true;
     }
 
     public PMDataTracker(EntityPMWitchMinion minion){
@@ -119,6 +123,7 @@ public class PMDataTracker {
         player_state = 3;
 
         ready = true;
+        this.dirty = true;
     }
 
     public PMDataTracker(EntityPMWitch witch){
@@ -133,6 +138,7 @@ public class PMDataTracker {
         player_state = 2;
 
         ready = true;
+        this.dirty = true;
     }
 
     public PMDataTracker(){
@@ -339,6 +345,7 @@ public class PMDataTracker {
         tags.setLong("ENTITY_UUID_MOST_SIG",  entity.getUniqueID().getMostSignificantBits()  );
         tags.setLong("ENTITY_UUID_LEAST_SIG", entity.getUniqueID().getLeastSignificantBits() );
         */
+        this.dirty = false; // We are no longer dirty if we have finished writing our data
     }
 
     public void updateData(){
@@ -447,6 +454,8 @@ public class PMDataTracker {
         // Saving
         PlayerDataTrackerManager.getInstance().saveTracker(this);
         updatedatatimer = 0;
+
+        this.dirty = true;
     }
 
     // NOTE: Maybe do something here if Entity e is in liked_entities?
@@ -487,6 +496,7 @@ public class PMDataTracker {
 
     public void setPlayerState(int state){
         player_state = state;
+        this.dirty = true;
     }
 
     public boolean isMinion(){
@@ -648,49 +658,63 @@ public class PMDataTracker {
 
     public void setPotential(float val){
         potential = val;
+        this.dirty = true;
     }
 
     public void setCorruption(float val){
-        if(playerSoulGem != null && playerSoulGem.getTagCompound() != null)
+        if(playerSoulGem != null && playerSoulGem.getTagCompound() != null){
             playerSoulGem.getTagCompound().setFloat("SG_DESPAIR",val);
+            this.dirty = true;
+        }
     }
 
     public void setArchitectScore(float val){
         architectScore = val;
+        this.dirty = true;
     }
     public void setEngineeringScore(float val){
         engineeringScore = val;
+        this.dirty = true;
     }
     public void setGreedScore(float val){
         greedScore = val;
+        this.dirty = true;
     }
 
     public void setWaterScore(float val){
         waterScore = val;
+        this.dirty = true;
     }
     public void setNatureScore(float val){
         natureScore = val;
+        this.dirty = true;
     }
     public void setDayScore(float val){
         dayScore = val;
+        this.dirty = true;
     }
     public void setNightScore(float val){
         nightScore = val;
+        this.dirty = true;
     }
 
     public void setHeroScore(float val){
         heroScore = val;
+        this.dirty = true;
     }
     public void setVillainScore(float val){
         villainScore = val;
+        this.dirty = true;
     }
 
     public void setPassiveScore(float val){
         passiveScore = val;
+        this.dirty = true;
     }
 
     public void setAggressiveScore(float val){
         aggressiveScore = val;
+        this.dirty = true;
     }
 
     public void incrementDataTimer(){
@@ -742,6 +766,7 @@ public class PMDataTracker {
 
     public void setIsTransformingIntoWitch(boolean newValue){
         this.currentlyTransformingIntoWitch = newValue;
+        this.dirty = true;
     }
 
     public boolean isTransformingIntoWitch(){
@@ -780,5 +805,13 @@ public class PMDataTracker {
 
     public UUID getEntityUUID(){
         return entity.getPersistentID();
+    }
+
+    public boolean isDirty(){
+        return dirty;
+    }
+
+    public void markDirty(){
+        this.dirty = true;
     }
 }
