@@ -88,7 +88,7 @@ public class PMEventHandler{
                 LabrynthManager.getInstance().setHasLoaded(true);
             }
         }
-        if(PlayerDataTrackerManager.getInstance().havePMDataTrackersBeenLoaded()){
+        if(!PlayerDataTrackerManager.getInstance().havePMDataTrackersBeenLoaded()){
             // Make sure that the load methods run correctly before saying that they have actually loaded
             if(PlayerDataTrackerManager.getInstance().loadPersistentFile()){
                 PlayerDataTrackerManager.getInstance().setHasLoaded(true);
@@ -102,6 +102,7 @@ public class PMEventHandler{
     // I'm pretty sure it would be something bad, so it's probably best to do so regardless
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onWorldUnload(WorldEvent.Unload event){
+        // TODO: Check and make sure that this doesn't get reset when simply switching dimensions, we only want to do it when the game-save is closed
         if(LabrynthManager.getInstance().haveLabrynthsLoaded()){
             LabrynthManager.getInstance().unloadAllData();
             LabrynthManager.getInstance().setHasLoaded(false);
@@ -122,8 +123,12 @@ public class PMEventHandler{
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onWorldSave(WorldEvent.Save event){
-        if(PlayerDataTrackerManager.getInstance() != null)
-            PlayerDataTrackerManager.getInstance().saveAllTrackers();
+        if(PlayerDataTrackerManager.getInstance() != null){
+            if(PlayerDataTrackerManager.getInstance().isDirty()){
+                //PlayerDataTrackerManager.getInstance().saveAllTrackers();
+                PlayerDataTrackerManager.getInstance().writePersistentFile();
+            }
+        }
 
         LabrynthManager.getInstance().saveAll();
     }
