@@ -65,12 +65,14 @@ public class PlayerDataTrackerManager{
         pmdt.writeTags(tags);
     }
 
+    /*
     public void saveAllTrackers(){
         for(Entry<UUID,PMDataTracker> trackerset : datatrackers.entrySet()){
             saveTracker(trackerset.getValue());
         }
         writePersistentFile();
     }
+    */
 
     @Deprecated
     public PMDataTracker getTrackerByUsername(String name){
@@ -154,6 +156,7 @@ public class PlayerDataTrackerManager{
             trackerEntry.setLong("UUID_LEAST_SIG",trackerset.getKey().getLeastSignificantBits());
             trackerset.getValue().writeTags(trackerEntry);
             data.setTag(""+i,trackerEntry);
+            i++;
         }
         System.out.println("Saving Signatures for " + i + " valid data trackers.");
         data.setInteger("TrackerAmount",i);
@@ -186,6 +189,14 @@ public class PlayerDataTrackerManager{
 
     public void setHasLoaded(boolean loaded){
         hasLoaded = loaded;
+    }
+
+    public boolean isDirty(){
+        for(Entry<UUID,PMDataTracker> trackerset : datatrackers.entrySet()){
+            if(trackerset.getValue().isDirty())
+                return true;
+        }
+        return false;
     }
 
 	public static PlayerDataTrackerManager getInstance(){
