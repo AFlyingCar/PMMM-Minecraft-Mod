@@ -50,6 +50,7 @@ import com.MadokaMagica.mod_madokaMagica.commands.CommandDisplayInformation;
 import com.MadokaMagica.mod_madokaMagica.commands.CommandTestWish;
 import com.MadokaMagica.mod_madokaMagica.commands.CommandPlayerData;
 import com.MadokaMagica.mod_madokaMagica.commands.CommandInspectManager;
+import com.MadokaMagica.mod_madokaMagica.commands.CommandBasicJavaInterpreter;
 
 import com.MadokaMagica.mod_madokaMagica.managers.PlayerDataTrackerManager;
 import com.MadokaMagica.mod_madokaMagica.managers.ItemSoulGemManager;
@@ -213,6 +214,7 @@ public class MadokaMagicaMod {
         event.registerServerCommand( CommandPlayerData.getInstance() );
         event.registerServerCommand( CommandTestWish.getInstance() );
         event.registerServerCommand( CommandInspectManager.getInstance() );
+        event.registerServerCommand( CommandBasicJavaInterpreter.getInstance() );
     }
 
     @EventHandler
