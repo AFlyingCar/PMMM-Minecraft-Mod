@@ -153,17 +153,18 @@ public class PMDataTracker {
 
     public void setEntity(Entity entity){
         this.entity = entity;
-        potential = calculatePotential();
         playerswinglasttime = entity.worldObj.getTotalWorldTime();
         loadTagData();
-        if(entity instanceof EntityPlayer)
+        if(entity instanceof EntityPlayer){
             player_state = 0;
-        else if(entity instanceof EntityPMWitch)
+            potential = calculatePotential();
+        }else if(entity instanceof EntityPMWitch){
             player_state = 2;
-        else if(entity instanceof EntityPMWitchMinion)
+        }else if(entity instanceof EntityPMWitchMinion){
             player_state = 3;
-        else
+        }else{
             player_state = -1;
+        }
         ready = true;
     }
 
