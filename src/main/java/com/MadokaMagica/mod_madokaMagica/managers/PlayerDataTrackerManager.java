@@ -96,6 +96,8 @@ public class PlayerDataTrackerManager{
         return datatrackers;
     }
 
+    // Returns true on data being successfully loaded, false otherwise
+    // Will return true if the file is not found (not necessarily a fatal error, but needs to be checked anyways)
     public boolean loadPersistentFile(){
         System.out.println("Loading Persistent File.");
         File file = getPDTMDataFile();
@@ -103,13 +105,27 @@ public class PlayerDataTrackerManager{
             System.out.println("ERROR: getPDTMDataFile returned null. Unable to load Persistent Data for PlayerDataTrackerManager");
             return false;
         }
-        NBTTagCompound data;
+
+        // This should fix the issue of the file not existing on a new world being created.
+        if(!file.exists()){
+            System.out.println("No PMDataTracker Persistent Data File found.");
+            this.setHasLoaded(true);
+            return true; // return true here so that we don't try again (if we didn't find it the first time, obviously we aren't going to find it again
+        }
+
+        NBTTagCompound data = null;
 
         try{
             data = CompressedStreamTools.read(file);
         }catch(IOException exception){
             System.out.println("An error occurred when reading persistent data for PlayerDataTrackerManager.");
             exception.printStackTrace();
+            return false;
+        }
+
+        if(data == null){
+            System.out.println("OH GOD WHAT THE HELL JUST HAPPENED?! WHY THE FUCK IS data NULL?!");
+            System.out.println("FUCK IT! ABORT ABORT!");
             return false;
         }
 
@@ -120,16 +136,21 @@ public class PlayerDataTrackerManager{
         int trackerAmount = data.getInteger("TrackerAmount");
         int c=0;
 
+        System.out.println("Found " + trackerAmount + " possible data trackers.");
+
         for(int i=0; i<trackerAmount;i++){
+            System.out.println("Attempting to load data tracker #"+(i+1));
             NBTTagCompound trackerNBT = data.getCompoundTag(""+i);
             if(trackerNBT.hasKey("UUID_MOST_SIG") && trackerNBT.hasKey("UUID_LEAST_SIG")){
                 // Load up an empty data tracker, which will be filled later
                 // This way, every UUID that has existed will have a data tracker in memory, even if that data tracker is empty
                 // This is fine, since it will actually be loaded anyways (and they should never be used when a player isn't logged in/a witch doesn't exist)
+                PMDataTracker tracker = new PMDataTracker();
+                tracker.tagData = trackerNBT;
                 datatrackers.put(new UUID(trackerNBT.getLong("UUID_MOST_SIG"),
                                           trackerNBT.getLong("UUID_LEAST_SIG")
                                          ),
-                                 new PMDataTracker()
+                                 tracker
                         );
                 c++;
             }else{
@@ -162,6 +183,8 @@ public class PlayerDataTrackerManager{
         data.setInteger("TrackerAmount",i);
 
         try{
+            // Make sure that this file exists so that we don't lose our data
+            file.createNewFile();
             CompressedStreamTools.write(data,file);
         }catch(IOException exception){
             System.out.println("An error occurred when writing persistent data for PlayerDataTrackerManager.");
