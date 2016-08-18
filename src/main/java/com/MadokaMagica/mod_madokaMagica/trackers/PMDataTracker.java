@@ -87,6 +87,12 @@ public class PMDataTracker {
 
     private boolean dirty;
 
+    // Some simple
+    private static int currID = 0;
+    private int ID; // Was going to make this final, but java is fucking stupid
+
+    public NBTTagCompound tagData;
+
     public PMDataTracker(EntityPlayer nplayer){
         entity = nplayer;
         like_entity_type = new HashMap<Integer,Float>();
@@ -100,12 +106,15 @@ public class PMDataTracker {
 
         ready = true;
         this.dirty = true;
+        ID=currID++;
     }
 
     public PMDataTracker(EntityPlayer nplayer, ItemStack nplayerSG){
         this(nplayer);
         playerSoulGem = nplayerSG;
         this.dirty = true;
+
+        ID=currID++;
     }
 
     public PMDataTracker(EntityPMWitchMinion minion){
@@ -124,6 +133,8 @@ public class PMDataTracker {
 
         ready = true;
         this.dirty = true;
+
+        ID=currID++;
     }
 
     public PMDataTracker(EntityPMWitch witch){
@@ -139,6 +150,8 @@ public class PMDataTracker {
 
         ready = true;
         this.dirty = true;
+
+        ID=currID++;
     }
 
     public PMDataTracker(){
@@ -149,6 +162,8 @@ public class PMDataTracker {
         nearbyEntitiesMap = new HashMap<Entity,Float>();
         playerswinglasttime = 0;
         this.ready = false;
+
+        ID=currID++;
     }
 
     public void setEntity(Entity entity){
@@ -172,8 +187,10 @@ public class PMDataTracker {
         return ready;
     }
 
-    public void loadTagData(){
-        NBTTagCompound tags = entity.getEntityData();
+    // Returns true if successfully loaded, false otherwise
+    public boolean loadTagData(){
+        //NBTTagCompound tags = entity.getEntityData();
+        NBTTagCompound tags = this.tagData; // Do this for backwards-compatibility
 
         String failure = "Failed to load PMDataTracker tags! Save data is missing ";
 
@@ -195,7 +212,7 @@ public class PMDataTracker {
             potential = tags.getFloat("PM_POTENTIAL");
         }else{
             System.out.println(failure + "PM_POTENTIAL!");
-            return;
+            return false;
         }
 
         // Get Hero/Villain scores
@@ -203,13 +220,13 @@ public class PMDataTracker {
             heroScore = tags.getFloat("PM_HERO_SCORE");
         }else{
             System.out.println(failure + "PM_HERO_SCORE!");
-            return;
+            return false;
         }
         if(tags.hasKey("PM_VILLAIN_SCORE")){
             villainScore = tags.getFloat("PM_VILLAIN_SCORE");
         }else{
             System.out.println(failure + "PM_VILLAIN_SCORE!");
-            return;
+            return false;
         }
 
         // Get Aggressive/Passive score
@@ -217,13 +234,13 @@ public class PMDataTracker {
             aggressiveScore = tags.getFloat("PM_AGGRESSIVE_SCORE");
         }else{
             System.out.println(failure + "PM_AGGRESSIVE_SCORE!");
-            return;
+            return false;
         }
         if(tags.hasKey("PM_PASSIVE_SCORE")){
             passiveScore = tags.getFloat("PM_PASSIVE_SCORE");
         }else{
             System.out.println(failure + "PM_PASSIVE_SCORE!");
-            return;
+            return false;
         }
 
         // Enviroment-based scores
@@ -231,19 +248,19 @@ public class PMDataTracker {
             natureScore = tags.getFloat("PM_NATURE_SCORE");
         }else{
             System.out.println(failure + "PM_NATURE_SCORE!");
-            return;
+            return false;
         }
         if(tags.hasKey("PM_DAY_SCORE")){
             dayScore = tags.getFloat("PM_DAY_SCORE");
         }else{
             System.out.println(failure + "PM_DAY_SCORE!");
-            return;
+            return false;
         }
         if(tags.hasKey("PM_NIGHT_SCORE")){
             dayScore = tags.getFloat("PM_NIGHT_SCORE");
         }else{
             System.out.println(failure + "PM_NIGHT_SCORE!");
-            return;
+            return false;
         }
 
         // engineering-type score
@@ -251,21 +268,21 @@ public class PMDataTracker {
             engineeringScore = tags.getFloat("PM_ENGINEERING_SCORE");
         }else{
             System.out.println(failure + "PM_ENGINEERING_SCORE!");
-            return;
+            return false;
         }
 
         if(tags.hasKey("PM_ARCHITECT_SCORE")){
             architectScore = tags.getFloat("PM_ARCHITECT_SCORE");
         }else{
             System.out.println(failure + "PM_ARCHITECT_SCORE!");
-            return;
+            return false;
         }
 
         if(tags.hasKey("PM_GREED_SCORE")){
             greedScore = tags.getFloat("PM_GREED_SCORE");
         }else{
             System.out.println(failure + "PM_GREED_SCORE!");
-            return;
+            return false;
         }
 
         if(tags.hasKey("PM_LIKES_LEVEL")){
@@ -274,14 +291,14 @@ public class PMDataTracker {
             like_level.put(new Integer(level_data[0]),new Float(like_amt));
         }else{
             System.out.println(failure + "PM_LIKES_LEVEL!");
-            return;
+            return false;
         }
 
         if(tags.hasKey("PM_PLAYER_STATE")){
             player_state = tags.getInteger("PM_PLAYER_STATE");
         }else{
             System.out.println(failure + "PM_PLAYER_STATE!");
-            return;
+            return false;
         }
 
         // TODO: Rewrite this so that it actually fucking works (also re-enable it
@@ -301,7 +318,7 @@ public class PMDataTracker {
             }
         }else{
             System.out.println(failure + "PM_LIKES_ENTITY!");
-            return;
+            return false;
         }
 
         // TODO: Rewrite this so that it actually fucking works
@@ -320,8 +337,10 @@ public class PMDataTracker {
             }
         }else{
             System.out.println(failure + "PM_LIKES_ENTITY_TYPE!");
-            return;
+            return false;
         }
+
+        return true;
     }
 
     public void writeTags(NBTTagCompound tags){
