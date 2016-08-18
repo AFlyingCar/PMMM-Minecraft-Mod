@@ -28,7 +28,9 @@ import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitch;
 import com.MadokaMagica.mod_madokaMagica.entities.ai.EntityAIWanderWithChunkBias;
 import com.MadokaMagica.mod_madokaMagica.entities.ai.EntityAIWanderWithVillageBias;
 import com.MadokaMagica.mod_madokaMagica.entities.ai.EntityAIRandomTeleportPlayerOrVillager;
+import com.MadokaMagica.mod_madokaMagica.entities.ai.EntityAICreateRandomTeleporterBlocks;
 import com.MadokaMagica.mod_madokaMagica.factories.LabrynthFactory.LabrynthDetails;
+import com.MadokaMagica.mod_madokaMagica.factories.LabrynthFactory;
 import com.MadokaMagica.mod_madokaMagica.world.LabrynthWorldServer; 
 
 public class EntityPMWitchLabrynthEntrance extends EntityCreature{
@@ -53,6 +55,9 @@ public class EntityPMWitchLabrynthEntrance extends EntityCreature{
         rand = new Random();
         setupAITasks();
 
+        // TODO [CRITICAL]: Find a way to check if we should do this (we shouldn't do this when loading from disk, only when spawned without a home)
+        createRandomizedWitch();
+
         System.out.println("Size of Entrance task list: " + this.tasks.taskEntries.size());
         System.out.println("Size of Entrance targetTask list: " + this.targetTasks.taskEntries.size());
     }
@@ -61,7 +66,8 @@ public class EntityPMWitchLabrynthEntrance extends EntityCreature{
         this.tasks.taskEntries.clear();
         this.targetTasks.taskEntries.clear();
         this.tasks.addTask(0,new EntityAIWanderWithVillageBias(this,0.05F));
-        this.tasks.addTask(1,new EntityAIRandomTeleportPlayerOrVillager(this));
+        //this.tasks.addTask(1,new EntityAIRandomTeleportPlayerOrVillager(this));
+        this.tasks.addTask(1,new EntityAICreateRandomTeleporterBlocks(this));
     }
 
     @Override
@@ -208,5 +214,25 @@ public class EntityPMWitchLabrynthEntrance extends EntityCreature{
     @Override
     public boolean isAIEnabled(){
         return true;
+    }
+
+    // A method for creating a randomized witch upon creation
+    protected void createRandomizedWitch(){
+        // Create a randomized data tracker
+        PMDataTracker randTracker = new PMDataTracker();
+        randTracker.tagData = new NBTTagCompound(); // Create a new NBTTagCompound to prevent a NullPointerException
+        randTracker.randomize();
+
+        // Build a new labrynth
+        LabrynthDetails randDetails = LabrynthFactory.createLabrynth(randTracker);
+
+        // Create a new witch
+        EntityPMWitch randWitch = new EntityPMWitch(randDetails.world);
+        randTracker.setEntity(randWitch);
+
+        // Set our own data to this new randomized data
+        this.labrynthDetails = randDetails;
+        this.linkedWorldObj = randDetails.world;
+        this.witch = randWitch;
     }
 }
