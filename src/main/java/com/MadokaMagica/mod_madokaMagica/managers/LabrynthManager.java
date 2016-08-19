@@ -215,18 +215,24 @@ public class LabrynthManager{
         details.dimID = nbt.getInteger("dimID");
         details.dimName = nbt.getString("dimName");
 
+        System.out.println("Attempting to load dimension #" + details.dimID + "("+details.dimName+")");
+
         details.world = LabrynthWorldServer.loadFromNBT(nbt);
 
-        registerDetailsWithDimensionManager(details);
+        if(details.world != null){
+            DimensionManager.registerDimension(details.dimID,MadokaMagicaConfig.labrynthProviderID);
+            DimensionManager.setWorld(details.dimID,details.world);
+        }
 
         this.allDetails.add(details);
     }
 
+    /*
     public void registerDetailsWithDimensionManager(LabrynthDetails details){
         DimensionManager.registerDimension(details.dimID,MadokaMagicaConfig.labrynthProviderID);
         DimensionManager.initDimension(details.dimID);
-        DimensionManager.setWorld(details.dimID,details.world);
     }
+    */
 
     /*
      * Methods related to Labrynth Entrances
