@@ -12,7 +12,10 @@ import java.nio.ByteBuffer;
 
 import org.lwjgl.opengl.GL11;
 
+import cpw.mods.fml.common.FMLCommonHandler;
+
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.Minecraft;
@@ -22,6 +25,7 @@ import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.network.play.server.S07PacketRespawn;
 import net.minecraft.village.Village;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.ChunkCoordinates;
@@ -30,6 +34,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.block.Block;
 import net.minecraftforge.oredict.OreDictionary;
+import net.minecraftforge.common.DimensionManager;
 
 import com.MadokaMagica.mod_madokaMagica.trackers.PMDataTracker;
 import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitchMinion;
@@ -55,6 +60,7 @@ public class Helper{
         // Round player position up.
         if(!p.worldObj.canBlockSeeTheSky((int)(0.55+p.posX),(int)(0.55+p.posY),(int)(0.55+p.posZ))){
             // The player is not underground if they are inside a building, so...
+            // TODO: Finish this
             // if(p.)
         }
         return false;
@@ -386,6 +392,97 @@ public class Helper{
 
     public static Entity getEntityFromUUID(UUID uuid){
         return getEntityFromUUID(uuid,MinecraftServer.getServer().getEntityWorld());
+    }
+
+    public static void transportEntity(Entity entity,double x){
+        transportEntity(entity,x,entity.posY);
+    }
+
+    public static void transportEntity(Entity entity,double x,double y){
+        transportEntity(entity,x,y,entity.posZ);
+    }
+
+    public static void transportEntity(Entity entity,double x,double y,double z){
+        transportEntity(entity,x,y,z,entity.dimension);
+    }
+
+    public static void transportEntity(Entity entity,double x, double y, double z, int dimension){
+        if(entity == null){
+            throw new IllegalArgumentException("entity cannot be null!");
+        }
+        // Get the old world (request it for sanity's sake)
+        WorldServer oldWorld = requestDimensionWorld(entity.dimension);
+        WorldServer newWorld;
+
+        boolean wasPlayer = false;
+        boolean changedDimensions = false;
+
+        // Are we changing dimensions?
+        if(dimension != entity.dimension){
+            // Get the new world (request it so that it is loaded and initialized in case it hasn't been)
+            newWorld = requestDimensionWorld(dimension);
+
+            // Try to do player-specific stuff
+            EntityPlayerMP player = (entity instanceof EntityPlayerMP) ? (EntityPlayerMP)entity : null;
+            if(player != null){
+                wasPlayer = true;
+                WorldServer world = (WorldServer)player.worldObj;
+
+                player.dimension = dimension;
+                player.playerNetServerHandler.sendPacket(new S07PacketRespawn(player.dimension,player.worldObj.difficultySetting,((WorldServer)player.worldObj).getWorldInfo().getTerrainType(),player.theItemInWorldManager.getGameType()));
+                ((WorldServer)player.worldObj).getPlayerManager().removePlayer(player);
+                ((WorldServer)player.worldObj).removePlayerEntityDangerously(player); // TODO: Should we be worried about this?
+                player.isDead = false;
+
+                oldWorld.getPlayerManager().removePlayer(player); // Just in case ;)
+                newWorld.getPlayerManager().addPlayer(player);
+
+                player.theItemInWorldManager.setWorld(newWorld);
+
+                // Make sure the client knows whats up
+                player.mcServer.getConfigurationManager().updateTimeAndWeatherForPlayer(player,((WorldServer)player.worldObj));
+                player.mcServer.getConfigurationManager().syncPlayerInventory(player);
+            }
+
+            oldWorld.onEntityRemoved(entity);
+            newWorld.spawnEntityInWorld(entity);
+            entity.setWorld(newWorld);
+            changedDimensions = true;
+        }else{
+            newWorld = oldWorld;
+        }
+
+        entity.worldObj.updateEntityWithOptionalForce(entity,false);
+
+        // Load the chunk if entity is a player
+        if(wasPlayer){
+            newWorld.getChunkProvider().loadChunk(MathHelper.floor_double(entity.posX)>>4,MathHelper.floor_double(entity.posZ)>>4);
+            // Fire an event that tells all other mods that we've changed dimensions, but only do so if we actually have done so
+            if(changedDimensions){
+                FMLCommonHandler.instance().firePlayerChangedDimensionEvent((EntityPlayer)entity,oldWorld.provider.dimensionId,newWorld.provider.dimensionId);
+            }
+        }
+
+        // Finally, change their position
+        // Do this last because I'm not sure if the whole changing dimensions thing messes up positioning
+        // So just do it down here just to be safe
+        entity.setPosition(x,y,z);
+    }
+
+    public static WorldServer requestDimensionWorld(int id){
+        if(!DimensionManager.isDimensionRegistered(id)){
+            return null;
+        }
+
+        WorldServer world = DimensionManager.getWorld(id);
+
+        // Is the world null? Is the world's provider?
+        if(world == null || world.provider == null){
+            DimensionManager.initDimension(id);
+            world = DimensionManager.getWorld(id);
+        }
+        
+        return world;
     }
 }
 
