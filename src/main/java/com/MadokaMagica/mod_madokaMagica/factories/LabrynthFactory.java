@@ -11,6 +11,7 @@ import com.MadokaMagica.mod_madokaMagica.factories.LabrynthWorldServerFactory;
 import com.MadokaMagica.mod_madokaMagica.trackers.PMDataTracker;
 import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitch;
 import com.MadokaMagica.mod_madokaMagica.managers.LabrynthManager;
+import com.MadokaMagica.mod_madokaMagica.MadokaMagicaConfig;
 
 public class LabrynthFactory{
     public static class LabrynthDetails{
@@ -26,14 +27,18 @@ public class LabrynthFactory{
         String worldType = ""; // TODO: Set this properly
         int providerID;
 
-        WorldServer customWorldServer = LabrynthWorldServerFactory.createWorldServer(tracker,dimID);
 
         LabrynthDetails details = new LabrynthDetails();
         details.dimID = dimID;
         details.dimName = dimName;
-        details.world = (LabrynthWorldServer)customWorldServer;
 
-        LabrynthManager.getInstance().registerDetailsWithDimensionManager(details);
+        DimensionManager.registerDimension(details.dimID,MadokaMagicaConfig.labrynthProviderID);
+        DimensionManager.initDimension(details.dimID);
+
+        // Do this after to fix a runtime error 
+        WorldServer customWorldServer = LabrynthWorldServerFactory.createWorldServer(tracker,dimID);
+        details.world = (LabrynthWorldServer)customWorldServer;
+        DimensionManager.setWorld(details.dimID,details.world);
 
         return details;
     }
