@@ -207,10 +207,19 @@ public class PMDataTracker {
         }
         */
 
+        // Get the state first
+        if(tags.hasKey("PM_PLAYER_STATE")){
+            player_state = tags.getInteger("PM_PLAYER_STATE");
+        }else{
+            System.out.println(failure + "PM_PLAYER_STATE!");
+            return false;
+        }
+
         // Get the player's potential
         if(tags.hasKey("PM_POTENTIAL")){
             potential = tags.getFloat("PM_POTENTIAL");
-        }else{
+        }else if(player_state > 1){
+            // Only fail if they aren't a player or puella magi (those are the only states were potential is needed or allowed)
             System.out.println(failure + "PM_POTENTIAL!");
             return false;
         }
@@ -291,13 +300,6 @@ public class PMDataTracker {
             like_level.put(new Integer(level_data[0]),new Float(like_amt));
         }else{
             System.out.println(failure + "PM_LIKES_LEVEL!");
-            return false;
-        }
-
-        if(tags.hasKey("PM_PLAYER_STATE")){
-            player_state = tags.getInteger("PM_PLAYER_STATE");
-        }else{
-            System.out.println(failure + "PM_PLAYER_STATE!");
             return false;
         }
 
