@@ -29,10 +29,6 @@ public class LabrynthWorldServer extends WorldServer{
         this.tracker = tracker;
     }
 
-    protected IChunkProvider createChunkProvider(){
-        return chunkProvider;
-    }
-
     public static boolean verifyNBTIntegrity(NBTTagCompound nbt){
         return (nbt.hasKey("dimID") &&
                 nbt.hasKey("ENTITY_UUID_MOST_SIG") &&
