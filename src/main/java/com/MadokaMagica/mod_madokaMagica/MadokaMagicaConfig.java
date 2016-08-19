@@ -9,6 +9,8 @@ public class MadokaMagicaConfig{
     public static boolean enableCorruptionVisualEffects;
     public static boolean killLabrynthEntranceWithoutWitchOrLabrynth;
     public static boolean deleteBlockLabrynthTeleporterWithoutTileEntityOrLinkedWorld;
+    public static boolean createRandomizedLabrynthsIfNoneExist;
+    public static boolean canDamageLabrynthEntrances;
     public static int labrynthDimensionID;
     public static int labrynthProviderID;
 
@@ -24,6 +26,8 @@ public class MadokaMagicaConfig{
             useDebugModels = cfg.get("Debug","UseDebugModels",false).getBoolean(false);
             killLabrynthEntranceWithoutWitchOrLabrynth = cfg.get("Debug","KillLabrynthEntranceWithoutWitchOrLabrynth",false).getBoolean(false);
             deleteBlockLabrynthTeleporterWithoutTileEntityOrLinkedWorld = cfg.get("Debug","DeleteBlockLabrynthTeleporterWithoutTileEntityOrLinkedWorld",true).getBoolean(true);
+            createRandomizedLabrynthsIfNoneExist = cfg.get("Debug","createRandomizedLabrynthsIfNoneExist",true).getBoolean(true);
+            canDamageLabrynthEntrances = cfg.get("Debug","canDamageLabrynthEntrances",false).getBoolean(false);
 
             /*
              * Effects
