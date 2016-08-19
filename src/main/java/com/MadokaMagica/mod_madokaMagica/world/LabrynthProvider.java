@@ -73,6 +73,7 @@ public class LabrynthProvider extends WorldProvider{
         return 4;
     }
 
+    // The location to save our labrynths to
     @Override
     @SideOnly(Side.CLIENT)
     public String getSaveFolder(){
@@ -93,12 +94,8 @@ public class LabrynthProvider extends WorldProvider{
 
     @Override
     public IChunkProvider createChunkGenerator(){
-        WorldServer server = (WorldServer)MinecraftServer.getServer().getEntityWorld();
-        if(server instanceof LabrynthWorldServer){
-            return ((LabrynthWorldServer)server).createChunkProvider();
-        }
-        // This method shouldn't ever be called if we aren't in a Labrynth, and a Labrynth should never have a WorldServer that isn't a LabrynthWorldServer
-        return null;
+        //WorldServer server = (WorldServer)MinecraftServer.getServer().getEntityWorld();
+        return new LabrynthGenerator(worldObj,worldObj.getWorldInfo().getSeed(),false);
     }
 
     @Override
