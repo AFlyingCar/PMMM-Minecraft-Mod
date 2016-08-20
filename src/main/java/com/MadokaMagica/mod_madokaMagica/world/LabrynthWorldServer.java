@@ -13,7 +13,9 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraftforge.common.DimensionManager;
 
 import com.MadokaMagica.mod_madokaMagica.trackers.PMDataTracker;
+import com.MadokaMagica.mod_madokaMagica.managers.LabrynthManager;
 import com.MadokaMagica.mod_madokaMagica.managers.PlayerDataTrackerManager;
+import com.MadokaMagica.mod_madokaMagica.factories.LabrynthFactory.LabrynthDetails;
 import com.MadokaMagica.mod_madokaMagica.util.Helper;
 
 public class LabrynthWorldServer extends WorldServer{
@@ -21,12 +23,14 @@ public class LabrynthWorldServer extends WorldServer{
     public boolean isCold;
     public int time; // 0 - Permanent day-time, 1 - Permanent night time, 2 - Permanent evening, 3 - Permanent morning
     public int stormy; // 0 - nothing, 1 - raining, 2 - thundering
+    public LabrynthDetails details; // The LabrynthDetails object for ourself
     //public IChunkProvider provider;
 
-    public LabrynthWorldServer(MinecraftServer server, ISaveHandler saveHandler, String name, int dimID, WorldSettings settings, Profiler profiler,PMDataTracker tracker){
+    public LabrynthWorldServer(MinecraftServer server, ISaveHandler saveHandler, String name, int dimID, WorldSettings settings, Profiler profiler,PMDataTracker tracker, LabrynthDetails details){
         super(server,saveHandler,name,dimID,settings,profiler);
 
         this.tracker = tracker;
+        this.details = details;
     }
 
     public static boolean verifyNBTIntegrity(NBTTagCompound nbt){
@@ -43,6 +47,7 @@ public class LabrynthWorldServer extends WorldServer{
         // The witch
         //EntityLiving entity = Helper.getEntityLivingByUUID(new UUID(nbt.getLong("ENTITY_UUID_MOST_SIG"),nbt.getLong("ENTITY_UUID_LEAST_SIG")));
         PMDataTracker tracker = new PMDataTracker();
+        LabrynthDetails details = LabrynthManager.getInstance().getDetailsByDimID(nbt.getInteger("dimID"));
         PlayerDataTrackerManager.getInstance().addDataTracker(tracker);
 
         LabrynthWorldServer server = new LabrynthWorldServer(MinecraftServer.getServer(),
@@ -51,7 +56,8 @@ public class LabrynthWorldServer extends WorldServer{
                 nbt.getInteger("dimID"),
                 new WorldSettings(DimensionManager.getWorld(0).getWorldInfo()),
                 MinecraftServer.getServer().theProfiler,
-                tracker
+                tracker,
+                details
                 );
         return server;
     }
