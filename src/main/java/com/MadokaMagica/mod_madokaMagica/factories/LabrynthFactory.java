@@ -27,16 +27,24 @@ public class LabrynthFactory{
         String worldType = ""; // TODO: Set this properly
         int providerID;
 
+        // Sanity check
+        if(DimensionManager.isDimensionRegistered(dimID)){
+            System.out.println("Wait what? How did we get an already registered dimension id when calling getNextFreeDimId()?");
+            System.out.println("Not sure what happened there, but we're just going to return null to prevent bad stuff from happening.");
+            return null;
+        }
 
         LabrynthDetails details = new LabrynthDetails();
         details.dimID = dimID;
         details.dimName = dimName;
 
+        System.out.println("Creating Dimension #"+details.dimID+" ("+details.dimName+")");
+
         DimensionManager.registerDimension(details.dimID,MadokaMagicaConfig.labrynthProviderID);
         DimensionManager.initDimension(details.dimID);
 
         // Do this after to fix a runtime error 
-        WorldServer customWorldServer = LabrynthWorldServerFactory.createWorldServer(tracker,dimID);
+        WorldServer customWorldServer = LabrynthWorldServerFactory.createWorldServer(tracker,dimID,details);
         details.world = (LabrynthWorldServer)customWorldServer;
         DimensionManager.setWorld(details.dimID,details.world);
 
