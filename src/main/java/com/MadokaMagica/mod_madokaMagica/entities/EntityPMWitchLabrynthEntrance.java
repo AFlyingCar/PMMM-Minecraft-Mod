@@ -39,6 +39,7 @@ public class EntityPMWitchLabrynthEntrance extends EntityCreature{
     public World linkedWorldObj; // TODO: Do we need this?
     public LabrynthDetails labrynthDetails;
     public EntityPMWitch witch;
+    public boolean loadingFromFile = false;
 
     public EntityPMWitchLabrynthEntrance(World world, LabrynthDetails details){
         super(world);
@@ -54,9 +55,6 @@ public class EntityPMWitchLabrynthEntrance extends EntityCreature{
         labrynthDetails = new LabrynthDetails();
         rand = new Random();
         setupAITasks();
-
-        // TODO [CRITICAL]: Find a way to check if we should do this (we shouldn't do this when loading from disk, only when spawned without a home)
-        createRandomizedWitch();
 
         System.out.println("Size of Entrance task list: " + this.tasks.taskEntries.size());
         System.out.println("Size of Entrance targetTask list: " + this.targetTasks.taskEntries.size());
@@ -90,6 +88,12 @@ public class EntityPMWitchLabrynthEntrance extends EntityCreature{
     @Override
     protected void entityInit(){
         super.entityInit();
+
+        System.out.println("");
+
+        if((!loadingFromFile) && labrynthDetails == null && MadokaMagicaConfig.createRandomizedLabrynthsIfNoneExist){
+            createRandomizedWitch();
+        }
     }
 
     // This method was almost completely shamelessly copied from StevenRS11's DimensionalDoors mod. Specifically, DDTeleporter.java
@@ -144,7 +148,9 @@ public class EntityPMWitchLabrynthEntrance extends EntityCreature{
     @Override
     public void writeEntityToNBT(NBTTagCompound rootTag){
         // TODO: Finish this method
-        rootTag.setInteger("Linked Dimension ID",this.labrynthDetails.dimID);
+        if(this.labrynthDetails != null){
+            rootTag.setInteger("LINKED_ID",this.labrynthDetails.dimID);
+        }
 
         /*
         // Save LabrynthDetails object to NBT here, so we can rebuild it later
@@ -166,13 +172,20 @@ public class EntityPMWitchLabrynthEntrance extends EntityCreature{
 
     @Override
     public void readEntityFromNBT(NBTTagCompound rootTag){
+        System.out.println("");
+        loadingFromFile = true;
         // TODO: Finish this method
 
         // Fail if we don't have this tag, because without it we don't know where to go
-        if(!rootTag.hasKey("Linked Dimension ID")) return;
-        int linkedDimID = rootTag.getInteger("Linked Dimension ID");
+        if(!rootTag.hasKey("LINKED_ID")) return;
+        int linkedDimID = rootTag.getInteger("LINKED_ID");
         this.labrynthDetails = LabrynthManager.getInstance().getDetailsByDimID(linkedDimID);
         // NOTE: Maybe we should throw an error if labrynthDetails is null?
+
+        if(labrynthDetails == null && MadokaMagicaConfig.createRandomizedLabrynthsIfNoneExist){
+            System.out.println("From readEntityFromNBT comes: ");
+            createRandomizedWitch();
+        }
 
         /*
         NBTTagCompound detailstag = rootTag.getCompoundTag("PMMM LABRYNTH DETAILS");
@@ -201,7 +214,9 @@ public class EntityPMWitchLabrynthEntrance extends EntityCreature{
 
     @Override
     public boolean attackEntityFrom(DamageSource source, float what){
-        // TODO: Find out what the second parameter is supposed to represent
+        if(MadokaMagicaConfig.canDamageLabrynthEntrances){
+            return super.attackEntityFrom(source,what);
+        }
         return false;
     }
 
@@ -216,15 +231,32 @@ public class EntityPMWitchLabrynthEntrance extends EntityCreature{
         return true;
     }
 
+    @Override
+    public void onDeath(DamageSource dsource){
+        // Make sure that if the Entrance is killed, the labrynth goes down with it (we don't want the labrynths to live on, constantly taking up space)
+        labrynthDetails.markForDestruction = true;
+        System.out.println("An EntityPMWitchLabrynthEntrance has died! Marking its linked Labrynth (#" + labrynthDetails.dimID + ") for destruction.");
+        super.onDeath(dsource);
+    }
+
     // A method for creating a randomized witch upon creation
     protected void createRandomizedWitch(){
+        System.out.println("Creating a randomized Labrynth and witch");
         // Create a randomized data tracker
         PMDataTracker randTracker = new PMDataTracker();
         randTracker.tagData = new NBTTagCompound(); // Create a new NBTTagCompound to prevent a NullPointerException
         randTracker.randomize();
 
+        // Make sure that we don't accidentally generate a second one
+        if(this.labrynthDetails != null){
+            this.labrynthDetails.markForDestruction = true;
+        }
+
         // Build a new labrynth
         LabrynthDetails randDetails = LabrynthFactory.createLabrynth(randTracker);
+
+        // Make sure we don't continue if createLabrynth returns null
+        if(randDetails == null) return;
 
         // Create a new witch
         EntityPMWitch randWitch = new EntityPMWitch(randDetails.world);
