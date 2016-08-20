@@ -105,7 +105,8 @@ public class LabrynthProvider extends WorldProvider{
 
     @Override
     public String getDimensionName(){
-        return this.witchName;
+        //return this.witchName;
+        return "Labrynth";
     }
 
     // TODO: Figure out if this method even exists anymore
