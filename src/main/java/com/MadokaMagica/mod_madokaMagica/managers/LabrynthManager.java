@@ -14,6 +14,7 @@ import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitch;
 import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitchLabrynthEntrance;
 import com.MadokaMagica.mod_madokaMagica.factories.LabrynthFactory.LabrynthDetails;
 import com.MadokaMagica.mod_madokaMagica.world.LabrynthWorldServer;
+import com.MadokaMagica.mod_madokaMagica.util.Helper;
 import com.MadokaMagica.mod_madokaMagica.MadokaMagicaConfig;
 
 // TODO: Finish this file
@@ -47,6 +48,14 @@ public class LabrynthManager{
         return null;
     }
 
+    public WorldServer loadLabrynth(EntityPMWitch epmw){
+        // TODO: Delete this method
+        // Here because EntityPMWitchLabrynthEntrance depends on it, but it shouldn't
+        // However I don't feel like fixing it yet
+        // Do this soon future me pls
+        return null;
+    }
+
     // WARNING! This method will not save all data! We must make sure that this data is saved before calling this method!
     public void unloadAllData(){
         System.out.println("Unloading data for LabrynthManager.");
@@ -59,11 +68,6 @@ public class LabrynthManager{
         allDetails.clear();
         dirty = false;
     }
-
-	public WorldServer loadLabrynth(EntityPMWitch witch){
-		// TODO: Finish this method
-		return null;
-	}
 
 	public static LabrynthManager getInstance(){
 		if(instance == null)
@@ -126,7 +130,11 @@ public class LabrynthManager{
         for(int i=0; i<allDetails.size(); i++){
             LabrynthDetails details = allDetails.get(i);
             // Do not save the labrynth if it has been marked to be destroyed
-            if(details.markForDestruction) continue;
+            if(details.markForDestruction){
+                // Attempt to delete the labrynth's save file too
+                deleteLabrynth(details.dimID,true);
+                continue;
+            }
 
             NBTTagCompound dnbt = new NBTTagCompound();
             save(details,dnbt);
@@ -269,5 +277,36 @@ public class LabrynthManager{
 
     public void setHasLoaded(boolean loaded){
         hasLoaded = loaded;
+    }
+
+    public boolean deleteLabrynth(int id,boolean deleteFolder){
+        // NOTE: We must be very careful here, we don't want to delete the wrong dimension after all
+        // Make sure we cast this so that it will throw an error if the world isn't a LabrynthWorldServer, which all Labrynths should have and which nothing else should have
+        LabrynthWorldServer world = (LabrynthWorldServer)DimensionManager.getWorld(id);
+        LabrynthDetails details = world.details;
+
+        // Make sure the world isn't in use before we attempt to delete it
+        if(DimensionManager.getWorld(details.dimID) == null){
+            if(deleteFolder){
+                deleteFiles(details);
+            }
+
+            deleteData(details);
+            return true;
+        }
+
+        return false;
+    }
+
+    // Deletes data from disk
+    private void deleteFiles(LabrynthDetails details){
+        String rootSavePath = DimensionManager.getCurrentSaveRootDirectory().getAbsolutePath();
+        File savePath = new File(rootSavePath + "/MadokaMagicaLabrynths/" + details.dimID);
+        Helper.deleteFolderRecursively(savePath);
+    }
+
+    // Deletes the data from memory
+    private void deleteData(LabrynthDetails details){
+        allDetails.remove(details); // Not many places to delete it from
     }
 }
