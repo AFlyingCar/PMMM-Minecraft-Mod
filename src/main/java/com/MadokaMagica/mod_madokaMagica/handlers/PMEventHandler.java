@@ -237,6 +237,7 @@ public class PMEventHandler{
     // That and it just looks so much nicer by itself.
     @SubscribeEvent
     public boolean onCreateWitch(MadokaMagicaCreateWitchEvent event){
+        System.out.println("MadokaMagicaCreateWitchEvent detected!");
         PMDataTracker tracker = event.playerTracker;
 
         LabrynthDetails details = LabrynthFactory.createLabrynth(tracker);
