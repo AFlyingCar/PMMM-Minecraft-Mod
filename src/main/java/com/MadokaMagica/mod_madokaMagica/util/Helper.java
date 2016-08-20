@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.lang.Math;
 import java.nio.IntBuffer;
 import java.nio.ByteBuffer;
+import java.io.File;
+import java.io.IOException;
 
 import org.lwjgl.opengl.GL11;
 
@@ -483,6 +485,25 @@ public class Helper{
         }
         
         return world;
+    }
+
+    public static void deleteFolderRecursively(File file){
+        try{
+            File[] allFiles = file.listFiles();
+            if(allFiles == null){
+               file.delete();
+               return;
+            }
+
+            for(File f : allFiles){
+                if(f.isDirectory())
+                    deleteFolderRecursively(f);
+                else
+                    f.delete();
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+        }
     }
 }
 
