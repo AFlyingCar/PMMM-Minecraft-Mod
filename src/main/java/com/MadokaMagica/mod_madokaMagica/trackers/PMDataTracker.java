@@ -93,6 +93,10 @@ public class PMDataTracker {
 
     public NBTTagCompound tagData;
 
+    private String failureMsg;
+
+    public boolean hasLoadedData;
+
     public PMDataTracker(EntityPlayer nplayer){
         entity = nplayer;
         like_entity_type = new HashMap<Integer,Float>();
@@ -107,6 +111,9 @@ public class PMDataTracker {
         ready = true;
         this.dirty = true;
         ID=currID++;
+
+        failureMsg = "";
+        hasLoadedData = false;
     }
 
     public PMDataTracker(EntityPlayer nplayer, ItemStack nplayerSG){
@@ -115,6 +122,9 @@ public class PMDataTracker {
         this.dirty = true;
 
         ID=currID++;
+
+        failureMsg = "";
+        hasLoadedData = false;
     }
 
     public PMDataTracker(EntityPMWitchMinion minion){
@@ -135,6 +145,8 @@ public class PMDataTracker {
         this.dirty = true;
 
         ID=currID++;
+        failureMsg = "";
+        hasLoadedData = false;
     }
 
     public PMDataTracker(EntityPMWitch witch){
@@ -152,6 +164,8 @@ public class PMDataTracker {
         this.dirty = true;
 
         ID=currID++;
+        failureMsg = "";
+        hasLoadedData = false;
     }
 
     public PMDataTracker(){
@@ -164,6 +178,8 @@ public class PMDataTracker {
         this.ready = false;
 
         ID=currID++;
+        failureMsg = "";
+        hasLoadedData = false;
     }
 
     public void setEntity(Entity entity){
@@ -179,6 +195,7 @@ public class PMDataTracker {
             player_state = 3;
         }else{
             player_state = -1;
+            failureMsg += "Unknown Entity type.";
         }
         ready = true;
     }
@@ -189,6 +206,9 @@ public class PMDataTracker {
 
     // Returns true if successfully loaded, false otherwise
     public boolean loadTagData(){
+        // Return successfully if we have already loaded the data (don't want to load twice by accident, and we don't want to count it as a failure)
+        if(hasLoadedData) return true;
+
         //NBTTagCompound tags = entity.getEntityData();
         NBTTagCompound tags = this.tagData; // Do this for backwards-compatibility
 
@@ -211,7 +231,7 @@ public class PMDataTracker {
         if(tags.hasKey("PM_PLAYER_STATE")){
             player_state = tags.getInteger("PM_PLAYER_STATE");
         }else{
-            System.out.println(failure + "PM_PLAYER_STATE!");
+            failureMsg += (failure + "PM_PLAYER_STATE!");
             return false;
         }
 
@@ -220,7 +240,7 @@ public class PMDataTracker {
             potential = tags.getFloat("PM_POTENTIAL");
         }else if(player_state > 1){
             // Only fail if they aren't a player or puella magi (those are the only states were potential is needed or allowed)
-            System.out.println(failure + "PM_POTENTIAL!");
+            failureMsg += (failure + "PM_POTENTIAL!");
             return false;
         }
 
@@ -228,13 +248,13 @@ public class PMDataTracker {
         if(tags.hasKey("PM_HERO_SCORE")){
             heroScore = tags.getFloat("PM_HERO_SCORE");
         }else{
-            System.out.println(failure + "PM_HERO_SCORE!");
+            failureMsg += (failure + "PM_HERO_SCORE!");
             return false;
         }
         if(tags.hasKey("PM_VILLAIN_SCORE")){
             villainScore = tags.getFloat("PM_VILLAIN_SCORE");
         }else{
-            System.out.println(failure + "PM_VILLAIN_SCORE!");
+            failureMsg += (failure + "PM_VILLAIN_SCORE!");
             return false;
         }
 
@@ -242,13 +262,13 @@ public class PMDataTracker {
         if(tags.hasKey("PM_AGGRESSIVE_SCORE")){
             aggressiveScore = tags.getFloat("PM_AGGRESSIVE_SCORE");
         }else{
-            System.out.println(failure + "PM_AGGRESSIVE_SCORE!");
+            failureMsg += (failure + "PM_AGGRESSIVE_SCORE!");
             return false;
         }
         if(tags.hasKey("PM_PASSIVE_SCORE")){
             passiveScore = tags.getFloat("PM_PASSIVE_SCORE");
         }else{
-            System.out.println(failure + "PM_PASSIVE_SCORE!");
+            failureMsg += (failure + "PM_PASSIVE_SCORE!");
             return false;
         }
 
@@ -256,19 +276,19 @@ public class PMDataTracker {
         if(tags.hasKey("PM_NATURE_SCORE")){
             natureScore = tags.getFloat("PM_NATURE_SCORE");
         }else{
-            System.out.println(failure + "PM_NATURE_SCORE!");
+            failureMsg += (failure + "PM_NATURE_SCORE!");
             return false;
         }
         if(tags.hasKey("PM_DAY_SCORE")){
             dayScore = tags.getFloat("PM_DAY_SCORE");
         }else{
-            System.out.println(failure + "PM_DAY_SCORE!");
+            failureMsg += (failure + "PM_DAY_SCORE!");
             return false;
         }
         if(tags.hasKey("PM_NIGHT_SCORE")){
             dayScore = tags.getFloat("PM_NIGHT_SCORE");
         }else{
-            System.out.println(failure + "PM_NIGHT_SCORE!");
+            failureMsg += (failure + "PM_NIGHT_SCORE!");
             return false;
         }
 
@@ -276,21 +296,21 @@ public class PMDataTracker {
         if(tags.hasKey("PM_ENGINEERING_SCORE")){
             engineeringScore = tags.getFloat("PM_ENGINEERING_SCORE");
         }else{
-            System.out.println(failure + "PM_ENGINEERING_SCORE!");
+            failureMsg += (failure + "PM_ENGINEERING_SCORE!");
             return false;
         }
 
         if(tags.hasKey("PM_ARCHITECT_SCORE")){
             architectScore = tags.getFloat("PM_ARCHITECT_SCORE");
         }else{
-            System.out.println(failure + "PM_ARCHITECT_SCORE!");
+            failureMsg += (failure + "PM_ARCHITECT_SCORE!");
             return false;
         }
 
         if(tags.hasKey("PM_GREED_SCORE")){
             greedScore = tags.getFloat("PM_GREED_SCORE");
         }else{
-            System.out.println(failure + "PM_GREED_SCORE!");
+            failureMsg += (failure + "PM_GREED_SCORE!");
             return false;
         }
 
@@ -299,7 +319,7 @@ public class PMDataTracker {
             float like_amt = Helper.unpackFloat(level_data[1]);
             like_level.put(new Integer(level_data[0]),new Float(like_amt));
         }else{
-            System.out.println(failure + "PM_LIKES_LEVEL!");
+            failureMsg += (failure + "PM_LIKES_LEVEL!");
             return false;
         }
 
@@ -319,7 +339,7 @@ public class PMDataTracker {
                 liked_entities.put(new Integer(id),new Float(val));
             }
         }else{
-            System.out.println(failure + "PM_LIKES_ENTITY!");
+            failureMsg += (failure + "PM_LIKES_ENTITY!");
             return false;
         }
 
@@ -338,9 +358,13 @@ public class PMDataTracker {
                 like_entity_type.put(new Integer(id),new Float(val));
             }
         }else{
-            System.out.println(failure + "PM_LIKES_ENTITY_TYPE!");
+            failureMsg += (failure + "PM_LIKES_ENTITY_TYPE!");
             return false;
         }
+
+        // Do it down here, because we don't want to say we've loaded the data if we failed to do so
+        // Don't want to lie now do we? That would be rude.
+        hasLoadedData = true;
 
         return true;
     }
@@ -835,5 +859,11 @@ public class PMDataTracker {
 
     public void markDirty(){
         this.dirty = true;
+    }
+
+    public String getFailureMsg(){
+        String msg = this.failureMsg;
+        this.failureMsg = "";
+        return msg;
     }
 }
