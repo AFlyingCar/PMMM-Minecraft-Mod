@@ -46,6 +46,19 @@ public class Helper{
 
     public static float timeTolerance;
 
+    // Namespaces don't exist, so I'm cheating a bit
+    public static class Debug{
+        public static void printCurrentStackTrace(){
+            // Sorcery and witchery
+            StackTraceElement[] stackTrace = new Throwable().getStackTrace();
+
+            // For each element, print "FileName.java: ClassName#MethodName@LLineNumber"
+            for(StackTraceElement ste : stackTrace){
+                System.out.println(ste.getFileName() + ": " + ste.getClassName() + "#" + ste.getMethodName() + "@L" + ste.getLineNumber());
+            }
+        }
+    }
+
     /*
      * Only keeps the first INT_ALTER_AMT decimal places
      */
