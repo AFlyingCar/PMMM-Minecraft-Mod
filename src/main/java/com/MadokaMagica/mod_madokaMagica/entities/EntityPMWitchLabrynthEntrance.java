@@ -32,6 +32,7 @@ import com.MadokaMagica.mod_madokaMagica.entities.ai.EntityAICreateRandomTelepor
 import com.MadokaMagica.mod_madokaMagica.factories.LabrynthFactory.LabrynthDetails;
 import com.MadokaMagica.mod_madokaMagica.factories.LabrynthFactory;
 import com.MadokaMagica.mod_madokaMagica.world.LabrynthWorldServer; 
+import com.MadokaMagica.mod_madokaMagica.util.Helper;
 
 public class EntityPMWitchLabrynthEntrance extends EntityCreature{
     private Random rand;
@@ -56,8 +57,11 @@ public class EntityPMWitchLabrynthEntrance extends EntityCreature{
         rand = new Random();
         setupAITasks();
 
-        System.out.println("Size of Entrance task list: " + this.tasks.taskEntries.size());
-        System.out.println("Size of Entrance targetTask list: " + this.targetTasks.taskEntries.size());
+        //Helper.Debug.printCurrentStackTrace();
+
+        //System.out.println("Size of Entrance task list: " + this.tasks.taskEntries.size());
+        //System.out.println("Size of Entrance targetTask list: " + this.targetTasks.taskEntries.size());
+        //System.out.println("Constructing.");
     }
 
     private void setupAITasks(){
@@ -89,9 +93,10 @@ public class EntityPMWitchLabrynthEntrance extends EntityCreature{
     protected void entityInit(){
         super.entityInit();
 
-        System.out.println("");
 
-        if((!loadingFromFile) && labrynthDetails == null && MadokaMagicaConfig.createRandomizedLabrynthsIfNoneExist){
+        // Only do this if we're talking about the server
+        if((!loadingFromFile) && labrynthDetails == null && this.worldObj.isRemote && MadokaMagicaConfig.createRandomizedLabrynthsIfNoneExist){
+            //System.out.println("Preparing to call createRandomizedWitch()");
             createRandomizedWitch();
         }
     }
@@ -233,9 +238,11 @@ public class EntityPMWitchLabrynthEntrance extends EntityCreature{
 
     @Override
     public void onDeath(DamageSource dsource){
-        // Make sure that if the Entrance is killed, the labrynth goes down with it (we don't want the labrynths to live on, constantly taking up space)
-        labrynthDetails.markForDestruction = true;
-        System.out.println("An EntityPMWitchLabrynthEntrance has died! Marking its linked Labrynth (#" + labrynthDetails.dimID + ") for destruction.");
+        if(this.worldObj.isRemote){
+            // Make sure that if the Entrance is killed, the labrynth goes down with it (we don't want the labrynths to live on, constantly taking up space)
+            labrynthDetails.markForDestruction = true;
+            System.out.println("An EntityPMWitchLabrynthEntrance has died! Marking its linked Labrynth (#" + labrynthDetails.dimID + ") for destruction.");
+        }
         super.onDeath(dsource);
     }
 
