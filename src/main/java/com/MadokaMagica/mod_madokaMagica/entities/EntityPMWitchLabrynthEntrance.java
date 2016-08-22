@@ -187,7 +187,7 @@ public class EntityPMWitchLabrynthEntrance extends EntityCreature{
         this.labrynthDetails = LabrynthManager.getInstance().getDetailsByDimID(linkedDimID);
         // NOTE: Maybe we should throw an error if labrynthDetails is null?
 
-        if(labrynthDetails == null && MadokaMagicaConfig.createRandomizedLabrynthsIfNoneExist){
+        if(labrynthDetails == null && this.worldObj.isRemote && MadokaMagicaConfig.createRandomizedLabrynthsIfNoneExist){
             System.out.println("From readEntityFromNBT comes: ");
             createRandomizedWitch();
         }
