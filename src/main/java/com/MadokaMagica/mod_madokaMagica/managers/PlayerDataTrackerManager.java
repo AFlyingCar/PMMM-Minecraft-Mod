@@ -147,6 +147,10 @@ public class PlayerDataTrackerManager{
                 // This is fine, since it will actually be loaded anyways (and they should never be used when a player isn't logged in/a witch doesn't exist)
                 PMDataTracker tracker = new PMDataTracker();
                 tracker.tagData = trackerNBT;
+                if(tracker.loadTagData()){
+                    System.out.println("Loading tracker from disk failed: " + tracker.getFailureMsg());
+                    tracker = null; // Make it null
+                }
                 datatrackers.put(new UUID(trackerNBT.getLong("UUID_MOST_SIG"),
                                           trackerNBT.getLong("UUID_LEAST_SIG")
                                          ),
@@ -168,6 +172,18 @@ public class PlayerDataTrackerManager{
             System.out.println("ERROR: getPDTMDataFile returned null. Unable to save Persistent Data for PlayerDataTrackerManager");
             return false;
         }
+
+        /*
+         * NBT:
+         *  0:
+         *    UUID
+         *    PMDataTracker
+         *  1:
+         *    UUID
+         *    PMDataTracker
+         *  etc...
+         *  TrackerAmount
+         */
 
         NBTTagCompound data = new NBTTagCompound();
         int i = 0;
