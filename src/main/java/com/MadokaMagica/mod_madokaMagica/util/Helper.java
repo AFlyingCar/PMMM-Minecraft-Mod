@@ -514,9 +514,46 @@ public class Helper{
                 else
                     f.delete();
             }
+            file.delete(); // Make sure to delete the folder once we've cleared out its contents
         }catch(Exception e){
             e.printStackTrace();
         }
+    }
+
+    public static void spawnEntityRandomlyNearPlayer(EntityPlayer player,Entity entity){
+        spawnEntityRandomlyNearPlayer(player,entity,new Random().nextInt(10)+1);
+    }
+
+    public static void spawnEntityRandomlyNearPlayer(EntityPlayer player,Entity entity, int radius){
+        if(radius <= 0){
+            throw new IllegalArgumentException("Radius must be greater than 0");
+        }
+
+        int minX = (Math.abs((int)player.posX));
+        int minY = (Math.abs((int)player.posY));
+        int minZ = (Math.abs((int)player.posZ));
+        int maxX = (Math.abs((int)player.posX));
+        int maxY = (Math.abs((int)player.posY));
+        int maxZ = (Math.abs((int)player.posZ));
+
+        // Take the abs
+        minX = (minX - radius)*(((int)player.posX)/minX);
+        minY = (minY - radius)*(((int)player.posY)/minY);
+        minZ = (minZ - radius)*(((int)player.posZ)/minZ);
+        maxX = (maxX + radius)*(((int)player.posX)/minX);
+        maxY = (maxY + radius)*(((int)player.posY)/minY);
+        maxZ = (maxZ + radius)*(((int)player.posZ)/minZ);
+
+        AxisAlignedBB aabb = AxisAlignedBB.getBoundingBox(minX,minY,minZ,maxX,maxY,maxZ);
+
+        int[] position = getRandomBlockWithinAABB(aabb,player.worldObj,new Random());
+
+        int x = position[0];
+        int z = position[0];
+        int y = (int)player.posY; // Make it the same Y so that the entity doesn't spawn in the floor
+
+        entity.setPosition(x,y,z);
+        player.worldObj.spawnEntityInWorld(entity);
     }
 }
 
