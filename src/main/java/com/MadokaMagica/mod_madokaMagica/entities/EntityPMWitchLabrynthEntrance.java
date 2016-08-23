@@ -242,6 +242,7 @@ public class EntityPMWitchLabrynthEntrance extends EntityCreature{
             // Make sure that if the Entrance is killed, the labrynth goes down with it (we don't want the labrynths to live on, constantly taking up space)
             labrynthDetails.markForDestruction = true;
             System.out.println("An EntityPMWitchLabrynthEntrance has died! Marking its linked Labrynth (#" + labrynthDetails.dimID + ") for destruction.");
+            LabrynthManager.getInstance().markDirty(true); // Make sure to mark it as dirty, since we don't want to save this labrynth if it no longer exists.
         }
         super.onDeath(dsource);
     }
@@ -257,6 +258,7 @@ public class EntityPMWitchLabrynthEntrance extends EntityCreature{
         // Make sure that we don't accidentally generate a second one
         if(this.labrynthDetails != null){
             this.labrynthDetails.markForDestruction = true;
+            LabrynthManager.getInstance().markDirty(true);
         }
 
         // Build a new labrynth
@@ -273,5 +275,7 @@ public class EntityPMWitchLabrynthEntrance extends EntityCreature{
         this.labrynthDetails = randDetails;
         this.linkedWorldObj = randDetails.world;
         this.witch = randWitch;
+
+        LabrynthManager.getInstance().registerLabrynthDetails(this,randDetails);
     }
 }
