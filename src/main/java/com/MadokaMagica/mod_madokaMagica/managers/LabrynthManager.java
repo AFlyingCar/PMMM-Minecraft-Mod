@@ -3,19 +3,26 @@ package com.MadokaMagica.mod_madokaMagica.managers;
 import java.util.Map;
 import java.util.UUID;
 import java.util.List;
+import java.util.Random;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.io.File;
 import java.io.IOException;
 
 import net.minecraftforge.common.DimensionManager;
+
+import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.CompressedStreamTools;
-import net.minecraft.world.WorldServer;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.ChunkCoordinates;
+import net.minecraft.village.Village;
 
 import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitch;
 import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitchLabrynthEntrance;
 import com.MadokaMagica.mod_madokaMagica.factories.LabrynthFactory.LabrynthDetails;
+import com.MadokaMagica.mod_madokaMagica.factories.EntityPMWitchLabrynthEntranceFactory;
 import com.MadokaMagica.mod_madokaMagica.world.LabrynthWorldServer;
 import com.MadokaMagica.mod_madokaMagica.util.Helper;
 import com.MadokaMagica.mod_madokaMagica.MadokaMagicaConfig;
@@ -416,4 +423,48 @@ public class LabrynthManager{
         if(mine != null)
             entranceToDetailsMap.remove(mine);
     }
+
+    // Simple method to check each entrance and details to determine if it should be removed, or if a new Labrynth Entrance should be spawned (if one doesn't exist when it should)
+    public void verifyEntranceNecessityAndExistence(){
+        List<UUID> uuidsToRemove = new ArrayList<UUID>();
+        World oworld = DimensionManager.getWorld(0); // Only deal with the overworld
+
+        for(Map.Entry<UUID,LabrynthDetails> entry : entranceToDetailsMap.entrySet()){
+            if(entry.getKey() == null || entry.getValue() == null){
+                uuidsToRemove.add(entry.getKey());
+            }else if(Helper.getEntityFromUUID(entry.getKey(),oworld) == null){
+                EntityPMWitchLabrynthEntrance newEntrance = EntityPMWitchLabrynthEntranceFactory.createWitchLabrynthEntrance(entry.getValue());
+                List vilList = oworld.villageCollectionObj.getVillageList();
+                List playerList = oworld.playerEntities;
+
+                // Attempt to spawn near a village and spawn near a player if no villages exist
+                if(!vilList.isEmpty()){
+                    int rand_index = (new Random().nextInt(vilList.size()-1)); // Choose a random village
+                    ChunkCoordinates vilCenter = ((Village)vilList.get(rand_index)).getCenter();
+                    newEntrance.setPosition(vilCenter.posX,vilCenter.posY,vilCenter.posZ);
+                }else if(!playerList.isEmpty()){
+                    int rand_index = (new Random().nextInt(playerList.size()-1)); // Choose a random player
+                    EntityPlayer player = (EntityPlayer)playerList.get(rand_index);
+                    newEntrance.setPosition(player.posX,player.posY,player.posZ);
+                }else{
+                    // If neither villages nor players exist in the overworld, then simply spawn the entrance at the player's spawn point
+                    newEntrance.setPosition(oworld.getWorldInfo().getSpawnX(),oworld.getWorldInfo().getSpawnY(),oworld.getWorldInfo().getSpawnZ());
+                }
+
+                // Finally spawn the entity
+                oworld.spawnEntityInWorld(newEntrance);
+            }else if(entry.getValue().markForDestruction){
+                uuidsToRemove.add(entry.getKey());
+                Helper.getEntityFromUUID(entry.getKey(),DimensionManager.getWorld(0)).setDead();
+            }
+        }
+
+        for(UUID uuid : uuidsToRemove){
+            deleteLabrynth(entranceToDetailsMap.get(uuid).dimID,true);
+            // Make sure to remove the uuid from the map, AND from the list of all LabrynthDetails
+            allDetails.remove(entranceToDetailsMap.get(uuid));
+            entranceToDetailsMap.remove(uuid);
+        }
+    }
 }
+

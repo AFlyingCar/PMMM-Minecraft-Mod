@@ -58,6 +58,7 @@ import com.MadokaMagica.mod_madokaMagica.commands.CommandDeleteLabrynth;
 
 import com.MadokaMagica.mod_madokaMagica.managers.PlayerDataTrackerManager;
 import com.MadokaMagica.mod_madokaMagica.managers.ItemSoulGemManager;
+import com.MadokaMagica.mod_madokaMagica.managers.LabrynthManager;
 
 import com.MadokaMagica.mod_madokaMagica.proxies.CommonProxy;
 
@@ -98,6 +99,7 @@ public class MadokaMagicaMod {
 
     private static PlayerDataTrackerManager playerDataTrackerManager;
     private static ItemSoulGemManager itemSoulGemManager;
+    private static LabrynthManager labrynthManager;
     // private static ListenerList madokaMagicaEventListener;
 
     private static ISound wtransform_music = null;
@@ -227,6 +229,7 @@ public class MadokaMagicaMod {
 
     @EventHandler
     public void onServerStarted(FMLServerStartedEvent event){
+        labrynthManager.verifyEntranceNecessityAndExistence();
         playerDataTrackerManager.manage();
         itemSoulGemManager.manage();
     }
