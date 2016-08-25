@@ -39,6 +39,18 @@ public class PlayerDataTrackerManager{
         datatrackers.put(tracker.getEntityUUID(),tracker);
 	}
 
+    // Will add the specified tracker to map if a tracker doesn't already exist
+    // If the specified UUID already exists, then it is overwritten
+    public void setDataTracker(UUID uuid, PMDataTracker tracker){
+        UUID newUUID = uuid;
+        for(Entry<UUID,PMDataTracker> entry : datatrackers){
+            if(entry.getKey().equals(uuid)){
+                newUUID = entry.getKey();
+            }
+        }
+        datatrackers.put(newUUID,tracker);
+    }
+
     public PMDataTracker getTrackerByUUID(UUID uuid){
         if(datatrackers.containsKey(uuid))
             return datatrackers.get(uuid);
@@ -147,15 +159,15 @@ public class PlayerDataTrackerManager{
                 // This is fine, since it will actually be loaded anyways (and they should never be used when a player isn't logged in/a witch doesn't exist)
                 PMDataTracker tracker = new PMDataTracker();
                 tracker.tagData = trackerNBT;
-                if(tracker.loadTagData()){
+                if(!tracker.loadTagData()){
                     System.out.println("Loading tracker from disk failed: " + tracker.getFailureMsg());
                     tracker = null; // Make it null
                 }
-                datatrackers.put(new UUID(trackerNBT.getLong("UUID_MOST_SIG"),
-                                          trackerNBT.getLong("UUID_LEAST_SIG")
-                                         ),
-                                 tracker
-                        );
+                this.setDataTracker(new UUID(trackerNBT.getLong("UUID_MOST_SIG"),
+                                             trackerNBT.getLong("UUID_LEAST_SIG")
+                                            ),
+                                    tracker
+                                   );
                 c++;
             }else{
                 System.out.println("ERROR: A saved data tracker is missing required tags UUID_MOST_SIG or UUID_LEAST_SIG. Unable to proceed with loading PMDataTracker #" + i);
