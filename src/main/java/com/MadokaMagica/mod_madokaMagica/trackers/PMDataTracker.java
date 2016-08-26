@@ -21,10 +21,6 @@ import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitchMinion;
 import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitch;
 import com.MadokaMagica.mod_madokaMagica.managers.PlayerDataTrackerManager;
 
-// IMPORTANT
-// TODO: Re-write part of this class later so that it is more compatible with Witches and Minions
-// IMPORTANT
-
 // NOTE: These classes may quickly fill up save-files if there are lots of witches
 //       We should come up with a way to clean up these objects if they start to get out of control
 
