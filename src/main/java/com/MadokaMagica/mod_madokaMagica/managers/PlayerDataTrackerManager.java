@@ -111,7 +111,7 @@ public class PlayerDataTrackerManager{
 
         // Clean up the list if we've found bad values.
         for(UUID u : uuidsToRemove){
-            trackerset.remove(u);
+            datatrackers.remove(u);
         }
 	}
 
