@@ -147,6 +147,7 @@ public class MadokaMagicaMod {
 
         playerDataTrackerManager = PlayerDataTrackerManager.getInstance();
         itemSoulGemManager = ItemSoulGemManager.getInstance();
+        labrynthManager = LabrynthManager.getInstance();
 
         /*********************\
          * ITEM REGISTRATION *

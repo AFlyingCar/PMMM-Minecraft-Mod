@@ -43,7 +43,7 @@ public class PlayerDataTrackerManager{
     // If the specified UUID already exists, then it is overwritten
     public void setDataTracker(UUID uuid, PMDataTracker tracker){
         UUID newUUID = uuid;
-        for(Entry<UUID,PMDataTracker> entry : datatrackers){
+        for(Entry<UUID,PMDataTracker> entry : datatrackers.entrySet()){
             if(entry.getKey().equals(uuid)){
                 newUUID = entry.getKey();
             }
@@ -94,13 +94,24 @@ public class PlayerDataTrackerManager{
     }
 
 	public void manage(){
+        List<UUID> uuidsToRemove = new ArrayList<UUID>();
 		for(Entry<UUID,PMDataTracker> trackerset : datatrackers.entrySet()){
+            if(trackerset.getKey() == null || trackerset.getValue() == null){
+                System.out.println("Found null UUID or PMDataTracker in datatrackers. Removing.");
+                uuidsToRemove.add(trackerset.getKey());
+                continue;
+            }
             trackerset.getValue().incrementDataTimer();
 
             if(trackerset.getValue().getUpdateDataTime() >= 10){
                 trackerset.getValue().updateData();
                 // PMEffects.applyPlayerEffects(trackerset.getValue());
             }
+        }
+
+        // Clean up the list if we've found bad values.
+        for(UUID u : uuidsToRemove){
+            trackerset.remove(u);
         }
 	}
 
