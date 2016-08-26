@@ -38,7 +38,7 @@ public class CommandCreateLabrynth extends CommandBase {
     @Override
     public final String getCommandUsage(ICommandSender sender){
         String usage = "";
-        usage += "/" + name + "<player name|entity UUID> <x> <y> <z>";
+        usage += "/" + name + " <player name|entity UUID> <x> <y> <z>";
         return usage;
     }
 
@@ -73,11 +73,6 @@ public class CommandCreateLabrynth extends CommandBase {
 
         LabrynthDetails details = LabrynthFactory.createLabrynth(tracker);
         EntityPMWitchLabrynthEntrance entrance = new EntityPMWitchLabrynthEntrance(((EntityPlayer)sender).worldObj,details);
-        /*
-        EntityPMWitchLabrynthEntrance entrance = EntityList.createEntityByID(EntityList.getEntityID(new EntityPMWitchLabrynthEntrance()),
-                                                                             ((EntityPlayer)sender).worldObj
-                                                                            );
-        */
         LabrynthManager.getInstance().registerLabrynthDetails(entrance,details);
 
         if(command.length >= 4){
