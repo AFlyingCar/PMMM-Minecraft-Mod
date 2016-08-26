@@ -115,8 +115,7 @@ public class EntityPMWitchLabrynthEntrance extends EntityCreature{
             throw new IllegalArgumentException("entity is null.");
         }
 
-        // TODO: Figure out if WorldServer really does extend from World, or if the documentation lied again
-        WorldServer old = (WorldServer)entity.worldObj;// (entity.worldObj instanceof WorldServer) ? (WorldServer)entity.worldObj : entity.worldObj;
+        WorldServer old = (WorldServer)entity.worldObj;
         WorldServer nwo = LabrynthManager.getInstance().loadLabrynth(this.witch);
         EntityPlayerMP player = (entity instanceof EntityPlayerMP) ? (EntityPlayerMP)entity : null;
 
@@ -126,8 +125,7 @@ public class EntityPMWitchLabrynthEntrance extends EntityCreature{
         }
 
         if(player != null){
-            // TODO: Find a way to set this value correctly
-            // player.dimension = ?;
+            player.dimension = this.labrynthDetails.dimID;
 
             // Sanity check
             old.getPlayerManager().removePlayer(player);
@@ -152,26 +150,14 @@ public class EntityPMWitchLabrynthEntrance extends EntityCreature{
 
     @Override
     public void writeEntityToNBT(NBTTagCompound rootTag){
-        // TODO: Finish this method
+        // Notice how we don't save the LabrynthDetails object here. We're only saving the ID number 
+        // because each labrynth should be able to be written to a file without assuming that its entrance 
+        // actually exists. Therefore, we just make sure that each entrance knows how to find its linked 
+        // dimension
         if(this.labrynthDetails != null){
             rootTag.setInteger("LINKED_ID",this.labrynthDetails.dimID);
         }
 
-        /*
-        // Save LabrynthDetails object to NBT here, so we can rebuild it later
-        NBTTagCompound detailsTag = new NBTTagCompound(); // Tag just for the Labrynth details
-        NBTTagCompound worldTag = new NBTTagCompound(); // Tag just for the world shit
-        detailsTag.setInteger("dimID",labrynthDetails.dimID);
-        // Make sure we don't keep getting NullPointerExceptions and IllegalArugmentExceptions
-        // We're still getting them...
-        if(labrynthDetails.dimName != null && !labrynthDetails.dimName.equals(""))
-            detailsTag.setString("dimName",labrynthDetails.dimName);
-        else
-            detailsTag.setString("dimName","Labrynth Details");
-        labrynthDetails.world.writeToNBT(worldTag);
-        detailsTag.setTag("world",worldTag);
-        rootTag.setTag("PMMM LABRYNTH DETAILS",detailsTag);
-        */
         super.writeEntityToNBT(rootTag);
     }
 
@@ -179,40 +165,26 @@ public class EntityPMWitchLabrynthEntrance extends EntityCreature{
     public void readEntityFromNBT(NBTTagCompound rootTag){
         System.out.println("");
         loadingFromFile = true;
-        // TODO: Finish this method
 
         // Fail if we don't have this tag, because without it we don't know where to go
-        if(!rootTag.hasKey("LINKED_ID")) return;
+        if(!rootTag.hasKey("LINKED_ID")){
+            System.out.println("ERROR: LabrynthEntrance is missing required NBTTag LINKED_ID. Killing entrance.");
+            this.setDead();
+            return;
+        }
         int linkedDimID = rootTag.getInteger("LINKED_ID");
         this.labrynthDetails = LabrynthManager.getInstance().getDetailsByDimID(linkedDimID);
-        // NOTE: Maybe we should throw an error if labrynthDetails is null?
 
         if(labrynthDetails == null && this.worldObj.isRemote && MadokaMagicaConfig.createRandomizedLabrynthsIfNoneExist){
+            // TODO: For some reason this is still being executed
+            //  Need to find out why
             System.out.println("From readEntityFromNBT comes: ");
             createRandomizedWitch();
-        }
-
-        /*
-        NBTTagCompound detailstag = rootTag.getCompoundTag("PMMM LABRYNTH DETAILS");
-        if(!(detailstag.hasKey("dimID") && detailstag.hasKey("dimName") && detailstag.hasKey("world"))){
-            System.out.println("Found LabrynthEntrance entity without any Labrynth data saved. Killing.");
+        }else if(labrynthDetails == null && this.worldObj.isRemote){
+            System.out.println("ERROR: Unknown dimension ID stored for LabrynthEntrance. Unable to link to dimension. Killing entrance.");
             this.setDead();
             return;
         }
-        int dimID = detailstag.getInteger("dimID");
-        String dimName = detailstag.getString("dimName");
-        NBTTagCompound worldTag = detailstag.getCompoundTag("world");
-        LabrynthWorldServer worldServer = LabrynthWorldServer.loadFromNBT(worldTag);
-        if(worldServer == null){
-            System.out.println("Failed to load LabrynthWorldServer from NBT.");
-            this.setDead();
-            return;
-        }
-        LabrynthDetails details = new LabrynthDetails();
-        details.dimID = dimID;
-        details.dimName = dimName;
-        details.world = worldServer;
-        */
 
         super.readEntityFromNBT(rootTag);
     }
