@@ -148,7 +148,11 @@ public class PMEventHandler{
         if(tracker.getPlayerState() == 2){
             event.setCanceled(true);
             size = 2.0F;
-            // TODO: Spawn witch here, or throw an event to do so
+            MinecraftForge.EVENT_BUS.post(new MadokaMagicaCreateWitchEvent(tracker));
+        }else{
+            // If we shouldn't stop, then fire another event.
+            // Basically, keep firing these events until the player has completely transformed.
+            MinecraftForge.EVENT_BUS.post(new MadokaMagicaWitchTransformationEvent(tracker));
         }
 
         EntityPlayer player = (EntityPlayer)tracker.getEntity();
@@ -239,15 +243,24 @@ public class PMEventHandler{
     public boolean onCreateWitch(MadokaMagicaCreateWitchEvent event){
         System.out.println("MadokaMagicaCreateWitchEvent detected!");
         PMDataTracker tracker = event.playerTracker;
+        Entity entity = tracker.getEntity();
 
         LabrynthDetails details = LabrynthFactory.createLabrynth(tracker);
         EntityPMWitchLabrynthEntrance labrynthentrance = EntityPMWitchLabrynthEntranceFactory.createWitchLabrynthEntrance(details);
         EntityPMWitch witch = EntityPMWitchFactory.createWitch(tracker);
 
-        tracker.entity.worldObj.spawnEntityInWorld(labrynthentrance);
+        // Make sure to set the positions of each entity, as well as their home dimension
+        labrynthentrance.setPosition(entity.posX,entity.posY,entity.posZ);
+        labrynthentrance.dimension = 0;
+        witch.setPosition(entity.posX,entity.posY,entity.posZ);
+        witch.dimension = details.dimID;
+
+        tracker.entity.worldObj.spawnEntityInWorld(labrynthentrance); // TODO: Maybe we should replace this with Dimension 0 specifically?
         details.world.spawnEntityInWorld(witch);
 
-        LabrynthManager.getInstance().registerLabrynthDetails(details);
+        LabrynthManager.getInstance().registerLabrynthDetails(labrynthentrance,details);
+
+        tracker.setPlayerState(2); // Make sure that the data tracker knows what the player is
 
         return true;
     }
@@ -304,7 +317,7 @@ public class PMEventHandler{
                     // TODO: Add some code here that increments hero score if the other player is a villain, and villain score if the other player is a hero
                     PMDataTracker targetTracker = PlayerDataTrackerManager.getInstance().getTrackerByUUID(event.source.getEntity().getPersistentID());
                     tracker.setHeroScore(tracker.getHeroScore() + (source.getMaxHealth()/event.ammount) + Math.abs(1/(targetTracker.getHeroScore() - tracker.getHeroScore())));
-                    tracker.setHeroScore(tracker.getVillainScore() + (source.getMaxHealth()/event.ammount) + Math.abs(1/(targetTracker.getVillainScore() - tracker.getVillainScore())));
+                    tracker.setVillainScore(tracker.getVillainScore() + (source.getMaxHealth()/event.ammount) + Math.abs(1/(targetTracker.getVillainScore() - tracker.getVillainScore())));
                 }
             }
             // NOTE: Maybe add something here to check for the player's home?
