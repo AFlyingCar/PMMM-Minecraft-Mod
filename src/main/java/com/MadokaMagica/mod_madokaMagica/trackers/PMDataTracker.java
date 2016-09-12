@@ -10,10 +10,12 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.AxisAlignedBB;
 
 import com.MadokaMagica.mod_madokaMagica.util.Helper;
 import com.MadokaMagica.mod_madokaMagica.items.ItemSoulGem;
@@ -27,6 +29,10 @@ import com.MadokaMagica.mod_madokaMagica.managers.PlayerDataTrackerManager;
 public class PMDataTracker {
     public static final int MAX_POTENTIAL = 100;
     public static final int SWING_TOLERANCE = 3; // 3 seconds
+    public static final double RUNNING_AWAY_RADIUS = 50.0D; // 50 block radius
+    public static final double ANGLE_TO_RANGE_END_DEG = 15.0D; // In degrees
+    public static final double ANGLE_TO_RANGE_END_RAD = 0.26D; // In radians
+
     public Entity entity; // The entity being tracked
     private ItemStack playerSoulGem = null;
 
@@ -863,4 +869,150 @@ public class PMDataTracker {
         this.failureMsg = "";
         return msg;
     }
+
+    protected boolean isRunningAwayFromSingularEnemyReal(EntityMob enemy){
+        // Player's current position (corner3)
+        double posX = this.entity.posX;
+        double posY = this.entity.posY;
+        double posZ = this.entity.posZ;
+        // Player's last position
+        double lastPosX = this.entity.lastTickPosX;
+        double lastPosY = this.entity.lastTickPosY;
+        double lastPosZ = this.entity.lastTickPosZ;
+
+        // Enemy's real position
+        double ePosX = enemy.posX;
+        double ePosY = enemy.posY;
+        double ePosZ = enemy.posZ;
+
+        // It is a perfect sphere, so we only need to take the radius in one dimension, no need to factor in Z position
+        double radius = Math.sqrt((ePosX*ePosX)+(ePosY*ePosY)); // TODO: FINISH THIS SHIT
+
+        // TODO: Does arccos use radians or degrees?
+        double eAngleFrom00 = Math.acos((ePosX-posX)/radius);
+        double leftAngle = eAngleFrom00 + 30.0D; // Degrees
+        double rightAngle = eAngleFrom00 - 30.0D;
+
+        double xzl = radius * Math.cos(leftAngle);
+        double xzr = radius * Math.cos(rightAngle);
+
+        double yl = radius * Math.sin(leftAngle);
+        double yr = radius * Math.sin(rightAngle);
+
+        // Get enemy's position to the left and right by 30 degrees (create a triangle, where the enemy is in the center of the hypotenuse)
+
+        // Corner1
+        double eLeftX = posX + xzl;
+        double eLeftZ = posZ + xzl;
+        double eLeftY = posY + yl;
+
+        // Corner2
+        double eRightX = posX + xzr;
+        double eRightZ = posZ + xzr;
+        double eRightY = posY + yr;
+
+
+        // Player's velocity in each one of the 3 velocities
+        double vX = (lastPosX-posX);
+        double vY = (lastPosY-posY);
+        double vZ = (lastPosZ-posZ);
+
+        // Player's position 1000 ticks from now
+        double testLocX = (1000*vX)+posX;
+        double testLocY = (1000*vY)+posY;
+        double testLocZ = (1000*vZ)+posZ;
+
+
+        // Do same calc twice with XZ and YZ
+        boolean xzInTri = Helper.isInTriangle(testLocX,testLocZ,
+                                              posX,posZ,
+                                              eLeftX,eLeftZ,
+                                              eRightX,eLeftZ);
+        boolean yzInTri = Helper.isInTriangle(testLocY,testLocZ,
+                                              posY,posZ,
+                                              eLeftY,eLeftZ,
+                                              eRightY,eLeftZ);
+        return !(xzInTri && yzInTri);
+    }
+
+    protected boolean isRunningAwayFromSingularEnemy(EntityMob enemy){
+        // Player's current position
+        double posX = this.entity.posX;
+        double posY = this.entity.posY;
+        double posZ = this.entity.posZ;
+        // Player's last position
+        double lastPosX = this.entity.lastTickPosX;
+        double lastPosY = this.entity.lastTickPosY;
+        double lastPosZ = this.entity.lastTickPosZ;
+
+        // Enemy's real position
+        double ePosX = enemy.posX;
+        double ePosY = enemy.posY;
+        double ePosZ = enemy.posZ;
+
+        // It is a perfect sphere, so we only need to take the radius in one dimension, no need to factor in Z position
+        double circRadiusXY = Math.sqrt((ePosX*ePosX)+(ePosY*ePosY)); // TODO: FINISH THIS SHIT
+
+        // Find 2 positions from a certain degrees around the enemy
+        // This will give us our other two points for the triangle
+
+        // Position x degrees to the left of Enemy
+        double leftDegEPosX = circRadiusXY*Math.sin(ANGLE_TO_RANGE_END_RAD) + ePosX;
+        double leftDegEPosY = circRadiusXY*Math.cos(ANGLE_TO_RANGE_END_RAD) + ePosY;
+        double leftDegEPosZ = circRadiusXY*Math.sin(ANGLE_TO_RANGE_END_RAD) + ePosZ; // NOTE: Does this work for Z coordinate?
+        // Position x degrees to the right of Enemy
+        double rightDegEPosX = circRadiusXY*Math.sin(-ANGLE_TO_RANGE_END_RAD) + ePosX;
+        double rightDegEPosY = circRadiusXY*Math.cos(-ANGLE_TO_RANGE_END_RAD) + ePosY;
+        double rightDegEPosZ = circRadiusXY*Math.sin(-ANGLE_TO_RANGE_END_RAD) + ePosZ; // NOTE: Does this work for Z coordinate?
+
+        // Player's velocity in each one of the 3 velocities
+        double vX = (lastPosX-posX);
+        double vY = (lastPosY-posY);
+        double vZ = (lastPosZ-posZ);
+
+        // Player's position 1000 ticks from now
+        double px2 = (1000*vX)+posX;
+        double py2 = (1000*vY)+posY;
+        double pz2 = (1000*vZ)+posZ;
+
+        double[] playerFuturePointXY = {px2,py2};
+        double[] playerFuturePointZY = {pz2,py2};
+
+        double[] playerPosXYAsArray = {posX,posY};
+        double[] enemyShiftLeftPosXYAsArray = {leftDegEPosX,leftDegEPosY};
+        double[] enemyShiftRightPosXYAsArray = {rightDegEPosX,rightDegEPosY};
+
+        double[] playerPosZYAsArray = {posZ,posY};
+        double[] enemyShiftLeftPosZYAsArray = {leftDegEPosZ,leftDegEPosY};
+        double[] enemyShiftRightPosZYAsArray = {rightDegEPosZ,rightDegEPosY};
+
+        // TODO: Add other 
+        boolean dim1 = Helper.calcBarycentricCoords(playerPosXYAsArray,enemyShiftLeftPosXYAsArray,enemyShiftRightPosXYAsArray,playerFuturePointXY);
+        boolean dim2 = Helper.calcBarycentricCoords(playerPosZYAsArray,enemyShiftLeftPosZYAsArray,enemyShiftRightPosZYAsArray,playerFuturePointZY);
+
+        // The final calculations
+        // According to StackOverflow, we need to use barycentric coordinates
+        // This will allow us to determine if a single point (our position 1000 ticks from now) is still within the range to be considered 'running towards' the enemy
+        return dim1 && dim2;
+    }
+
+    protected boolean isRunningAway(){
+        int minX = (int)(this.entity.posX-RUNNING_AWAY_RADIUS);
+        int minY = (int)(this.entity.posY-RUNNING_AWAY_RADIUS);
+        int minZ = (int)(this.entity.posZ-RUNNING_AWAY_RADIUS);
+        int maxX = (int)(this.entity.posX+RUNNING_AWAY_RADIUS);
+        int maxY = (int)(this.entity.posY+RUNNING_AWAY_RADIUS);
+        int maxZ = (int)(this.entity.posZ+RUNNING_AWAY_RADIUS);
+
+        AxisAlignedBB checkRadius = AxisAlignedBB.getBoundingBox(minX,minY,minZ,maxX,maxY,maxZ);
+
+        List all_entities = this.entity.worldObj.getEntitiesWithinAABB(EntityMob.class,checkRadius);
+        for(Object obj : all_entities){
+            EntityMob e = (EntityMob)obj;
+            if(!isRunningAwayFromSingularEnemyReal(e))
+                return false;
+        }
+        return true;
+    }
 }
+
