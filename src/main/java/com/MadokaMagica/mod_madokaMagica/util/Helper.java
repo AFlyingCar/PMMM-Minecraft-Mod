@@ -555,5 +555,48 @@ public class Helper{
         entity.setPosition(x,y,z);
         player.worldObj.spawnEntityInWorld(entity);
     }
+
+    public static boolean calcBarycentricCoords(double[] point1, double[] point2, double[] point3,double[] pointCheck){
+        // Calculate whether a point (pointCheck) is within a triangle defined by the points point1, point2, point3
+        /*
+         *    point1
+         *      /^\
+         *     /___\
+         * point2  point3
+         *
+         */
+
+        if(point1.length < 2 || point2.length < 2 || point3.length < 2 || pointCheck.length < 2)
+            throw new IllegalArgumentException("Invalid length in one or more points. Length must be >= 2");
+
+        double alpha = ((point2[1]-point3[1])*(pointCheck[0]-point3[0]) + (point3[0]-point2[0])*(pointCheck[1]-point3[1]));
+              alpha /= ((point2[1]-point3[1])*(point1[0]-point3[0]) + (point3[0]-point2[0])*(point1[1]-point3[1]));
+
+        double beta = ((point3[1]-point1[1])*(pointCheck[0]-point3[0]) + (point1[0]-point3[0])*(pointCheck[1]-point3[1]));
+              beta /= ((point2[1]-point3[1])*(point1[0]-point3[0]) + (point3[0]-point2[0])*(point1[1]-point3[1]));
+
+        double gamma = 1.0D - alpha - beta;
+
+        return ((alpha < 0.0D) && (beta < 0.0D) && (gamma < 0.0D));
+    }
+
+    public static boolean isInTriangle(double pointCheckX,double pointCheckY,double corner1X,double corner1Y,double corner2X,double corner2Y,double corner3X,double corner3Y){
+        boolean b1 = sign(pointCheckX,pointCheckY,
+                          corner1X,corner1Y,
+                          corner2X,corner2Y) < 0.0D;
+        boolean b2 = sign(pointCheckX,pointCheckY,
+                          corner2X,corner2Y,
+                          corner3X,corner3Y) < 0.0D;
+        boolean b3 = sign(pointCheckX,pointCheckY,
+                          corner3X,corner3Y,
+                          corner1X,corner1Y) < 0.0D;
+        return ((b1 == b2) && (b2 == b3));
+    }
+
+    public static double sign(double point1X,double point1Y,double point2X,double point2Y,double point3X,double point3Y){
+        return ((point1X-point3X) * (point2Y-point3Y)) - ((point2X-point3X) * (point1Y-point3Y));
+    }
+
+
 }
 
