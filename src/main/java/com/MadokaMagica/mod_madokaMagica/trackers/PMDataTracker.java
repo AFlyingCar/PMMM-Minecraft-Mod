@@ -389,9 +389,11 @@ public class PMDataTracker {
         tags.setFloat("PM_GREED_SCORE",      getGreedScore()        );
         tags.setInteger("PM_PLAYER_STATE",   getPlayerState()       );
         
+        /*
         tags.setTag("PM_LIKES_ENTITY",new NBTTagCompound());
         tags.setTag("PM_LIKES_ENTITY_TYPE",new NBTTagCompound());
         tags.setTag("PM_LIKES_LEVEL",new NBTTagCompound());
+        */
 
         /*
         // Save the Entity's UUID number
