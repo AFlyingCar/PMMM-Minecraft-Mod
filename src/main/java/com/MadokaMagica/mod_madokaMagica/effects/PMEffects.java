@@ -27,7 +27,7 @@ import net.minecraft.client.shader.ShaderGroup;
 import net.minecraft.client.Minecraft;
 
 import com.MadokaMagica.mod_madokaMagica.util.Helper;
-import com.MadokaMagica.mod_madokaMagica.util.PMGuiHelper;
+//import com.MadokaMagica.mod_madokaMagica.util.PMGuiHelper;
 import com.MadokaMagica.mod_madokaMagica.trackers.PMDataTracker;
 
 public class PMEffects{
@@ -179,7 +179,7 @@ public class PMEffects{
         int width = sres.getScaledWidth();
         int height = sres.getScaledHeight();
 
-        PMGuiHelper.drawGradientRectGetAround(0,0,width,height,Helper.RGBToHex(fcolor),Helper.RGBToHex(tcolor));
+        //PMGuiHelper.drawGradientRectGetAround(0,0,width,height,Helper.RGBToHex(fcolor),Helper.RGBToHex(tcolor));
     }
 
     private static IntBuffer generateHeroOverlay(){
@@ -272,4 +272,5 @@ public class PMEffects{
         return returnable;
     }
 }
+
 
