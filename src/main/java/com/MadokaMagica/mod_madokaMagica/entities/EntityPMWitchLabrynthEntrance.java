@@ -196,7 +196,8 @@ public class EntityPMWitchLabrynthEntrance extends EntityCreature{
     @Override
     public boolean attackEntityFrom(DamageSource source, float what){
         // TODO: Find out what the second parameter is supposed to represent
-        return false;
+        return super.attackEntityFrom(source,what);
+        //return false;
     }
 
     // We don't want this to go to a dimension it shouldn't go to (Hint: It shouldn't go to any dimension, and should stay where it is, alone and unloved until its death)
