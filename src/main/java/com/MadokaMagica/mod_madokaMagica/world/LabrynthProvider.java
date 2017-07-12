@@ -16,6 +16,7 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
 import com.MadokaMagica.mod_madokaMagica.factories.LabrynthGeneratorFactory;
+import com.MadokaMagica.mod_madokaMagica.world.LabrynthGenerator;
 import com.MadokaMagica.mod_madokaMagica.entities.EntityPMWitch;
 import com.MadokaMagica.mod_madokaMagica.trackers.PMDataTracker;
 import com.MadokaMagica.mod_madokaMagica.MadokaMagicaMod;
