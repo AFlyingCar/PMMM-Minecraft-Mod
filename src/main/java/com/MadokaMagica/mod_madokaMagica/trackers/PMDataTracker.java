@@ -320,7 +320,7 @@ public class PMDataTracker {
             return false;
         }
 
-        if(tags.hasKey("PM_LIKES_LEVEL")){
+        if(tags.hasKey("PM_LIKES_LEVEL") && false){
             int[] level_data = tags.getIntArray("PM_LIKES_LEVEL");
             float like_amt = Helper.unpackFloat(level_data[1]);
             like_level.put(new Integer(level_data[0]),new Float(like_amt));
