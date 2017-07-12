@@ -30,8 +30,10 @@ public class PMDataTracker {
     public static final int MAX_POTENTIAL = 100;
     public static final int SWING_TOLERANCE = 3; // 3 seconds
     public static final double RUNNING_AWAY_RADIUS = 50.0D; // 50 block radius
+    public static final double RUNNING_AWAY_CONSTANT = 0; // TODO: Change this constant after testing it
     public static final double ANGLE_TO_RANGE_END_DEG = 15.0D; // In degrees
     public static final double ANGLE_TO_RANGE_END_RAD = 0.26D; // In radians
+    public static final int RUNNING_AWAY_CHECK_FREQUENCY = 10;
 
     public Entity entity; // The entity being tracked
     private ItemStack playerSoulGem = null;
@@ -84,6 +86,8 @@ public class PMDataTracker {
 
     private int updatedatatimer = 0;
     private int updateeffectstimer = 0;
+
+    private int runAwayChecker = 0;
 
     private boolean currentlyTransformingIntoWitch;
 
@@ -385,9 +389,11 @@ public class PMDataTracker {
         tags.setFloat("PM_GREED_SCORE",      getGreedScore()        );
         tags.setInteger("PM_PLAYER_STATE",   getPlayerState()       );
         
+        /*
         tags.setTag("PM_LIKES_ENTITY",new NBTTagCompound());
         tags.setTag("PM_LIKES_ENTITY_TYPE",new NBTTagCompound());
         tags.setTag("PM_LIKES_LEVEL",new NBTTagCompound());
+        */
 
         /*
         // Save the Entity's UUID number
@@ -497,9 +503,25 @@ public class PMDataTracker {
             }
         }
 
+        // IS THE PLAYER RUNNING AWAY FROM ANY ENEMY
+        // =========================================
+        if(runAwayChecker % RUNNING_AWAY_CHECK_FREQUENCY == 0) {
+            /* How many enemies are we not running away from? */
+            int[] ira_vals = isRunningAway();
+
+            /* Are there even any enemies? Do this to prevent a divide by 0 error. */
+            if(ira_vals[0] != 0) {
+                float ag_score_change = ira_vals[1]  / ira_vals[0];
+                float ps_score_change = (ira_vals[0] - ira_vals[1]) / ira_vals[0];
+
+                this.aggressiveScore += ag_score_change;
+                this.passiveScore    += ps_score_change;
+            }
+        }
+
         // WHY ARE WE YELLING?
 
-        
+        runAwayChecker++;
         // Saving
         PlayerDataTrackerManager.getInstance().saveTracker(this);
         updatedatatimer = 0;
@@ -996,7 +1018,14 @@ public class PMDataTracker {
         return dim1 && dim2;
     }
 
-    protected boolean isRunningAway(){
+    /**
+     * Checks if the player is running away from any enemy in a RUNNING_AWAY_RADIUS radius.
+     *
+     * @return Returns an array containing the number of enemies in RUNNING_AWAY_RADIUS 
+     *         blocks around the player and the number of enemies the player is not running
+     *         away from.
+     */
+    protected int[] isRunningAway(){
         int minX = (int)(this.entity.posX-RUNNING_AWAY_RADIUS);
         int minY = (int)(this.entity.posY-RUNNING_AWAY_RADIUS);
         int minZ = (int)(this.entity.posZ-RUNNING_AWAY_RADIUS);
@@ -1004,15 +1033,49 @@ public class PMDataTracker {
         int maxY = (int)(this.entity.posY+RUNNING_AWAY_RADIUS);
         int maxZ = (int)(this.entity.posZ+RUNNING_AWAY_RADIUS);
 
+        int[] ret = new int[2];
+
         AxisAlignedBB checkRadius = AxisAlignedBB.getBoundingBox(minX,minY,minZ,maxX,maxY,maxZ);
 
         List all_entities = this.entity.worldObj.getEntitiesWithinAABB(EntityMob.class,checkRadius);
+
+        ret[0] = all_entities.size();
+
         for(Object obj : all_entities){
             EntityMob e = (EntityMob)obj;
-            if(!isRunningAwayFromSingularEnemyReal(e))
-                return false;
+
+            /* Do we even care about this entity? Is it trying to attack us? */
+            if((e.getAttackTarget() == this.entity) && !isRunningAwayFromSingularEnemy2(e)) {
+                ret[1]++;
+            }
         }
-        return true;
+
+        return ret;
+    }
+
+    protected boolean isRunningAwayFromSingularEnemy2(EntityMob enemy){
+        double[] entLastPos = {entity.lastTickPosX, entity.lastTickPosY, entity.lastTickPosZ};
+        double[] entPos =     {entity.posX,         entity.posY,         entity.posZ};
+        double[] enemyPos =   {enemy.posX,          enemy.posY,          enemy.posZ};
+
+        double[] entVelocity = {entLastPos[0] - entPos[0],
+                                entLastPos[1] - entPos[1],
+                                entLastPos[2] - entPos[2]};
+
+        if(entVelocity[0] == 0 && entVelocity[1] == 0 && entVelocity[2] == 0) {
+            return false;
+        }
+
+        double[] entVelocityFuture = { entPos[0] - enemyPos[0],
+                                       entPos[1] - enemyPos[1],
+                                       entPos[2] - enemyPos[2]};
+
+        double dotProd = (entVelocityFuture[0] * entVelocity[0]) +
+                         (entVelocityFuture[1] * entVelocity[1]) +
+                         (entVelocityFuture[2] * entVelocity[2]);
+
+
+        return dotProd < RUNNING_AWAY_CONSTANT;
     }
 }
 
