@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import net.minecraft.world.Explosion;
+import net.minecraft.world.WorldServer;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
@@ -12,6 +13,8 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.monster.IMob;
+import net.minecraft.util.ChunkCoordinates;
+import net.minecraft.util.MathHelper;
 
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.client.event.RenderWorldEvent;
@@ -44,6 +47,8 @@ import com.MadokaMagica.mod_madokaMagica.managers.LabrynthManager;
 
 import com.MadokaMagica.mod_madokaMagica.events.MadokaMagicaCreateWitchEvent;
 import com.MadokaMagica.mod_madokaMagica.events.MadokaMagicaCreateModelEvent;
+import com.MadokaMagica.mod_madokaMagica.events.MadokaMagicaCreateLabrynthEvent;
+import com.MadokaMagica.mod_madokaMagica.events.MadokaMagicaTransportVictimEvent;
 import com.MadokaMagica.mod_madokaMagica.events.PreMadokaMagicaWitchDeathEvent;
 import com.MadokaMagica.mod_madokaMagica.events.MadokaMagicaWitchTransformationEvent;
 import com.MadokaMagica.mod_madokaMagica.events.MadokaMagicaPuellaMagiTransformationEvent;
@@ -201,6 +206,45 @@ public class PMEventHandler{
     }
 
     @SubscribeEvent
+    public boolean onVictimTransportEvent(MadokaMagicaTransportVictimEvent event) {
+        EntityLivingBase victim = event.victim;
+        EntityPMWitchLabrynthEntrance entrance = event.entrance;
+        LabrynthDetails details = LabrynthManager.getInstance().getDetailsByEntrance(entrance);
+
+        WorldServer old = (WorldServer)victim.worldObj;
+        WorldServer nwo = LabrynthManager.getInstance().loadLabrynth(entrance.witch);
+        ChunkCoordinates coords = entrance.witch.worldObj.provider.getRandomizedSpawnPoint();
+
+        // Sanity check.
+        if(victim == null) {
+            return false;
+        }
+
+        // We're going to do some multiplayer-specific shit that ONLY applies to players
+        if(victim instanceof EntityPlayerMP) {
+            EntityPlayerMP player = (EntityPlayerMP)victim;
+
+            old.getPlayerManager().removePlayer(player);
+            nwo.getPlayerManager().addPlayer(player);
+            player.setPositionAndUpdate(coords.posX,coords.posY,coords.posZ);
+        }
+
+        nwo.spawnEntityInWorld(victim);
+        victim.setWorld(nwo);
+        
+        victim.worldObj.updateEntityWithOptionalForce(victim,false);
+
+        if(victim instanceof EntityPlayerMP) {
+            nwo.getChunkProvider().loadChunk(MathHelper.floor_double(victim.posX) >> 4,MathHelper.floor_double(victim.posZ) >> 4);
+        }
+
+
+        victim.setPosition(coords.posX, coords.posY, coords.posZ);
+
+        return true;
+    }
+
+    @SubscribeEvent
     public boolean onPreMadokaMagicaWitchDeath(PreMadokaMagicaWitchDeathEvent event){
         return true;
     }
@@ -243,11 +287,28 @@ public class PMEventHandler{
     public boolean onCreateWitch(MadokaMagicaCreateWitchEvent event){
         System.out.println("MadokaMagicaCreateWitchEvent detected!");
         PMDataTracker tracker = event.playerTracker;
+
+        EntityPMWitch witch = EntityPMWitchFactory.createWitch(tracker);
+
+        MinecraftForge.EVENT_BUS.post(new MadokaMagicaCreateModelEvent(witch));
+        MinecraftForge.EVENT_BUS.post(new MadokaMagicaCreateLabrynthEvent(tracker));
+
+        tracker.setPlayerState(2); // Make sure that the data tracker knows what the player is
+
+        return true;
+    }
+
+    @SubscribeEvent
+    public boolean onCreateLabrynth(MadokaMagicaCreateLabrynthEvent event) {
+        System.out.println("MadokaMagicaCreateLabrynthEvent detected!");
+
+        PMDataTracker tracker = event.tracker;
         Entity entity = tracker.getEntity();
+
+        EntityPMWitch witch = (EntityPMWitch)entity;
 
         LabrynthDetails details = LabrynthFactory.createLabrynth(tracker);
         EntityPMWitchLabrynthEntrance labrynthentrance = EntityPMWitchLabrynthEntranceFactory.createWitchLabrynthEntrance(details);
-        EntityPMWitch witch = EntityPMWitchFactory.createWitch(tracker);
 
         // Make sure to set the positions of each entity, as well as their home dimension
         labrynthentrance.setPosition(entity.posX,entity.posY,entity.posZ);
@@ -259,8 +320,6 @@ public class PMEventHandler{
         details.world.spawnEntityInWorld(witch);
 
         LabrynthManager.getInstance().registerLabrynthDetails(labrynthentrance,details);
-
-        tracker.setPlayerState(2); // Make sure that the data tracker knows what the player is
 
         return true;
     }
