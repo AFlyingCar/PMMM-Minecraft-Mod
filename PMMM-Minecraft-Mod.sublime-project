@@ -6,6 +6,23 @@
 		},
 		{
 			"path": "src\\main\\java\\com\\MadokaMagica\\mod_madokaMagica"
+		},
+		{
+			"path": "build\\tmp\\recompSrc"
 		}
-	]
+	],
+	"SublimeLinter":
+	{
+		"linters":
+		{
+			"javac": {
+				"lint": "all",
+				"args": [
+					"-encoding", "UTF8",
+					"-cp", "${project}/build/tmp/deobfuscateJar/deobf.jar:${project}/build/tmp/recompCls",
+					"-sourcepath", "${project}/src/main/java/;${project}/build/tmp/recompSrc/"
+				]
+			}
+		}
+	}
 }
