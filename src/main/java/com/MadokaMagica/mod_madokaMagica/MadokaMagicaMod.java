@@ -55,6 +55,7 @@ import com.MadokaMagica.mod_madokaMagica.commands.CommandClearPMDataTrackerData;
 import com.MadokaMagica.mod_madokaMagica.commands.CommandCreateLabrynth;
 import com.MadokaMagica.mod_madokaMagica.commands.CommandListLabrynths;
 import com.MadokaMagica.mod_madokaMagica.commands.CommandDeleteLabrynth;
+import com.MadokaMagica.mod_madokaMagica.commands.CommandPMTeleport;
 
 import com.MadokaMagica.mod_madokaMagica.managers.PlayerDataTrackerManager;
 import com.MadokaMagica.mod_madokaMagica.managers.ItemSoulGemManager;
@@ -226,6 +227,7 @@ public class MadokaMagicaMod {
         event.registerServerCommand( CommandCreateLabrynth.getInstance() );
         event.registerServerCommand( CommandListLabrynths.getInstance() );
         event.registerServerCommand( CommandDeleteLabrynth.getInstance() );
+        event.registerServerCommand( CommandPMTeleport.getInstance() );
     }
 
     @EventHandler
