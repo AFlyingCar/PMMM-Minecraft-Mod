@@ -85,18 +85,21 @@ public class PMEventHandler{
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onWorldLoad(WorldEvent.Load event){
-        // Only load labrynths if they haven't been done so yet
-        // This fixes a problem where we tried to load labrynths multiple times (we must only do it once)
-        if(!LabrynthManager.getInstance().haveLabrynthsLoaded()){
-            // Make sure that the load methods run correctly before saying that they have actually loaded
-            if(LabrynthManager.getInstance().loadAll()){
-                LabrynthManager.getInstance().setHasLoaded(true);
+        // Don't execute this on the client side, only on the server side.
+        if(event.world != null && event.world.isRemote) {
+            // Only load labrynths if they haven't been done so yet
+            // This fixes a problem where we tried to load labrynths multiple times (we must only do it once)
+            if(!LabrynthManager.getInstance().haveLabrynthsLoaded()){
+                // Make sure that the load methods run correctly before saying that they have actually loaded
+                if(LabrynthManager.getInstance().loadAll()){
+                    LabrynthManager.getInstance().setHasLoaded(true);
+                }
             }
-        }
-        if(!PlayerDataTrackerManager.getInstance().havePMDataTrackersBeenLoaded()){
-            // Make sure that the load methods run correctly before saying that they have actually loaded
-            if(PlayerDataTrackerManager.getInstance().loadPersistentFile()){
-                PlayerDataTrackerManager.getInstance().setHasLoaded(true);
+            if(!PlayerDataTrackerManager.getInstance().havePMDataTrackersBeenLoaded()){
+                // Make sure that the load methods run correctly before saying that they have actually loaded
+                if(PlayerDataTrackerManager.getInstance().loadPersistentFile()){
+                    PlayerDataTrackerManager.getInstance().setHasLoaded(true);
+                }
             }
         }
     }
@@ -109,10 +112,12 @@ public class PMEventHandler{
     public void onWorldUnload(WorldEvent.Unload event){
         // TODO: Check and make sure that this doesn't get reset when simply switching dimensions, we only want to do it when the game-save is closed
         if(LabrynthManager.getInstance().haveLabrynthsLoaded()){
+            LabrynthManager.getInstance().saveAll();
             LabrynthManager.getInstance().unloadAllData();
             LabrynthManager.getInstance().setHasLoaded(false);
         }
         if(PlayerDataTrackerManager.getInstance().havePMDataTrackersBeenLoaded()){
+            // PlayerDataTrackerManager.getInstance().writePersistentFile();
             PlayerDataTrackerManager.getInstance().unloadAllData();
             PlayerDataTrackerManager.getInstance().setHasLoaded(false);
         }
@@ -268,13 +273,16 @@ public class PMEventHandler{
             // Disabled for now since it prints that annoying as hell error-message
             // PMEffects.applyPlayerEffects(trackerset.getValue());
 
-            // Leave the timer stuff here, in case we decide to use it.
-            // Also, if we do use a value here, we should make sure to deccrement it by a lot, since 10 is way to high
-            // I'm just leaving it as 10 for now
-            if(trackerset.getValue().getUpdateEffectsTime() >= 10)
-                trackerset.getValue().incrementEffectsTimer();
-            else
-                trackerset.getValue().resetEffectsTimer();
+            // Sanity check
+            if(trackerset != null && trackerset.getValue() != null) {
+                // Leave the timer stuff here, in case we decide to use it.
+                // Also, if we do use a value here, we should make sure to deccrement it by a lot, since 10 is way to high
+                // I'm just leaving it as 10 for now
+                if(trackerset.getValue().getUpdateEffectsTime() >= 10)
+                    trackerset.getValue().incrementEffectsTimer();
+                else
+                    trackerset.getValue().resetEffectsTimer();
+            }
         }
 
         return true;
@@ -305,9 +313,11 @@ public class PMEventHandler{
         PMDataTracker tracker = event.tracker;
         Entity entity = tracker.getEntity();
 
-        EntityPMWitch witch = (EntityPMWitch)entity;
+        // EntityPMWitch witch = (EntityPMWitch)entity;
 
         LabrynthDetails details = LabrynthFactory.createLabrynth(tracker);
+        // TODO: Uncomment this once entrances are working.
+        /*
         EntityPMWitchLabrynthEntrance labrynthentrance = EntityPMWitchLabrynthEntranceFactory.createWitchLabrynthEntrance(details);
 
         // Make sure to set the positions of each entity, as well as their home dimension
@@ -318,8 +328,8 @@ public class PMEventHandler{
 
         tracker.entity.worldObj.spawnEntityInWorld(labrynthentrance); // TODO: Maybe we should replace this with Dimension 0 specifically?
         details.world.spawnEntityInWorld(witch);
-
-        LabrynthManager.getInstance().registerLabrynthDetails(labrynthentrance,details);
+        */
+        LabrynthManager.getInstance().registerLabrynthDetails(/*labrynthentrance,*/ details);
 
         return true;
     }
