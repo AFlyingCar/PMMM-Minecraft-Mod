@@ -8,6 +8,9 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ChatComponentText;
 
+import net.minecraftforge.common.MinecraftForge;
+
+import com.MadokaMagica.mod_madokaMagica.events.MadokaMagicaCreateLabrynthEvent;
 import com.MadokaMagica.mod_madokaMagica.util.Helper;
 import com.MadokaMagica.mod_madokaMagica.trackers.PMDataTracker;
 import com.MadokaMagica.mod_madokaMagica.managers.LabrynthManager;
@@ -70,7 +73,9 @@ public class CommandCreateLabrynth extends CommandBase {
             }
         }
 
+        MinecraftForge.EVENT_BUS.post(new MadokaMagicaCreateLabrynthEvent(tracker));
 
+/*
         LabrynthDetails details = LabrynthFactory.createLabrynth(tracker);
         EntityPMWitchLabrynthEntrance entrance = new EntityPMWitchLabrynthEntrance(((EntityPlayer)sender).worldObj,details);
         LabrynthManager.getInstance().registerLabrynthDetails(entrance,details);
@@ -91,7 +96,9 @@ public class CommandCreateLabrynth extends CommandBase {
             Helper.spawnEntityRandomlyNearPlayer((EntityPlayer)sender,entrance);
         }
 
-        sendChat((EntityPlayer)sender,"A new Labrynth (ID#" + details.dimID + ") has been created with a new LabrynthEntrance at (" + entrance.posX + ", " + entrance.posY + ", " + entrance.posZ + ")");
+
+        sendChat((EntityPlayer)sender,"A new Labrynth (ID#" + details.dimID + ") has been created. with a new LabrynthEntrance at (" + entrance.posX + ", " + entrance.posY + ", " + entrance.posZ + ")");
+*/
     }
 
     @Override
