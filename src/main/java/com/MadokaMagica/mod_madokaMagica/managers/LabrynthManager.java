@@ -87,7 +87,16 @@ public class LabrynthManager{
     }
 
     // WARNING! This method will not save all data! We must make sure that this data is saved before calling this method!
-    public void unloadAllData(){
+    public void unloadAllData() {
+        // unloadAllData(false);
+    }
+
+    public void unloadAllData(boolean safe){
+        if(safe && dirty) {
+            System.out.println("Attempted to unload data when it has not yet been saved to the disk!");
+            return;
+        }
+
         System.out.println("Unloading data for LabrynthManager.");
         // Clear the list
         for(int i=0; i<entrances.length; i++){
@@ -170,6 +179,28 @@ public class LabrynthManager{
 
         System.out.println("Building LabrynthDetails NBT structure.");
         int count = 0;
+
+        for(LabrynthDetails details : allDetails) {
+            if(details.markForDestruction) {
+                System.out.println("Labrynth #" + count + " has been found to be marked for destruction. Deleting.");
+                deleteLabrynth(details.dimID,true);
+                continue;
+            }
+
+            // For if anything else needs to be saved under the same tag
+            NBTTagCompound nbt_container = new NBTTagCompound();
+
+            NBTTagCompound nbt_details = new NBTTagCompound();
+            nbt_details.setInteger("dimID", details.dimID);
+            nbt_details.setString("dimName", details.dimName);
+
+            nbt_container.setTag("LAB_DETAILS", nbt_details);
+
+            nbt.setTag("" + (count++), nbt_container);
+        }
+        System.out.println("Built an NBT Structure of " + count + " Labrynths");
+
+/*
         int i=-1;
         for(Map.Entry<UUID,LabrynthDetails> entry : entranceToDetailsMap.entrySet()){
             i++;
@@ -198,8 +229,8 @@ public class LabrynthManager{
             count++;
         }
         System.out.println("Built an NBT Structure of " + count + " Labrynths");
-
-        /*
+*/
+/*
         for(int i=0; i<allDetails.size(); i++){
             LabrynthDetails details = allDetails.get(i);
             // Do not save the labrynth if it has been marked to be destroyed
@@ -217,7 +248,7 @@ public class LabrynthManager{
             // Do this here because we don't want to count the details marked for destruction
             count++;
         }
-        */
+*/
         nbt.setInteger("MAX DETAILS",count);
 
         try{
@@ -376,7 +407,6 @@ public class LabrynthManager{
             return false;
         }
 
-
         // Call this method out here because it unloads the dimension on purpose.
         deleteData(details);
 
@@ -438,7 +468,9 @@ public class LabrynthManager{
                 List playerList = oworld.playerEntities;
 
                 // Attempt to spawn near a village and spawn near a player if no villages exist
-                if(!vilList.isEmpty()){
+                if(vilList.size() > 0) {
+                    // TODO: Figure out a better way to choose a random village, since if there is 1 village, then we get a crash, because you cannot choose a random number between 0 and 0.
+                    System.out.println(vilList.size());
                     int rand_index = (new Random().nextInt(vilList.size()-1)); // Choose a random village
                     ChunkCoordinates vilCenter = ((Village)vilList.get(rand_index)).getCenter();
                     newEntrance.setPosition(vilCenter.posX,vilCenter.posY,vilCenter.posZ);
