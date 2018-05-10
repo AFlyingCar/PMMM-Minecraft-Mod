@@ -268,13 +268,6 @@ public class LabrynthManager{
         this.dirty = false;
     }
 
-    // Don't check dirty here, because this doesn't actually write any data to a file
-    public void save(LabrynthDetails details,NBTTagCompound nbt){
-        nbt.setString("dimName",details.dimName);
-        nbt.setInteger("dimID",details.dimID);
-        details.world.writeToNBT(nbt);
-    }
-
     // From file
     public boolean loadAll(){
         System.out.println("Loading all saved Labrynths...");
