@@ -110,16 +110,18 @@ public class PMEventHandler{
     // I'm pretty sure it would be something bad, so it's probably best to do so regardless
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onWorldUnload(WorldEvent.Unload event){
-        // TODO: Check and make sure that this doesn't get reset when simply switching dimensions, we only want to do it when the game-save is closed
-        if(LabrynthManager.getInstance().haveLabrynthsLoaded()){
-            LabrynthManager.getInstance().saveAll();
-            LabrynthManager.getInstance().unloadAllData();
-            LabrynthManager.getInstance().setHasLoaded(false);
-        }
-        if(PlayerDataTrackerManager.getInstance().havePMDataTrackersBeenLoaded()){
-            // PlayerDataTrackerManager.getInstance().writePersistentFile();
-            PlayerDataTrackerManager.getInstance().unloadAllData();
-            PlayerDataTrackerManager.getInstance().setHasLoaded(false);
+        if(event.world != null && event.world.isRemote) {
+            // TODO: Check and make sure that this doesn't get reset when simply switching dimensions, we only want to do it when the game-save is closed
+            if(LabrynthManager.getInstance().haveLabrynthsLoaded()){
+                LabrynthManager.getInstance().saveAll();
+                LabrynthManager.getInstance().unloadAllData();
+                LabrynthManager.getInstance().setHasLoaded(false);
+            }
+            if(PlayerDataTrackerManager.getInstance().havePMDataTrackersBeenLoaded()){
+                // PlayerDataTrackerManager.getInstance().writePersistentFile();
+                PlayerDataTrackerManager.getInstance().unloadAllData();
+                PlayerDataTrackerManager.getInstance().setHasLoaded(false);
+            }
         }
     }
 
