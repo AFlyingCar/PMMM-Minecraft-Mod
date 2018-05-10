@@ -31,6 +31,11 @@ public class PlayerDataTrackerManager{
 
     // WARNING! This method will not save all data! We must make sure that this data is saved before calling this method!
     public void unloadAllData(){
+        unloadAllData(false);
+    }
+
+    public void unloadAllData(boolean safe) {
+        // TODO: Add dirty safety checks
         System.out.println("Unloading data for PlayerDataTrackerManager");
         datatrackers.clear(); // Clear the list
     }
